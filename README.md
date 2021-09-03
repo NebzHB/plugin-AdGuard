@@ -1,1 +1,1 @@
-# plugin-AdGuard
+# plugin-piHole

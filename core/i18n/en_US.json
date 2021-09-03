@@ -1,0 +1,54 @@
+{
+    "plugins\/AdGuard\/desktop\/php\/AdGuard.php": {
+        "Rechercher": "Search",
+        "Gestion": "Management",
+        "Configuration": "Setting",
+        "Santé": "Health",
+        "Mes serveurs AdGuard": "My AdGuard servers",
+        "Sauvegarder": "Save",
+        "Supprimer": "Delete",
+        "Configuration avancée": "Advanced configuration",
+        "Equipement": "Device",
+        "Commandes": "Commands",
+        "Nom de l'équipement": "Device name",
+        "Objet parent": "Parent object",
+        "Aucun": "None",
+        "Activer": "Enable",
+        "Visible": "Show",
+        "Ip du serveur": "Server IP",
+        "Ip du serveur AdGuard": "AdGuard server IP",
+        "Apikey": "Apikey",
+        "Apikey de votre serveur": "Your Server API-key",
+        "Tableau de commandes": "Control panel",
+        "Nom": "Name",
+        "Options": "Options",
+        "Action": "Action"
+    },
+    "plugins\/AdGuard\/desktop\/js\/AdGuard.js": {
+        "Santé AdGuard": "AdGuard Health",
+        "Afficher": "Display",
+        "Historiser": "Historize",
+        "Tester": "Test"
+    },
+    "plugins\/AdGuard\/desktop\/modal\/health.php": {
+        "Module": "Module",
+        "ID": "ID",
+        "IP": "IP",
+        "Date création": "Creation date"
+    },
+    "plugins\/AdGuard\/core\/class\/AdGuard.class.php": {
+        "Statut": "Status",
+        "Activer le filtrage": "Enable Filtering",
+        "Désactiver le filtrage": "Disable Filtering",
+        "Rafraîchir": "Refresh",
+        "Domaines bloqués": "Domains on Blocklist",
+        "Requêtes aujourd'hui": "Total queries",
+        "Publicités bloquées aujourd'hui": "Queries Blocked",
+        "Pourcentage publicités bloquées aujourd'hui": "Percent Blocked",
+        "Domaines uniques": "Unique Domains",
+        "Requêtes transmises": "Queries Forwarded",
+        "Requêtes en cache": "Queries Cached",
+        "Clients vus": "Clients ever seen",
+        "Clients uniques": "Unique Clients"
+    }
+}

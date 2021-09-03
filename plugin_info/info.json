@@ -1,0 +1,20 @@
+{
+	"id" : "AdGuard",
+	"name" : "AdGuard Home",
+	"description" : "Plugin permettant d'activer ou désactiver votre serveur AdGuard Home. Un interrupteur pour le désactiver et quelques chiffres, laissez-moi savoir si vous avez besoin de plus (en fonction de ce que l'API permet)",
+	"licence" : "AGPL",
+	"author" : "Nebz",
+	"hasDependency" : false,
+	"hasOwnDeamon" : false,
+	"require" : "3.3.24",
+	"category" : "monitoring",
+	"issue" : "https://github.com/NebzHB/plugin-AdGuard/issues",
+	"changelog" : "https://nebzhb.github.io/plugin-AdGuard/fr_FR/changelog",
+	"documentation" : "https://nebzhb.github.io/plugin-AdGuard/fr_FR/",
+	"forum_link" : "https://community.jeedom.com/tag/plugin-AdGuard",
+	"link" : {
+		"forum":"https://community.jeedom.com/tag/plugin-AdGuard"
+	},
+	"languages" : ["fr_FR","en_US"],
+	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile","v4"]
+}
