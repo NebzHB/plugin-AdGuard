@@ -41,16 +41,13 @@ class AdGuard extends eqLogic {
 	public static function getStructure ($name) {
 	
 		switch($name) {
-			case "summaryRaw" :
-				return ["domains_being_blocked"=>"Domaines bloqués",
-						"dns_queries_today"=>"Requêtes aujourd'hui",
-						"ads_blocked_today"=>"Publicités bloquées aujourd'hui",
-						"ads_percentage_today"=>"Pourcentage publicités bloquées aujourd'hui",
-						"unique_domains"=>"Domaines uniques",
-						"queries_forwarded"=>"Requêtes transmises",
-						"queries_cached"=>"Requêtes en cache",
-						"clients_ever_seen"=>"Clients vus",
-						"unique_clients"=>"Clients uniques"
+			case "status" :
+				return ["num_dns_queries"=>"Requêtes DNS",
+						"num_blocked_filtering"=>"Bloqué par Filtres",
+						"num_replaced_safebrowsing"=>"Tentative de malware/hameçonnage bloquée",
+						"num_replaced_safesearch"=>"Recherche sécurisée forcée",
+						"num_replaced_parental"=>"Sites à contenu adulte bloqués",
+						"avg_processing_time"=>"Temps moyen de traitement"
 					];
 			break;
 		}		
@@ -101,75 +98,45 @@ class AdGuard extends eqLogic {
 		return json_decode($AdGuardinfo,true);
 	}
 	
-	public function getAdGuardInfo($data=null,$order=null) {
+	public function getAdGuardInfo() {
 		try {
 				
-			if(!$data) {
-				$AdGuardinfo=$this->getAdGuard('status');
-			} else {
-				$AdGuardinfo=$data;
-			}
+			$AdGuardinfo=$this->getAdGuard('status');
+			$AdGuardinfo['safebrowsing']=$this->getAdGuard('safebrowsing/status');
+			$AdGuardinfo['parental']=$this->getAdGuard('parental/status');
+			$AdGuardinfo['safesearch']=$this->getAdGuard('safesearch/status');
+			$AdGuardinfo['filtering']=$this->getAdGuard('filtering/status');
+			$AdGuardinfo['filtering']['filters']="deleted";
+			$AdGuardinfo['stats']=$this->getAdGuard('stats');
+			$AdGuardinfo['stats']['top_queried_domains']="deleted";
+			$AdGuardinfo['stats']['top_clients']="deleted";
+			$AdGuardinfo['stats']['top_blocked_domains']="deleted";
+			$AdGuardinfo['stats']['dns_queries']="deleted";
+			$AdGuardinfo['stats']['blocked_filtering']="deleted";
+			$AdGuardinfo['stats']['replaced_safebrowsing']="deleted";
+			$AdGuardinfo['stats']['replaced_parental']="deleted";
+			$AdGuardinfo['version']=$this->getAdGuard('version.json');
+			$AdGuardinfo+=$this->getAdGuard('clients');
+			$AdGuardinfo['auto_clients']="deleted";
+			$AdGuardinfo['supported_tags']="deleted";
 
-			log::add('AdGuard','debug','recu:'.$AdGuardinfo);
-			
+
+			log::add('AdGuard','debug','recu:'.json_encode($AdGuardinfo));
 			return
-			$jsonAdGuard = json_decode($AdGuardinfo,true);
-
-			$AdGuardCmd = $this->getCmd(null, 'status');
-			$this->checkAndUpdateCmd($AdGuardCmd, (($jsonAdGuard['status']=='enabled')?1:0));
 			
-			if($data) {
-				$urlprinter = 'http://' . $ip . '/admin/api.php?summaryRaw&auth='.$apikey;
-				$request_http = new com_http($urlprinter);
-				$AdGuardinfo=$request_http->exec(60,1);
-				log::add('AdGuard','debug','recu:'.$AdGuardinfo);
-				$jsonAdGuard = json_decode($AdGuardinfo,true);
-			}
+			$AdGuardCmd = $this->getCmd(null, 'protection_enabled');
+			$this->checkAndUpdateCmd($AdGuardCmd, (($AdGuardinfo['protection_enabled']===true)?1:0));
 			
-			$summaryRaw = AdGuard::getStructure('summaryRaw');
+			$status = AdGuard::getStructure('status');
 			foreach($summaryRaw as $id => $trad) {
 				$AdGuardCmd = $this->getCmd(null, $id);
-				if(strpos($id,'percentage') !== false) $jsonAdGuard[$id]=round($jsonAdGuard[$id],2);
-				$this->checkAndUpdateCmd($AdGuardCmd, $jsonAdGuard[$id]);
+				if(strpos($id,'avg_processing_time') !== false) $AdGuardinfo['stats'][$id]=round($AdGuardinfo['stats'][$id],0);
+				$this->checkAndUpdateCmd($AdGuardCmd, $AdGuardinfo['stats'][$id]);
 			}
 			
-			if(isset($jsonAdGuard['gravity_last_updated'])) { //v4
-				$nextOrder = $order || 29;
-				$gravity_last_updated = $this->getCmd(null, 'gravity_last_updated');
-				if (!is_object($gravity_last_updated)) { // create if not exists
-					$nextOrder++;
-					$gravity_last_updated = new AdGuardcmd();
-					$gravity_last_updated->setLogicalId('gravity_last_updated');
-					$gravity_last_updated->setIsVisible(0);
-					$gravity_last_updated->setOrder($nextOrder);
-					$gravity_last_updated->setName(__('Dernière mise à jour', __FILE__));
-				}
-				$gravity_last_updated->setType('info');
-				$gravity_last_updated->setSubType('string');
-				$gravity_last_updated->setEqLogic_id($this->getId());
-				$gravity_last_updated->setDisplay('generic_type', 'GENERIC_INFO');
-				$gravity_last_updated->save();
-				
-				$time=$jsonAdGuard['gravity_last_updated']['absolute'];
-				$date= new DateTime("@$time");
-				$absolute = $date->format('d-m-Y H:i:s');
-				
-				$this->checkAndUpdateCmd($gravity_last_updated, $absolute);
-			}
-			
-			$urlprinter = 'http://' . $ip . '/admin/api.php?versions';
-			$request_http = new com_http($urlprinter);
-			$AdGuardVer=$request_http->exec(60,1);
-			log::add('AdGuard','debug','recu versions:'.$AdGuardVer);
-			if($AdGuardVer) {
-				$jsonAdGuardVer = json_decode($AdGuardVer,true);
-				$AdGuardCmd = $this->getCmd(null, 'hasUpdateAdGuard');
-				$this->checkAndUpdateCmd($AdGuardCmd, (($jsonAdGuardVer['core_update']===true)?1:0));
-				$AdGuardCmd = $this->getCmd(null, 'hasUpdateWebInterface');
-				$this->checkAndUpdateCmd($AdGuardCmd, (($jsonAdGuardVer['web_update']===true)?1:0));
-				$AdGuardCmd = $this->getCmd(null, 'hasUpdateFTL');
-				$this->checkAndUpdateCmd($AdGuardCmd, (($jsonAdGuardVer['FTL_update']===true)?1:0));
-			}
+			$AdGuardCmd = $this->getCmd(null, 'hasUpdateAdGuard');
+			$this->checkAndUpdateCmd($AdGuardCmd, (($AdGuardinfo['version']['can_autoupdate']===true)?1:0));
+
 			
 			$online = $this->getCmd(null, 'online');
 			if (is_object($online)) {
@@ -191,53 +158,53 @@ class AdGuard extends eqLogic {
 	
 	public function postSave() {
 		$order=1;
-		$status = $this->getCmd(null, 'status');
-		if (!is_object($status)) {
-			$status = new AdGuardcmd();
-			$status->setLogicalId('status');
-			$status->setIsVisible(1);
-			$status->setOrder($order);
-			$status->setName(__('Statut', __FILE__));
+		$protection_enabled = $this->getCmd(null, 'protection_enabled');
+		if (!is_object($protection_enabled)) {
+			$protection_enabled = new AdGuardcmd();
+			$protection_enabled->setLogicalId('protection_enabled');
+			$protection_enabled->setIsVisible(1);
+			$protection_enabled->setOrder($order);
+			$protection_enabled->setName(__('Statut', __FILE__));
 		}
-		$status->setType('info');
-		$status->setSubType('binary');
-		$status->setEqLogic_id($this->getId());
-		$status->setDisplay('generic_type', 'SWITCH_STATE');
-		$status->save();
+		$protection_enabled->setType('info');
+		$protection_enabled->setSubType('binary');
+		$protection_enabled->setEqLogic_id($this->getId());
+		$protection_enabled->setDisplay('generic_type', 'SWITCH_STATE');
+		$protection_enabled->save();
 		
 		$order++;
-		$enable = $this->getCmd(null, 'enable');
-		if (!is_object($enable)) {
-			$enable = new AdGuardcmd();
-			$enable->setLogicalId('enable');
-			$enable->setDisplay('icon','<i class="fas fa-play"></i>');
-			$enable->setIsVisible(1);
-			$enable->setOrder($order);
-			$enable->setName(__('Activer le filtrage', __FILE__));
+		$protection_enable = $this->getCmd(null, 'protection_enable');
+		if (!is_object($protection_enable)) {
+			$protection_enable = new AdGuardcmd();
+			$protection_enable->setLogicalId('protection_enable');
+			$protection_enable->setDisplay('icon','<i class="fas fa-play"></i>');
+			$protection_enable->setIsVisible(1);
+			$protection_enable->setOrder($order);
+			$protection_enable->setName(__('Activer le filtrage', __FILE__));
 		}
-		$enable->setType('action');
-		$enable->setSubType('other');
-		$enable->setEqLogic_id($this->getId());
-		$enable->setValue($status->getId());
-		$enable->setDisplay('generic_type', 'SWITCH_ON');
-		$enable->save();
+		$protection_enable->setType('action');
+		$protection_enable->setSubType('other');
+		$protection_enable->setEqLogic_id($this->getId());
+		$protection_enable->setValue($protection_enabled->getId());
+		$protection_enable->setDisplay('generic_type', 'SWITCH_ON');
+		$protection_enable->save();
 		
 		$order++;
-		$disable = $this->getCmd(null, 'disable');
-		if (!is_object($disable)) {
-			$disable = new AdGuardcmd();
-			$disable->setLogicalId('disable');
-			$disable->setDisplay('icon','<i class="fas fa-stop"></i>');
-			$disable->setIsVisible(1);
-			$disable->setOrder($order);
-			$disable->setName(__('Désactiver le filtrage', __FILE__));
+		$protection_disable = $this->getCmd(null, 'protection_disable');
+		if (!is_object($protection_disable)) {
+			$protection_disable = new AdGuardcmd();
+			$protection_disable->setLogicalId('protection_disable');
+			$protection_disable->setDisplay('icon','<i class="fas fa-stop"></i>');
+			$protection_disable->setIsVisible(1);
+			$protection_disable->setOrder($order);
+			$protection_disable->setName(__('Désactiver le filtrage', __FILE__));
 		}
-		$disable->setType('action');
-		$disable->setSubType('other');
-		$disable->setEqLogic_id($this->getId());
-		$disable->setValue($status->getId());
-		$disable->setDisplay('generic_type', 'SWITCH_OFF');
-		$disable->save();
+		$protection_disable->setType('action');
+		$protection_disable->setSubType('other');
+		$protection_disable->setEqLogic_id($this->getId());
+		$protection_disable->setValue($protection_enabled->getId());
+		$protection_disable->setDisplay('generic_type', 'SWITCH_OFF');
+		$protection_disable->save();
 		
 		$order++;
 		$refresh = $this->getCmd(null, 'refresh');
@@ -253,9 +220,9 @@ class AdGuard extends eqLogic {
 		$refresh->setEqLogic_id($this->getId());
 		$refresh->save();
 
-		$summaryRaw = AdGuard::getStructure('summaryRaw');
+		$status = AdGuard::getStructure('status');
 		
-		foreach($summaryRaw as $id => $trad) {
+		foreach($status as $id => $trad) {
 			$order++;
 			$newCommand = $this->getCmd(null, $id);
 			if (!is_object($newCommand)) {
@@ -271,7 +238,7 @@ class AdGuard extends eqLogic {
 			$newCommand->setSubType('numeric');
 			$newCommand->setEqLogic_id($this->getId());
 			$newCommand->setDisplay('generic_type', 'GENERIC_INFO');
-			if(strpos($id,'percentage') !== false) $newCommand->setUnite( '%' );
+			if(strpos($id,'avg_processing_time') !== false) $newCommand->setUnite( 'ms' );
 			$newCommand->save();		
 		}
 		
@@ -305,35 +272,7 @@ class AdGuard extends eqLogic {
 		$hasUpdateAdGuard->save();
 		
 		$order++;
-		$hasUpdateWebInterface = $this->getCmd(null, 'hasUpdateWebInterface');
-		if (!is_object($hasUpdateWebInterface)) {
-			$hasUpdateWebInterface = new AdGuardcmd();
-			$hasUpdateWebInterface->setLogicalId('hasUpdateWebInterface');
-			$hasUpdateWebInterface->setIsVisible(1);
-			$hasUpdateWebInterface->setOrder($order);
-			$hasUpdateWebInterface->setName(__('Update InterfaceWeb Dispo', __FILE__));
-		}
-		$hasUpdateWebInterface->setType('info');
-		$hasUpdateWebInterface->setSubType('binary');
-		$hasUpdateWebInterface->setEqLogic_id($this->getId());
-		$hasUpdateWebInterface->save();
-		
-		$order++;
-		$hasUpdateFTL = $this->getCmd(null, 'hasUpdateFTL');
-		if (!is_object($hasUpdateFTL)) {
-			$hasUpdateFTL = new AdGuardcmd();
-			$hasUpdateFTL->setLogicalId('hasUpdateFTL');
-			$hasUpdateFTL->setIsVisible(1);
-			$hasUpdateFTL->setOrder($order);
-			$hasUpdateFTL->setName(__('Update FTL Dispo', __FILE__));
-		}
-		$hasUpdateFTL->setType('info');
-		$hasUpdateFTL->setSubType('binary');
-		$hasUpdateFTL->setEqLogic_id($this->getId());
-		$hasUpdateFTL->save();
-		
-		$order++;
-		$this->getAdGuardInfo(null,$order);
+		$this->getAdGuardInfo();
 	}
 }
 
@@ -358,7 +297,7 @@ class AdGuardCmd extends cmd {
 		$logical = $this->getLogicalId();
 		$result=null;
 		if ($logical != 'refresh'){
-			$urlAdGuard = 'http://' . $ip . '/admin/api.php?status&summaryRaw';	
+
 			switch ($logical) {
 				case 'disable':
 					$urlAdGuard = 'http://' . $ip . '/admin/api.php?disable&auth='.$apikey;
@@ -385,7 +324,7 @@ class AdGuardCmd extends cmd {
 				log::add('AdGuard','debug','AdGuard non joignable : '.$e->getCode());
 			}
 		}
-		$eqLogic->getAdGuardInfo($result);
+		$eqLogic->getAdGuardInfo();
 	}
 
 	/************************Getteur Setteur****************************/
