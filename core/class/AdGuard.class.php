@@ -38,7 +38,7 @@ class AdGuard extends eqLogic {
 		}
 	}	
 	
-	public static function getStructure ($name) {
+	public static function getStructure($name) {
 	
 		switch($name) {
 			case "status" :
