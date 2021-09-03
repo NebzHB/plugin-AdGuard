@@ -65,7 +65,6 @@ class AdGuard extends eqLogic {
 		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
 		$request_http->setHeader(array(
 			'Content-Type: application/json',
-//			'Authorization: Basic '.base64_encode($user.':'.$pass),
 			'Accept application/json, text/plain, */*'
 		));
 		$request_http->setPost(json_encode($params));
@@ -88,7 +87,6 @@ class AdGuard extends eqLogic {
 		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
 		$request_http->setHeader(array(
 			'Content-Type: application/json',
-//			'Authorization: Basic '.base64_encode($user.':'.$pass),
 			'Accept application/json, text/plain, */*'
 		));
 		
