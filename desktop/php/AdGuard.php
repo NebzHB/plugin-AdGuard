@@ -26,7 +26,7 @@ $eqLogics = eqLogic::byType('AdGuard');
         <span>{{Santé}}</span>
       </div>
     </div>
-    <legend><i class="fas fa-table"></i>  {{Mes serveurs AdGuard}}</legend>
+    <legend><i class="fas fa-table"></i>  {{Mes serveurs AdGuard et clients}}</legend>
     <div class="eqLogicThumbnailContainer">
       <?php
         foreach ($eqLogics as $eqLogic) {
