@@ -273,9 +273,9 @@ class AdGuard extends eqLogic {
 				"display" => [
 					"generic_type" => 'GENERIC_INFO'
 				],
-				"isVisible": 1,
-				"isHistorized": 0,
-				"logicalId": $id
+				"isVisible"=> 1,
+				"isHistorized"=> 0,
+				"logicalId"=> $id
 			];
 			if(strpos($id,'avg_processing_time') !== false) $cmd['unit']='ms';
 			$this->createCmd($cmd,$order);		
@@ -294,7 +294,7 @@ class AdGuardCmd extends cmd {
 	/***********************Methode d'instance**************************/
   	public function refresh() {
 		$this->execute();
-	    }
+	}
 	
 	public function execute($_options = null) {
 		if ($this->getType() == '') {
