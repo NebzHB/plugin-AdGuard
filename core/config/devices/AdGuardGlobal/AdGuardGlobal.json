@@ -1,5 +1,14 @@
 {
 	"commands": [{
+			"name": "Rafraichir",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "DONT"
+			},
+			"isVisible": 1,
+			"logicalId": "refresh"
+		}, {
 			"name": "Online",
 			"type": "info",
 			"subtype": "binary",
@@ -48,15 +57,6 @@
 			"isVisible": 1,
 			"logicalId": "protection_disable",
 			"value": "protection_enabled"
-		}, {
-			"name": "Rafraichir",
-			"type": "action",
-			"subtype": "other",
-			"display": {
-				"generic_type": "DONT"
-			},
-			"isVisible": 1,
-			"logicalId": "refresh"
 		}, {
 			"name": "Statut Filtrage Global",
 			"type": "info",
