@@ -1,0 +1,190 @@
+{
+	"commands": [{
+			"name": "Online",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "ONLINE"
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "online"
+		}, {
+			"name": "Update AdGuard Dispo",
+			"type": "info",
+			"subtype": "binary",
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "hasUpdateAdGuard"
+		}, {
+			"name": "Statut protection",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE"
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "protection_enabled"
+		}, {
+			"name": "Activer la protection",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "protection_enable",
+			"value": "protection_enabled"
+		}, {
+			"name": "Désactiver la protection",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "protection_disable",
+			"value": "protection_enabled"
+		}, {
+			"name": "Rafraichir",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "DONT"
+			},
+			"isVisible": 1,
+			"logicalId": "refresh"
+		}, {
+			"name": "Statut Filtrage Global",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE"
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "filtering_enabled"
+		}, {
+			"name": "Activer le Filtrage Global",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "filtering_enable",
+			"value": "filtering_enabled"
+		}, {
+			"name": "Désactiver le Filtrage Global",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "filtering_disable",
+			"value": "filtering_enabled"
+		}, {
+			"name": "Statut Sécurité de navigation Globale",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE"
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "safebrowsing_enabled"
+		}, {
+			"name": "Activer la Sécurité de navigation Globale",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "safebrowsing_enable",
+			"value": "safebrowsing_enabled"
+		}, {
+			"name": "Désactiver la Sécurité de navigation Globale",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "safebrowsing_disable",
+			"value": "safebrowsing_enabled"
+		}, {
+			"name": "Statut Contrôle Parental Global",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE"
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "parental_enabled"
+		}, {
+			"name": "Activer le Contrôle Parental Global",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "parental_enable",
+			"value": "parental_enabled"
+		}, {
+			"name": "Désactiver le Contrôle Parental Global",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "parental_disable",
+			"value": "parental_enabled"
+		}, {
+			"name": "Statut Recherche Sécurisée Globale",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE"
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "safesearch_enabled"
+		}, {
+			"name": "Activer la Recherche Sécurisée Globale",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "safesearch_enable",
+			"value": "safesearch_enabled"
+		}, {
+			"name": "Désactiver la Recherche Sécurisée Globale",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "safesearch_disable",
+			"value": "safesearch_enabled"
+		}
+	]
+}
