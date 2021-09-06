@@ -24,6 +24,7 @@ class AdGuard extends eqLogic {
 	public static function cron($_eqlogic_id = null) {
 		$eqLogics = ($_eqlogic_id !== null) ? array(eqLogic::byId($_eqlogic_id)) : eqLogic::byType('AdGuard', true);
 		foreach ($eqLogics as $AdGuard) {
+			if($AdGuard->getConfiguration('type','AdGuardGlobal') != 'AdGuardGlobal') continue;
 			$autorefresh = $AdGuard->getConfiguration('autorefresh','*/5 * * * *');
 			if ($autorefresh != '') {
 				try {
@@ -52,6 +53,23 @@ class AdGuard extends eqLogic {
 			break;
 		}		
 	}
+	
+	public static function devicesParameters($type = '') {
+		$path = dirname(__FILE__) . '/../config/devices/' . $type;
+
+		if (!is_dir($path)) {
+			return false;
+		}
+		try {
+			$file = $path . '/' . $type.'.json';
+			$content = file_get_contents($file);
+			$return = json_decode($content, true);
+		} catch (Exception $e) {
+			return false;
+		}
+		
+        	return $return;
+    	}
 	
 	public function postAdGuard($cmd,$params) {
 		$ip = $this->getConfiguration('ip','');
@@ -165,328 +183,104 @@ class AdGuard extends eqLogic {
 		}
 	} 
 	
+	public function createCmd($cmd, $order) {
+
+		//change name if exists
+		$c = 1;
+		$origName = $cmd['name'];
+		while ($this->cmdNameExist($cmd['name'])) {
+			$cmd['name'] = $origName . '_' . $c;
+			$c++;
+		}
+
+		if (strlen($cmd['name']) > 45) $cmd['name'] = substr($cmd['name'], 0, 45);
+
+		$newCmd = $this->getCmd(null, $cmd['logicalId']);
+		if (!is_object($newCmd)) {
+			log::add('AdGuard', 'debug', 'Création commande:' . $cmd['logicalId']);
+			$newCmd = new unifiCmd();
+			$newCmd->setLogicalId($cmd['logicalId']);
+			$newCmd->setIsVisible($cmd['isVisible']);
+			$newCmd->setOrder($order);
+			$newCmd->setName(__($cmd['name'], __FILE__));
+			$newCmd->setEqLogic_id($this->getId());
+		}
+		else {
+			log::add('AdGuard', 'debug', 'Modification commande:' . $cmd['logicalId']);
+		}
+		if (isset($cmd['unit'])) {
+			$newCmd->setUnite($cmd['unit']);
+		}
+		$newCmd->setType($cmd['type']);
+		if (isset($cmd['configuration'])) {
+			foreach ($cmd['configuration'] as $configuration_type => $configuration_value) {
+				$newCmd->setConfiguration($configuration_type, $configuration_value);
+			}
+		}
+		if (isset($cmd['template'])) {
+			foreach ($cmd['template'] as $template_type => $template_value) {
+				$newCmd->setTemplate($template_type, $template_value);
+			}
+		}
+		if (isset($cmd['display'])) {
+			foreach ($cmd['display'] as $display_type => $display_value) {
+				if ($display_type == "generic_type") {
+					$newCmd->setGeneric_type($display_value);
+				}
+				else {
+					if ($newCmd->getDisplay($display_type) == "") {
+						$newCmd->setDisplay($display_type, $display_value);
+					}
+				}
+			}
+		}
+		$newCmd->setSubType($cmd['subtype']);
+		if ($cmd['type'] == 'action' && isset($cmd['value'])) {
+			$linkStatus = $this->getCmd(null, $cmd['value']);
+			if (is_object($linkStatus)) $newCmd->setValue($linkStatus->getId());
+		}
+		$newCmd->save();
+	}
+	
 	public function getImage(){
 		return 'plugins/AdGuard/plugin_info/AdGuard_icon.png';
 	}
 	
 	public function postSave() {
-		$order=1;
-		$protection_enabled = $this->getCmd(null, 'protection_enabled');
-		if (!is_object($protection_enabled)) {
-			$protection_enabled = new AdGuardcmd();
-			$protection_enabled->setLogicalId('protection_enabled');
-			$protection_enabled->setIsVisible(1);
-			$protection_enabled->setOrder($order);
-			$protection_enabled->setName(__('Statut Protection', __FILE__));
-		}
-		$protection_enabled->setType('info');
-		$protection_enabled->setSubType('binary');
-		$protection_enabled->setEqLogic_id($this->getId());
-		$protection_enabled->setDisplay('generic_type', 'SWITCH_STATE');
-		$protection_enabled->save();
 		
-		$order++;
-		$protection_enable = $this->getCmd(null, 'protection_enable');
-		if (!is_object($protection_enable)) {
-			$protection_enable = new AdGuardcmd();
-			$protection_enable->setLogicalId('protection_enable');
-			$protection_enable->setDisplay('icon','<i class="fas fa-play"></i>');
-			$protection_enable->setIsVisible(1);
-			$protection_enable->setOrder($order);
-			$protection_enable->setName(__('Activer la protection', __FILE__));
-		}
-		$protection_enable->setType('action');
-		$protection_enable->setSubType('other');
-		$protection_enable->setEqLogic_id($this->getId());
-		$protection_enable->setValue($protection_enabled->getId());
-		$protection_enable->setDisplay('generic_type', 'SWITCH_ON');
-		$protection_enable->save();
+		if($this->getConfiguration('type','') != 'AdGuardGlobal') return true;
 		
-		$order++;
-		$protection_disable = $this->getCmd(null, 'protection_disable');
-		if (!is_object($protection_disable)) {
-			$protection_disable = new AdGuardcmd();
-			$protection_disable->setLogicalId('protection_disable');
-			$protection_disable->setDisplay('icon','<i class="fas fa-stop"></i>');
-			$protection_disable->setIsVisible(1);
-			$protection_disable->setOrder($order);
-			$protection_disable->setName(__('Désactiver la protection', __FILE__));
+		$order=0;
+		$device = self::devicesParameters('AdGuardGlobal');
+	
+		foreach($device['commands'] as $cmd) {
+			$order++;
+			$this->createCmd($cmd,$order);
 		}
-		$protection_disable->setType('action');
-		$protection_disable->setSubType('other');
-		$protection_disable->setEqLogic_id($this->getId());
-		$protection_disable->setValue($protection_enabled->getId());
-		$protection_disable->setDisplay('generic_type', 'SWITCH_OFF');
-		$protection_disable->save();
-		
-		$order++;
-		$refresh = $this->getCmd(null, 'refresh');
-		if (!is_object($refresh)) {
-			$refresh = new AdGuardcmd();
-			$refresh->setLogicalId('refresh');
-			$refresh->setIsVisible(1);
-			$refresh->setOrder($order);
-			$refresh->setName(__('Rafraîchir', __FILE__));
-		}
-		$refresh->setType('action');
-		$refresh->setSubType('other');
-		$refresh->setEqLogic_id($this->getId());
-		$refresh->save();
-		
-		// GLOBAL PARAMS
-		// filtering
-		$order++;
-		$filtering_enabled = $this->getCmd(null, 'filtering_enabled');
-		if (!is_object($filtering_enabled)) {
-			$filtering_enabled = new AdGuardcmd();
-			$filtering_enabled->setLogicalId('filtering_enabled');
-			$filtering_enabled->setIsVisible(1);
-			$filtering_enabled->setOrder($order);
-			$filtering_enabled->setName(__('Statut Filtrage Global', __FILE__));
-		}
-		$filtering_enabled->setType('info');
-		$filtering_enabled->setSubType('binary');
-		$filtering_enabled->setEqLogic_id($this->getId());
-		$filtering_enabled->setDisplay('generic_type', 'SWITCH_STATE');
-		$filtering_enabled->save();
-		
-		$order++;
-		$filtering_enable = $this->getCmd(null, 'filtering_enable');
-		if (!is_object($filtering_enable)) {
-			$filtering_enable = new AdGuardcmd();
-			$filtering_enable->setLogicalId('filtering_enable');
-			$filtering_enable->setDisplay('icon','<i class="fas fa-play"></i>');
-			$filtering_enable->setIsVisible(1);
-			$filtering_enable->setOrder($order);
-			$filtering_enable->setName(__('Activer le Filtrage Global', __FILE__));
-		}
-		$filtering_enable->setType('action');
-		$filtering_enable->setSubType('other');
-		$filtering_enable->setEqLogic_id($this->getId());
-		$filtering_enable->setValue($filtering_enabled->getId());
-		$filtering_enable->setDisplay('generic_type', 'SWITCH_ON');
-		$filtering_enable->save();
-		
-		$order++;
-		$filtering_disable = $this->getCmd(null, 'filtering_disable');
-		if (!is_object($filtering_disable)) {
-			$filtering_disable = new AdGuardcmd();
-			$filtering_disable->setLogicalId('filtering_disable');
-			$filtering_disable->setDisplay('icon','<i class="fas fa-stop"></i>');
-			$filtering_disable->setIsVisible(1);
-			$filtering_disable->setOrder($order);
-			$filtering_disable->setName(__('Désactiver le Filtrage Global', __FILE__));
-		}
-		$filtering_disable->setType('action');
-		$filtering_disable->setSubType('other');
-		$filtering_disable->setEqLogic_id($this->getId());
-		$filtering_disable->setValue($filtering_enabled->getId());
-		$filtering_disable->setDisplay('generic_type', 'SWITCH_OFF');
-		$filtering_disable->save();
-		
-		// safebrowsing
-		$order++;
-		$safebrowsing_enabled = $this->getCmd(null, 'safebrowsing_enabled');
-		if (!is_object($safebrowsing_enabled)) {
-			$safebrowsing_enabled = new AdGuardcmd();
-			$safebrowsing_enabled->setLogicalId('safebrowsing_enabled');
-			$safebrowsing_enabled->setIsVisible(1);
-			$safebrowsing_enabled->setOrder($order);
-			$safebrowsing_enabled->setName(__('Statut Sécurité de navigation Globale', __FILE__));
-		}
-		$safebrowsing_enabled->setType('info');
-		$safebrowsing_enabled->setSubType('binary');
-		$safebrowsing_enabled->setEqLogic_id($this->getId());
-		$safebrowsing_enabled->setDisplay('generic_type', 'SWITCH_STATE');
-		$safebrowsing_enabled->save();
-		
-		$order++;
-		$safebrowsing_enable = $this->getCmd(null, 'safebrowsing_enable');
-		if (!is_object($safebrowsing_enable)) {
-			$safebrowsing_enable = new AdGuardcmd();
-			$safebrowsing_enable->setLogicalId('safebrowsing_enable');
-			$safebrowsing_enable->setDisplay('icon','<i class="fas fa-play"></i>');
-			$safebrowsing_enable->setIsVisible(1);
-			$safebrowsing_enable->setOrder($order);
-			$safebrowsing_enable->setName(__('Activer la Sécurité de navigation Globale', __FILE__));
-		}
-		$safebrowsing_enable->setType('action');
-		$safebrowsing_enable->setSubType('other');
-		$safebrowsing_enable->setEqLogic_id($this->getId());
-		$safebrowsing_enable->setValue($safebrowsing_enabled->getId());
-		$safebrowsing_enable->setDisplay('generic_type', 'SWITCH_ON');
-		$safebrowsing_enable->save();
-		
-		$order++;
-		$safebrowsing_disable = $this->getCmd(null, 'safebrowsing_disable');
-		if (!is_object($safebrowsing_disable)) {
-			$safebrowsing_disable = new AdGuardcmd();
-			$safebrowsing_disable->setLogicalId('safebrowsing_disable');
-			$safebrowsing_disable->setDisplay('icon','<i class="fas fa-stop"></i>');
-			$safebrowsing_disable->setIsVisible(1);
-			$safebrowsing_disable->setOrder($order);
-			$safebrowsing_disable->setName(__('Désactiver la Sécurité de navigation Globale', __FILE__));
-		}
-		$safebrowsing_disable->setType('action');
-		$safebrowsing_disable->setSubType('other');
-		$safebrowsing_disable->setEqLogic_id($this->getId());
-		$safebrowsing_disable->setValue($safebrowsing_enabled->getId());
-		$safebrowsing_disable->setDisplay('generic_type', 'SWITCH_OFF');
-		$safebrowsing_disable->save();
-		
-		// parental
-		$order++;
-		$parental_enabled = $this->getCmd(null, 'parental_enabled');
-		if (!is_object($parental_enabled)) {
-			$parental_enabled = new AdGuardcmd();
-			$parental_enabled->setLogicalId('parental_enabled');
-			$parental_enabled->setIsVisible(1);
-			$parental_enabled->setOrder($order);
-			$parental_enabled->setName(__('Statut Contrôle Parental Global', __FILE__));
-		}
-		$parental_enabled->setType('info');
-		$parental_enabled->setSubType('binary');
-		$parental_enabled->setEqLogic_id($this->getId());
-		$parental_enabled->setDisplay('generic_type', 'SWITCH_STATE');
-		$parental_enabled->save();
-		
-		$order++;
-		$parental_enable = $this->getCmd(null, 'parental_enable');
-		if (!is_object($parental_enable)) {
-			$parental_enable = new AdGuardcmd();
-			$parental_enable->setLogicalId('parental_enable');
-			$parental_enable->setDisplay('icon','<i class="fas fa-play"></i>');
-			$parental_enable->setIsVisible(1);
-			$parental_enable->setOrder($order);
-			$parental_enable->setName(__('Activer le Contrôle Parental Global', __FILE__));
-		}
-		$parental_enable->setType('action');
-		$parental_enable->setSubType('other');
-		$parental_enable->setEqLogic_id($this->getId());
-		$parental_enable->setValue($parental_enabled->getId());
-		$parental_enable->setDisplay('generic_type', 'SWITCH_ON');
-		$parental_enable->save();
-		
-		$order++;
-		$parental_disable = $this->getCmd(null, 'parental_disable');
-		if (!is_object($parental_disable)) {
-			$parental_disable = new AdGuardcmd();
-			$parental_disable->setLogicalId('parental_disable');
-			$parental_disable->setDisplay('icon','<i class="fas fa-stop"></i>');
-			$parental_disable->setIsVisible(1);
-			$parental_disable->setOrder($order);
-			$parental_disable->setName(__('Désactiver le Contrôle Parental Global', __FILE__));
-		}
-		$parental_disable->setType('action');
-		$parental_disable->setSubType('other');
-		$parental_disable->setEqLogic_id($this->getId());
-		$parental_disable->setValue($parental_enabled->getId());
-		$parental_disable->setDisplay('generic_type', 'SWITCH_OFF');
-		$parental_disable->save();
-		
-		// safesearch
-		$order++;
-		$safesearch_enabled = $this->getCmd(null, 'safesearch_enabled');
-		if (!is_object($safesearch_enabled)) {
-			$safesearch_enabled = new AdGuardcmd();
-			$safesearch_enabled->setLogicalId('safesearch_enabled');
-			$safesearch_enabled->setIsVisible(1);
-			$safesearch_enabled->setOrder($order);
-			$safesearch_enabled->setName(__('Statut Recherche Sécurisée Globale', __FILE__));
-		}
-		$safesearch_enabled->setType('info');
-		$safesearch_enabled->setSubType('binary');
-		$safesearch_enabled->setEqLogic_id($this->getId());
-		$safesearch_enabled->setDisplay('generic_type', 'SWITCH_STATE');
-		$safesearch_enabled->save();
-		
-		$order++;
-		$safesearch_enable = $this->getCmd(null, 'safesearch_enable');
-		if (!is_object($safesearch_enable)) {
-			$safesearch_enable = new AdGuardcmd();
-			$safesearch_enable->setLogicalId('safesearch_enable');
-			$safesearch_enable->setDisplay('icon','<i class="fas fa-play"></i>');
-			$safesearch_enable->setIsVisible(1);
-			$safesearch_enable->setOrder($order);
-			$safesearch_enable->setName(__('Activer la Recherche Sécurisée Globale', __FILE__));
-		}
-		$safesearch_enable->setType('action');
-		$safesearch_enable->setSubType('other');
-		$safesearch_enable->setEqLogic_id($this->getId());
-		$safesearch_enable->setValue($safesearch_enabled->getId());
-		$safesearch_enable->setDisplay('generic_type', 'SWITCH_ON');
-		$safesearch_enable->save();
-		
-		$order++;
-		$safesearch_disable = $this->getCmd(null, 'safesearch_disable');
-		if (!is_object($safesearch_disable)) {
-			$safesearch_disable = new AdGuardcmd();
-			$safesearch_disable->setLogicalId('safesearch_disable');
-			$safesearch_disable->setDisplay('icon','<i class="fas fa-stop"></i>');
-			$safesearch_disable->setIsVisible(1);
-			$safesearch_disable->setOrder($order);
-			$safesearch_disable->setName(__('Désactiver la Recherche Sécurisée Globale', __FILE__));
-		}
-		$safesearch_disable->setType('action');
-		$safesearch_disable->setSubType('other');
-		$safesearch_disable->setEqLogic_id($this->getId());
-		$safesearch_disable->setValue($safesearch_enabled->getId());
-		$safesearch_disable->setDisplay('generic_type', 'SWITCH_OFF');
-		$safesearch_disable->save();
 		
 		// stats
 		$stats = AdGuard::getStructure('stats');
 		foreach($stats as $id => $trad) {
 			$order++;
-			$newCommand = $this->getCmd(null, $id);
-			if (!is_object($newCommand)) {
-				$newCommand = new AdGuardcmd();
-				$newCommand->setLogicalId($id);
-				$newCommand->setIsVisible(0);
-				$newCommand->setOrder($order);
-				$newCommand->setName(__($trad, __FILE__));
-			}
-			$newCommand->setTemplate('dashboard', 'line');
-			$newCommand->setTemplate('mobile', 'line');
-			$newCommand->setType('info');
-			$newCommand->setSubType('numeric');
-			$newCommand->setEqLogic_id($this->getId());
-			$newCommand->setDisplay('generic_type', 'GENERIC_INFO');
-			if(strpos($id,'avg_processing_time') !== false) $newCommand->setUnite( 'ms' );
-			$newCommand->save();		
+			$cmd = [
+				"name" => $trad,
+				"type" => 'info',
+				"subtype" => 'numeric',
+				"template" => [
+					"dashboard" => 'line',
+					"mobile" => 'line'
+				],
+				"display" => [
+					"generic_type" => 'GENERIC_INFO'
+				],
+				"isVisible": 1,
+				"isHistorized": 0,
+				"logicalId": $id
+			];
+			if(strpos($id,'avg_processing_time') !== false) $cmd['unit']='ms';
+			$this->createCmd($cmd,$order);		
 		}
 		
-		$order++;
-		$online = $this->getCmd(null, 'online');
-		if (!is_object($online)) {
-			$online = new AdGuardcmd();
-			$online->setLogicalId('online');
-			$online->setIsVisible(1);
-			$online->setOrder($order);
-			$online->setName(__('Online', __FILE__));
-		}
-		$online->setType('info');
-		$online->setSubType('binary');
-		$online->setEqLogic_id($this->getId());
-		$online->setDisplay('generic_type', 'ONLINE');
-		$online->save();	
-
-		// updates
-		$order++;
-		$hasUpdateAdGuard = $this->getCmd(null, 'hasUpdateAdGuard');
-		if (!is_object($hasUpdateAdGuard)) {
-			$hasUpdateAdGuard = new AdGuardcmd();
-			$hasUpdateAdGuard->setLogicalId('hasUpdateAdGuard');
-			$hasUpdateAdGuard->setIsVisible(1);
-			$hasUpdateAdGuard->setOrder($order);
-			$hasUpdateAdGuard->setName(__('Update AdGuard Dispo', __FILE__));
-		}
-		$hasUpdateAdGuard->setType('info');
-		$hasUpdateAdGuard->setSubType('binary');
-		$hasUpdateAdGuard->setEqLogic_id($this->getId());
-		$hasUpdateAdGuard->save();
-		
-		$order++;
 		$this->getAdGuardInfo();
 	}
 }
