@@ -44,9 +44,9 @@ class AdGuard extends eqLogic {
 		switch($name) {
 			case "stats" :
 				return ["num_dns_queries"=>"Requêtes DNS",
-						"num_blocked_filtering"=>"Bloqué par Filtres",
-						"num_replaced_safebrowsing"=>"Tentative de malware-hameçonnage bloquée",
-						"num_replaced_safesearch"=>"Recherche sécurisée forcée",
+						"num_blocked_filtering"=>"Bloqués par Filtres",
+						"num_replaced_safebrowsing"=>"Tentatives de malware-hameçonnage bloquées",
+						"num_replaced_safesearch"=>"Recherches sécurisées forcées",
 						"num_replaced_parental"=>"Sites à contenu adulte bloqués",
 						"avg_processing_time"=>"Temps moyen de traitement"
 					];
@@ -127,33 +127,38 @@ class AdGuard extends eqLogic {
 		return json_decode($AdGuardinfo,true);
 	}
 	
+	public function getAdGuardStatut() {
+		$AdGuardinfo=$this->getAdGuard('status');
+		if(!$AdGuardinfo) return false;
+		$AdGuardinfo['safebrowsing']=$this->getAdGuard('safebrowsing/status');
+		$AdGuardinfo['parental']=$this->getAdGuard('parental/status');
+		$AdGuardinfo['safesearch']=$this->getAdGuard('safesearch/status');
+		$AdGuardinfo['filtering']=$this->getAdGuard('filtering/status');
+		$AdGuardinfo['filtering']['filters']="deleted";
+		$AdGuardinfo['stats']=$this->getAdGuard('stats');
+		$AdGuardinfo['stats']['top_queried_domains']="deleted";
+		$AdGuardinfo['stats']['top_clients']="deleted";
+		$AdGuardinfo['stats']['top_blocked_domains']="deleted";
+		$AdGuardinfo['stats']['dns_queries']="deleted";
+		$AdGuardinfo['stats']['blocked_filtering']="deleted";
+		$AdGuardinfo['stats']['replaced_safebrowsing']="deleted";
+		$AdGuardinfo['stats']['replaced_parental']="deleted";
+		$AdGuardinfo['version']=$this->getAdGuard('version.json');
+		$AdGuardinfo['clients']=$this->getAdGuard('clients');
+		$AdGuardinfo['clients']['auto_clients']="deleted";
+		$AdGuardinfo['clients']['supported_tags']="deleted";
+
+		return $AdGuardinfo;
+	}
+	
 	public function getAdGuardInfo() {
 		if(!$this->getIsEnable()) return;
 		try {
 				
-			$AdGuardinfo=$this->getAdGuard('status');
+			$AdGuardinfo=$this->getAdGuardStatut();
 			if(!$AdGuardinfo) return;
-			$AdGuardinfo['safebrowsing']=$this->getAdGuard('safebrowsing/status');
-			$AdGuardinfo['parental']=$this->getAdGuard('parental/status');
-			$AdGuardinfo['safesearch']=$this->getAdGuard('safesearch/status');
-			$AdGuardinfo['filtering']=$this->getAdGuard('filtering/status');
-			$AdGuardinfo['filtering']['filters']="deleted";
-			$AdGuardinfo['stats']=$this->getAdGuard('stats');
-			$AdGuardinfo['stats']['top_queried_domains']="deleted";
-			$AdGuardinfo['stats']['top_clients']="deleted";
-			$AdGuardinfo['stats']['top_blocked_domains']="deleted";
-			$AdGuardinfo['stats']['dns_queries']="deleted";
-			$AdGuardinfo['stats']['blocked_filtering']="deleted";
-			$AdGuardinfo['stats']['replaced_safebrowsing']="deleted";
-			$AdGuardinfo['stats']['replaced_parental']="deleted";
-			$AdGuardinfo['version']=$this->getAdGuard('version.json');
-			$AdGuardinfo['clients']=$this->getAdGuard('clients');
-			$AdGuardinfo['clients']['auto_clients']="deleted";
-			$AdGuardinfo['clients']['supported_tags']="deleted";
-
 
 			log::add('AdGuard','debug','recu:'.json_encode($AdGuardinfo));
-			return
 			
 			$protection_enabled = $this->getCmd(null, 'protection_enabled');
 			$this->checkAndUpdateCmd($protection_enabled, (($AdGuardinfo['protection_enabled']===true)?1:0));
@@ -172,10 +177,10 @@ class AdGuard extends eqLogic {
 			$this->checkAndUpdateCmd($safesearch_enabled, (($AdGuardinfo['safesearch']['enabled']===true)?1:0));
 			
 			// stats
-			$status = AdGuard::getStructure('stats');
-			foreach($summaryRaw as $id => $trad) {
+			$stats = AdGuard::getStructure('stats');
+			foreach($stats as $id => $trad) {
 				$AdGuardCmd = $this->getCmd(null, $id);
-				if(strpos($id,'avg_processing_time') !== false) $AdGuardinfo['stats'][$id]=round($AdGuardinfo['stats'][$id],0);
+				if(strpos($id,'avg_processing_time') !== false) $AdGuardinfo['stats'][$id]=round($AdGuardinfo['stats'][$id]*1000,0);
 				$this->checkAndUpdateCmd($AdGuardCmd, $AdGuardinfo['stats'][$id]);
 			}
 			
