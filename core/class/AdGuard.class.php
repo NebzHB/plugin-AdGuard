@@ -45,7 +45,7 @@ class AdGuard extends eqLogic {
 			case "stats" :
 				return ["num_dns_queries"=>"Requêtes DNS",
 						"num_blocked_filtering"=>"Bloqué par Filtres",
-						"num_replaced_safebrowsing"=>"Tentative de malware/hameçonnage bloquée",
+						"num_replaced_safebrowsing"=>"Tentative de malware-hameçonnage bloquée",
 						"num_replaced_safesearch"=>"Recherche sécurisée forcée",
 						"num_replaced_parental"=>"Sites à contenu adulte bloqués",
 						"avg_processing_time"=>"Temps moyen de traitement"
@@ -87,7 +87,14 @@ class AdGuard extends eqLogic {
 		));
 		$request_http->setPost(json_encode($params));
 				
-		$AdGuardinfo=$request_http->exec(10,1);
+		try {		
+			$AdGuardinfo=$request_http->exec(10,1);
+		} catch (Exception $e) {
+			log::add('AdGuard','error',"Impossible de communiquer avec le serveur AdGuard $ip ! Message : ".json_encode($e));
+		}
+		if($AdGuardinfo == "Forbidden") {
+			log::add('AdGuard','error',"Impossible de communiquer avec le serveur AdGuard $ip, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
+		}
 		
 		return json_decode($AdGuardinfo,true);
 	}
@@ -96,7 +103,7 @@ class AdGuard extends eqLogic {
 		$ip = $this->getConfiguration('ip','');
 		
 		$url = 'http://' . $ip . '/control/'.$cmd;
-		$url.=((count($params))?"?".http_build_query($params):'');
+		$url.=(($params && count($params))?"?".http_build_query($params):'');
 		
 		$user = $this->getConfiguration('user','');
 		$pass = $this->getConfiguration('password','');
@@ -108,8 +115,14 @@ class AdGuard extends eqLogic {
 			'Accept application/json, text/plain, */*'
 		));
 		
-				
-		$AdGuardinfo=$request_http->exec(10,1);
+		try {		
+			$AdGuardinfo=$request_http->exec(10,1);
+		} catch (Exception $e) {
+			log::add('AdGuard','error',"Impossible de communiquer avec le serveur AdGuard $ip ! Message : ".json_encode($e));
+		}
+		if($AdGuardinfo == "Forbidden") {
+			log::add('AdGuard','error',"Impossible de communiquer avec le serveur AdGuard $ip, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
+		}
 		
 		return json_decode($AdGuardinfo,true);
 	}
@@ -118,6 +131,7 @@ class AdGuard extends eqLogic {
 		try {
 				
 			$AdGuardinfo=$this->getAdGuard('status');
+			if(!$AdGuardinfo) return;
 			$AdGuardinfo['safebrowsing']=$this->getAdGuard('safebrowsing/status');
 			$AdGuardinfo['parental']=$this->getAdGuard('parental/status');
 			$AdGuardinfo['safesearch']=$this->getAdGuard('safesearch/status');
@@ -132,9 +146,9 @@ class AdGuard extends eqLogic {
 			$AdGuardinfo['stats']['replaced_safebrowsing']="deleted";
 			$AdGuardinfo['stats']['replaced_parental']="deleted";
 			$AdGuardinfo['version']=$this->getAdGuard('version.json');
-			$AdGuardinfo+=$this->getAdGuard('clients');
-			$AdGuardinfo['auto_clients']="deleted";
-			$AdGuardinfo['supported_tags']="deleted";
+			$AdGuardinfo['clients']=$this->getAdGuard('clients');
+			$AdGuardinfo['clients']['auto_clients']="deleted";
+			$AdGuardinfo['clients']['supported_tags']="deleted";
 
 
 			log::add('AdGuard','debug','recu:'.json_encode($AdGuardinfo));
@@ -185,15 +199,7 @@ class AdGuard extends eqLogic {
 	
 	public function createCmd($cmd, $order) {
 
-		//change name if exists
-		$c = 1;
-		$origName = $cmd['name'];
-		while ($this->cmdNameExist($cmd['name'])) {
-			$cmd['name'] = $origName . '_' . $c;
-			$c++;
-		}
-
-		if (strlen($cmd['name']) > 45) $cmd['name'] = substr($cmd['name'], 0, 45);
+		//if (strlen($cmd['name']) > 45) $cmd['name'] = substr($cmd['name'], 0, 45);
 
 		$newCmd = $this->getCmd(null, $cmd['logicalId']);
 		if (!is_object($newCmd)) {
@@ -246,6 +252,12 @@ class AdGuard extends eqLogic {
 		return 'plugins/AdGuard/plugin_info/AdGuard_icon.png';
 	}
 	
+	public function preSave() {
+		if ($this->getConfiguration('type','') == ''){
+			$this->setConfiguration('type','AdGuardGlobal');
+		}
+	}
+
 	public function postSave() {
 		
 		if($this->getConfiguration('type','') != 'AdGuardGlobal') return true;
