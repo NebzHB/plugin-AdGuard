@@ -128,6 +128,7 @@ class AdGuard extends eqLogic {
 	}
 	
 	public function getAdGuardInfo() {
+		if(!$this->getIsEnable()) return;
 		try {
 				
 			$AdGuardinfo=$this->getAdGuard('status');
