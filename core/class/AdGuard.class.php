@@ -371,6 +371,9 @@ class AdGuardCmd extends cmd {
 				case 'safesearch_disable':
 					$cmd = 'safesearch/disable';
 				break;
+				case 'reset_stats':
+					$cmd = 'stats_reset';
+				break;
 			}
 			
 			$AdGuardinfo=$eqLogic->postAdGuard($cmd,$params);
