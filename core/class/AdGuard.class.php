@@ -77,6 +77,41 @@ class AdGuard extends eqLogic {
 		}
 	}	
 	
+	public static function createEq($eq,$event=true) {
+		$eqp = eqlogic::byLogicalId($eq['logicalId'],'AdGuard');
+		if (!is_object($eqp)){
+			if($eq['name']) {
+				log::add('AdGuard', 'info', 'Création de l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ')');
+				$eqp = new AdGuard();
+				$eqp->setEqType_name('AdGuard');
+				$eqp->setLogicalId($eq['logicalId']);
+				$eqp->setName($eq['name']);
+				foreach($eq['configuration'] as $c => $v) {
+					$eqp->setConfiguration($c, $v);
+				}
+				$eqp->setConfiguration('toRemove',0);
+				$eqp->setIsEnable($eq['enable']);
+				$eqp->setIsVisible($eq['visible']);
+				$eqp->save(false);
+				if($event) event::add('AdGuard::includeDevice');
+			} else {
+				log::add('AdGuard', 'warning', 'Etrange l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ') n\'a pas de nom... vérifiez dans AdGuard : '.json_encode($eq));
+			}
+		} else {
+			if($eq['name']) {
+				log::add('AdGuard', 'info', 'Modification de l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ')');	
+				foreach($eq['configuration'] as $c => $v) {
+					$eqp->setConfiguration($c, $v);
+				}
+				$eqp->setConfiguration('toRemove',0);
+				$eqp->save(true);
+			} else {
+				log::add('AdGuard', 'warning', 'Etrange l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ') n\'a pas de nom... vérifiez dans AdGuard : '.json_encode($eq));
+			}
+		}
+		return $eqp;
+	}
+	
 	public static function getStructure($name) {
 	
 		switch($name) {
@@ -310,41 +345,58 @@ class AdGuard extends eqLogic {
 	}
 
 	public function postSave() {
-		
-		if($this->getConfiguration('type','') != 'AdGuardGlobal') return true;
+		$type=$this->getConfiguration('type','');
+		//if($type != 'AdGuardGlobal') return true;
 		
 		$order=0;
-		$device = self::devicesParameters('AdGuardGlobal');
+		$device = self::devicesParameters($type);
 	
 		foreach($device['commands'] as $cmd) {
 			$order++;
 			$this->createCmd($cmd,$order);
 		}
 		
-		// stats
-		$stats = AdGuard::getStructure('stats');
-		foreach($stats as $id => $trad) {
-			$order++;
-			$cmd = [
-				"name" => $trad,
-				"type" => 'info',
-				"subtype" => 'numeric',
-				"template" => [
-					"dashboard" => 'line',
-					"mobile" => 'line'
-				],
-				"display" => [
-					"generic_type" => 'GENERIC_INFO'
-				],
-				"isVisible"=> 1,
-				"isHistorized"=> 0,
-				"logicalId"=> $id
-			];
-			if(strpos($id,'avg_processing_time') !== false) $cmd['unit']='ms';
-			$this->createCmd($cmd,$order);		
+		if($type == 'AdGuardGlobal') {
+			// stats
+			$stats = self::getStructure('stats');
+			foreach($stats as $id => $trad) {
+				$order++;
+				$cmd = [
+					"name" => $trad,
+					"type" => 'info',
+					"subtype" => 'numeric',
+					"template" => [
+						"dashboard" => 'line',
+						"mobile" => 'line'
+					],
+					"display" => [
+						"generic_type" => 'GENERIC_INFO'
+					],
+					"isVisible"=> 1,
+					"isHistorized"=> 0,
+					"logicalId"=> $id
+				];
+				if(strpos($id,'avg_processing_time') !== false) $cmd['unit']='ms';
+				$this->createCmd($cmd,$order);		
+			}
+			
+			$clients=$this->getAdGuard('clients');
+			foreach($clients['clients'] as $client) {
+				$eq = [
+					"name"=>$client['name'],
+					"logicalId"=>$client['name'],
+					"enable"=>1,
+					"visible"=>1,
+					"configuration"=>[
+						"server"=>$this->getId(),
+						"type"=>'Client'
+					]
+				];
+				self::createEq($eq);
+			}
+			
+			$this->getAdGuardInfo();
 		}
-		
-		$this->getAdGuardInfo();
 	}
 }
 
