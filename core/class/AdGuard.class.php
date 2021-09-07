@@ -227,6 +227,7 @@ class AdGuard extends eqLogic {
 		$AdGuardinfo['clients']=$this->getAdGuard('clients');
 		$AdGuardinfo['clients']['auto_clients']="deleted";
 		$AdGuardinfo['clients']['supported_tags']="deleted";
+		$AdGuardinfo['blocked_services']=$this->getAdGuard('blocked_services/list');
 
 		return $AdGuardinfo;
 	}
@@ -267,7 +268,32 @@ class AdGuard extends eqLogic {
 			// updates
 			$hasUpdateAdGuard = $this->getCmd(null, 'hasUpdateAdGuard');
 			$this->checkAndUpdateCmd($hasUpdateAdGuard, (($AdGuardinfo['version']['can_autoupdate']===true)?1:0));
+			
+			// clients
+			foreach($AdGuardinfo['clients']['clients'] as $client) {
+				$eqp = eqLogic::byLogicalId($client['name'],'AdGuard');
+				// filtering
+				$client_filtering_enabled = $eqp->getCmd(null, 'client_filtering_enabled');
+				$eqp->checkAndUpdateCmd($client_filtering_enabled, (($client['filtering_enabled']===true)?1:0));
+				// safebrowsing
+				$client_safebrowsing_enabled = $eqp->getCmd(null, 'client_safebrowsing_enabled');
+				$eqp->checkAndUpdateCmd($client_safebrowsing_enabled, (($client['safebrowsing_enabled']===true)?1:0));
+				// parental
+				$client_parental_enabled = $eqp->getCmd(null, 'client_parental_enabled');
+				$eqp->checkAndUpdateCmd($client_parental_enabled, (($client['parental_enabled']===true)?1:0));
+				// safesearch
+				$client_safesearch_enabled = $eqp->getCmd(null, 'client_safesearch_enabled');
+				$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safesearch_enabled']===true)?1:0));
+				// client_use_global_blocked_services
+				$client_use_global_blocked_services = $eqp->getCmd(null, 'client_use_global_blocked_services');
+				$eqp->checkAndUpdateCmd($client_use_global_blocked_services, (($client['use_global_blocked_services']===true)?1:0));
+				// client_use_global_settings
+				$client_use_global_settings = $eqp->getCmd(null, 'client_use_global_settings');
+				$eqp->checkAndUpdateCmd($client_use_global_settings, (($client['use_global_settings']===true)?1:0));
+			}
 
+			$this->setConfiguration('blocked_services',$AdGuardinfo['blocked_services']);
+			$this->save(true);
 			
 			$online = $this->getCmd(null, 'online');
 			if (is_object($online)) {
@@ -284,8 +310,6 @@ class AdGuard extends eqLogic {
 	} 
 	
 	public function createCmd($cmd, $order) {
-
-		//if (strlen($cmd['name']) > 45) $cmd['name'] = substr($cmd['name'], 0, 45);
 
 		$newCmd = $this->getCmd(null, $cmd['logicalId']);
 		if (!is_object($newCmd)) {
@@ -396,7 +420,12 @@ class AdGuard extends eqLogic {
 			}
 			
 			$this->getAdGuardInfo();
-		}
+		} /*else {
+			$serverId=$this->getConfiguration('server',null);
+			if($serverId) {
+				$eqLogic=eqlogic::byId($serverId);
+			}
+		}*/
 	}
 }
 
