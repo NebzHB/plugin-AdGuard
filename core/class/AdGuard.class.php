@@ -21,6 +21,44 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
 class AdGuard extends eqLogic {
 	/***************************Attributs*******************************/	
+	public static $serviceList = [
+		"9gag"=>"9Gag", 
+		"amazon"=>"Amazon", 
+		"cloudflare"=>"CloudFlare", 
+		"dailymotion"=>"Dailymotion", 
+		"discord"=>"Discord", 
+		"disneyplus"=>"Disney+", 
+		"ebay"=>"EBay", 
+		"epic_games"=>"Epic Games", 
+		"facebook"=>"Facebook", 
+		"hulu"=>"Hulu", 
+		"imgur"=>"Imgur", 
+		"instagram"=>"Instagram", 
+		"mail_ru"=>"Mail.ru", 
+		"netflix"=>"Netflix", 
+		"ok"=>"OK.ru", 
+		"origin"=>"Origin", 
+		"pinterest"=>"Pinterest", 
+		"qq"=>"QQ", 
+		"reddit"=>"Reddit", 
+		"skype"=>"Skype", 
+		"snapchat"=>"Snapchat", 
+		"spotify"=>"Spotify", 
+		"steam"=>"Steam", 
+		"telegram"=>"Telegram", 
+		"tiktok"=>"TikTok", 
+		"tinder"=>"Tinder", 
+		"twitch"=>"Twitch", 
+		"twitter"=>"Twitter", 
+		"viber"=>"Viber", 
+		"vimeo"=>"Vimeo", 
+		"vk"=>"VK.com", 
+		"wechat"=>"WeChat", 
+		"weibo"=>"Weibo", 
+		"whatsapp"=>"WhatsApp", 
+		"youtube"=>"YouTube"
+	];
+	
 	public static function cron($_eqlogic_id = null) {
 		$eqLogics = ($_eqlogic_id !== null) ? array(eqLogic::byId($_eqlogic_id)) : eqLogic::byType('AdGuard', true);
 		foreach ($eqLogics as $AdGuard) {
