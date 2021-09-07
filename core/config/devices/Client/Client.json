@@ -1,0 +1,208 @@
+{
+	"commands": [{
+			"name": "Statut Filtrage",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_filtering_enabled"
+		}, {
+			"name": "Activer le Filtrage",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_filtering_enable",
+			"value": "client_filtering_enabled"
+		}, {
+			"name": "Désactiver le Filtrage",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_filtering_disable",
+			"value": "client_filtering_enabled"
+		}, {
+			"name": "Statut Sécurité de navigation",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_safebrowsing_enabled"
+		}, {
+			"name": "Activer la Sécurité de navigation",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_safebrowsing_enable",
+			"value": "client_safebrowsing_enabled"
+		}, {
+			"name": "Désactiver la Sécurité de navigation",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_safebrowsing_disable",
+			"value": "client_safebrowsing_enabled"
+		}, {
+			"name": "Statut Contrôle Parental",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_parental_enabled"
+		}, {
+			"name": "Activer le Contrôle Parental",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_parental_enable",
+			"value": "client_parental_enabled"
+		}, {
+			"name": "Désactiver le Contrôle Parental",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_parental_disable",
+			"value": "client_parental_enabled"
+		}, {
+			"name": "Statut Recherche Sécurisée",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_safesearch_enabled"
+		}, {
+			"name": "Activer la Recherche Sécurisée",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_safesearch_enable",
+			"value": "client_safesearch_enabled"
+		}, {
+			"name": "Désactiver la Recherche Sécurisée",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_safesearch_disable",
+			"value": "client_safesearch_enabled"
+		}, {
+			"name": "Statut Utilisation Services Globaux",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_use_global_blocked_services"
+		}, {
+			"name": "Activer Utilisation Services Globaux",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_use_global_blocked_services_enable",
+			"value": "client_use_global_blocked_services"
+		}, {
+			"name": "Désactiver Utilisation Services Globaux",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_use_global_blocked_services_disable",
+			"value": "client_use_global_blocked_services"
+		}, {
+			"name": "Statut Paramètres Globaux",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_use_global_settings"
+		}, {
+			"name": "Activer Paramètres Globaux",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-play\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_use_global_settings_enable",
+			"value": "client_use_global_settings"
+		}, {
+			"name": "Désactiver Paramètres Globaux",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_use_global_settings_disable",
+			"value": "client_use_global_settings"
+		}
+	]
+}
