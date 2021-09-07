@@ -13,7 +13,8 @@
 			"type": "info",
 			"subtype": "binary",
 			"display": {
-				"generic_type": "ONLINE"
+				"generic_type": "ONLINE",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"isHistorized": 0,
@@ -25,12 +26,23 @@
 			"isVisible": 1,
 			"isHistorized": 0,
 			"logicalId": "hasUpdateAdGuard"
+		},{
+			"name": "Update AdGuard",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"icon": "<i class=\"fas fa-cog\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "UpdateAdGuard"
 		}, {
 			"name": "Statut protection",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
-				"generic_type": "SWITCH_STATE"
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"isHistorized": 0,
@@ -52,7 +64,8 @@
 			"subtype": "other",
 			"display": {
 				"generic_type": "SWITCH_OFF",
-				"icon": "<i class=\"fas fa-stop\"></i>"
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"logicalId": "protection_disable",
@@ -62,7 +75,8 @@
 			"type": "info",
 			"subtype": "binary",
 			"display": {
-				"generic_type": "SWITCH_STATE"
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"isHistorized": 0,
@@ -84,7 +98,8 @@
 			"subtype": "other",
 			"display": {
 				"generic_type": "SWITCH_OFF",
-				"icon": "<i class=\"fas fa-stop\"></i>"
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"logicalId": "filtering_disable",
@@ -94,7 +109,8 @@
 			"type": "info",
 			"subtype": "binary",
 			"display": {
-				"generic_type": "SWITCH_STATE"
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"isHistorized": 0,
@@ -116,7 +132,8 @@
 			"subtype": "other",
 			"display": {
 				"generic_type": "SWITCH_OFF",
-				"icon": "<i class=\"fas fa-stop\"></i>"
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"logicalId": "safebrowsing_disable",
@@ -126,7 +143,8 @@
 			"type": "info",
 			"subtype": "binary",
 			"display": {
-				"generic_type": "SWITCH_STATE"
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"isHistorized": 0,
@@ -148,7 +166,8 @@
 			"subtype": "other",
 			"display": {
 				"generic_type": "SWITCH_OFF",
-				"icon": "<i class=\"fas fa-stop\"></i>"
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"logicalId": "parental_disable",
@@ -158,7 +177,8 @@
 			"type": "info",
 			"subtype": "binary",
 			"display": {
-				"generic_type": "SWITCH_STATE"
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"isHistorized": 0,
@@ -180,7 +200,8 @@
 			"subtype": "other",
 			"display": {
 				"generic_type": "SWITCH_OFF",
-				"icon": "<i class=\"fas fa-stop\"></i>"
+				"icon": "<i class=\"fas fa-stop\"></i>",
+				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
 			"logicalId": "safesearch_disable",
