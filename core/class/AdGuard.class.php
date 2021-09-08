@@ -369,7 +369,11 @@ class AdGuard extends eqLogic {
 	}
 	
 	public function getImage(){
-		return 'plugins/AdGuard/plugin_info/AdGuard_icon.png';
+		if ($this->getConfiguration('type','') == 'AdGuardGlobal'){
+			return 'plugins/AdGuard/plugin_info/AdGuard_icon.png';
+		}else {
+			return 'plugins/AdGuard/plugin_info/AdGuard_user.png';
+		}
 	}
 	
 	public function preSave() {
