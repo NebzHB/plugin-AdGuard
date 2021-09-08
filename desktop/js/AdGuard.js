@@ -105,7 +105,8 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',functio
 	}
 });
 
-for(var i=1;i<50;i++) {
+
+for(var i=1;i<($('.searchBox').length+1);i++) {
 	if($('#in_searchEqlogic'+i).length) {
 		$('#in_searchEqlogic'+i).off('keyup').keyup(function() {
 			var n = this.id.replace('in_searchEqlogic','');
@@ -131,7 +132,5 @@ for(var i=1;i<50;i++) {
 			$('#in_searchEqlogic'+n).val('');
 			$('#in_searchEqlogic'+n).keyup();
 		});
-	} else if(i>2){
-		break;
 	}
 }
