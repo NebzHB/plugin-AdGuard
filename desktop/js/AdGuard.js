@@ -91,6 +91,8 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',functio
 			$('#cronDevice').hide();
 			$('a[data-action=remove]').hide();
 			$('a[data-action=save]').addClass('roundedRight');
+			$('#eqName').prop('readonly', true);
+			$('#eqName').attr('title', '{{Doit être modifié dans AdGuard Home}}');
 			//add save roundedRight
 		}
 		else {
@@ -100,6 +102,8 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',functio
 			$('#cronDevice').show();
 			$('a[data-action=remove]').show();
 			$('a[data-action=save]').removeClass('roundedRight');
+			$('#eqName').prop('readonly', false);
+			$('#eqName').attr('title','{{Nom de l\'équipement}}');
 			//remove save roundedRight
 		}
 	}
