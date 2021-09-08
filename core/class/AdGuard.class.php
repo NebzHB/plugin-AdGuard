@@ -174,15 +174,15 @@ class AdGuard extends eqLogic {
 				
 		try {		
 			$AdGuardinfo=$request_http->exec(10,1);
-			log::add('AdGuard','debug',"raw return : ".$AdGuardinfo);
+			if($AdGuardinfo) log::add('AdGuard','debug',"raw return : ".$AdGuardinfo);
 		} catch (Exception $e) {
-			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip ! Message : ".json_encode($e));
+			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
 		}
 		if(trim($AdGuardinfo) == "Forbidden") {
-			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
+			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
 		}
 		if(trim($AdGuardinfo) == "404 page not found") {
-			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip, la commande n'existe pas ! Message : ".$AdGuardinfo);
+			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, la commande n'existe pas ! Message : ".$AdGuardinfo);
 		}
 		
 		return json_decode($AdGuardinfo,true);
@@ -207,13 +207,13 @@ class AdGuard extends eqLogic {
 		try {		
 			$AdGuardinfo=$request_http->exec(10,1);
 		} catch (Exception $e) {
-			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip ! Message : ".json_encode($e));
+			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
 		}
 		if(trim($AdGuardinfo) == "Forbidden") {
-			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
+			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
 		}
 		if(trim($AdGuardinfo) == "404 page not found") {
-			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip, la commande n'existe pas ! Message : ".$AdGuardinfo);
+			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd, la commande n'existe pas ! Message : ".$AdGuardinfo);
 		}
 		
 		return json_decode($AdGuardinfo,true);
@@ -483,6 +483,14 @@ class AdGuardCmd extends cmd {
 		}
 		$eqLogic = $this->getEqlogic();
 		$type = $eqLogic->getConfiguration('type','');
+		if($type == "Client") {
+			$serverId = $eqLogic->getConfiguration('server','');
+			if($serverId) {
+				$AdGuard=eqlogic::byId($serverId);
+			}
+		} else {
+			$AdGuard=$eqLogic;
+		}
 		$logical = $this->getLogicalId();
 		$cmd=null;
 		$params=null;
@@ -531,14 +539,14 @@ class AdGuardCmd extends cmd {
 					$cmd = 'stats_reset';
 				break;
 				case 'service_block':
-					$blocked_services=$eqLogic->getAdGuard('blocked_services/list');
+					$blocked_services=$AdGuard->getAdGuard('blocked_services/list');
 					array_push($blocked_services,$_options['select']);
 					$new_blocked_services=array_unique($blocked_services,SORT_STRING);
 					$cmd='blocked_services/set';
 					$params=$new_blocked_services;
 				break;
 				case 'service_unblock':
-					$blocked_services=$eqLogic->getAdGuard('blocked_services/list');
+					$blocked_services=$AdGuard->getAdGuard('blocked_services/list');
 					if (($key = array_search($_options['select'], $blocked_services)) !== false) {
 						array_splice($blocked_services,$key,1);
 						$cmd='blocked_services/set';
@@ -555,34 +563,46 @@ class AdGuardCmd extends cmd {
 				break;
 				// block everything for a client (first rule !) : ||*^$client='Nebz iPhone',important 
 				// Use the backslash (\) to escape quotes (" and '), commas (,), and pipes (|) in client name
+				
+				// CLIENT
+				case 'client_filtering_enable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['filtering_enabled']=true;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_filtering_disable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['filtering_enabled']=false;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
 			}
 			
 			if(!$cmd) return false;
 			
-			if($type == 'AdGuardGlobal') {
-				$AdGuardinfo=$eqLogic->postAdGuard($cmd,$params);
-				log::add('AdGuard','debug','Exec '.$cmd.' avec params '.json_encode($params).' '.$AdGuardinfo);
-				if($sleep) sleep($sleep);
-			} else {
-				$serverId = $eqLogic->getConfiguration('server','');
-				if($serverId) {
-					$eqLogicServer=eqlogic::byId($serverId);
-					$AdGuardinfo=$eqLogicServer->postAdGuard($cmd,$params);
-					log::add('AdGuard','debug','Exec '.$cmd.' avec params '.json_encode($params).' '.$AdGuardinfo);
-					if($sleep) sleep($sleep);
-				}
-			}
+
+			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params);
+			log::add('AdGuard','debug','Exec '.$cmd.' avec params '.json_encode($params).' | '.$AdGuardinfo);
+			if($sleep) sleep($sleep);
+			
 		}
 		
-		if($type == 'AdGuardGlobal') {
-			$eqLogic->getAdGuardInfo();
-		} else {
-			$serverId = $eqLogic->getConfiguration('server','');
-			if($serverId) {
-				$eqLogicServer=eqlogic::byId($serverId);
-				$eqLogicServer->getAdGuardInfo();
-			}
-		}
+		$AdGuard->getAdGuardInfo();
 	}
 
 	/************************Getteur Setteur****************************/
