@@ -29,12 +29,12 @@ $eqLogics = eqLogic::byType('AdGuard');
     <legend><i class="fas fa-table"></i>  {{Mes serveurs AdGuard et clients}}</legend>
 	<?php
 				$i=1;
-				foreach ($eqLogics as $eqLogicBridge) :
-					if($eqLogicBridge->getConfiguration('type','') != 'AdGuardGlobal') continue;
+				foreach ($eqLogics as $eqLogicAdGuard) :
+					if($eqLogicAdGuard->getConfiguration('type','') != 'AdGuardGlobal') continue;
 		?>
-					<legend> {{<?php echo $eqLogicBridge->getHumanName(true)?>}}</legend>
+					<legend> {{<?php echo $eqLogicAdGuard->getHumanName(true)?>}}</legend>
 					<div class="input-group" style="margin-bottom:5px;">
-						<input class="form-control roundedLeft" placeholder="{{Rechercher}}" id="in_searchEqlogic<?php echo $i?>" />
+						<input class="form-control roundedLeft searchBox" placeholder="{{Rechercher}}" id="in_searchEqlogic<?php echo $i?>" />
 						<div class="input-group-btn">
 							<a id="bt_resetEqlogicSearch<?php echo $i?>" class="btn roundedRight" style="width:30px"><i class="fas fa-times"></i></a>
 						</div>
@@ -44,8 +44,8 @@ $eqLogics = eqLogic::byType('AdGuard');
 							<div class="eqLogicThumbnailContainer">
 							  <?php
 								foreach ($eqLogics as $eqLogic) {
-									//if(strpos($eqLogic->getId(),$eqLogicBridge->getId()) === false) continue;
 									if($eqLogic->getConfiguration('type','') != 'AdGuardGlobal') continue;
+									if($eqLogic->getId() != $eqLogicAdGuard->getId()) continue;
 									$opacity = ($eqLogic->getIsEnable()) ? '' : ' disableCard';
 									$img=$eqLogic->getImage();
 									echo '<div class="eqLogicDisplayCard cursor cont'.$i.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
@@ -55,8 +55,8 @@ $eqLogics = eqLogic::byType('AdGuard');
 									echo '</div>';
 								}
 								foreach ($eqLogics as $eqLogic) {
-									//if(strpos($eqLogic->getId(),$eqLogicBridge->getId()) === false) continue;
 									if($eqLogic->getConfiguration('type','') != 'Client') continue;
+									if($eqLogic->getConfiguration('server','') != $eqLogicAdGuard->getId()) continue;
 									$opacity = ($eqLogic->getIsEnable()) ? '' : ' disableCard';
 									$img=$eqLogic->getImage();
 									echo '<div class="eqLogicDisplayCard cursor cont'.$i.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
