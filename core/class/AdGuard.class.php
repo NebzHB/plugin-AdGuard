@@ -21,43 +21,45 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
 class AdGuard extends eqLogic {
 	/***************************Attributs*******************************/	
-	public static $serviceList = [
-		"9gag"=>"9Gag", 
-		"amazon"=>"Amazon", 
-		"cloudflare"=>"CloudFlare", 
-		"dailymotion"=>"Dailymotion", 
-		"discord"=>"Discord", 
-		"disneyplus"=>"Disney+", 
-		"ebay"=>"EBay", 
-		"epic_games"=>"Epic Games", 
-		"facebook"=>"Facebook", 
-		"hulu"=>"Hulu", 
-		"imgur"=>"Imgur", 
-		"instagram"=>"Instagram", 
-		"mail_ru"=>"Mail.ru", 
-		"netflix"=>"Netflix", 
-		"ok"=>"OK.ru", 
-		"origin"=>"Origin", 
-		"pinterest"=>"Pinterest", 
-		"qq"=>"QQ", 
-		"reddit"=>"Reddit", 
-		"skype"=>"Skype", 
-		"snapchat"=>"Snapchat", 
-		"spotify"=>"Spotify", 
-		"steam"=>"Steam", 
-		"telegram"=>"Telegram", 
-		"tiktok"=>"TikTok", 
-		"tinder"=>"Tinder", 
-		"twitch"=>"Twitch", 
-		"twitter"=>"Twitter", 
-		"viber"=>"Viber", 
-		"vimeo"=>"Vimeo", 
-		"vk"=>"VK.com", 
-		"wechat"=>"WeChat", 
-		"weibo"=>"Weibo", 
-		"whatsapp"=>"WhatsApp", 
-		"youtube"=>"YouTube"
-	];
+	public static function serviceList() {
+		return [
+			"9gag"=>"9Gag", 
+			"amazon"=>"Amazon", 
+			"cloudflare"=>"CloudFlare", 
+			"dailymotion"=>"Dailymotion", 
+			"discord"=>"Discord", 
+			"disneyplus"=>"Disney+", 
+			"ebay"=>"EBay", 
+			"epic_games"=>"Epic Games", 
+			"facebook"=>"Facebook", 
+			"hulu"=>"Hulu", 
+			"imgur"=>"Imgur", 
+			"instagram"=>"Instagram", 
+			"mail_ru"=>"Mail.ru", 
+			"netflix"=>"Netflix", 
+			"ok"=>"OK.ru", 
+			"origin"=>"Origin", 
+			"pinterest"=>"Pinterest", 
+			"qq"=>"QQ", 
+			"reddit"=>"Reddit", 
+			"skype"=>"Skype", 
+			"snapchat"=>"Snapchat", 
+			"spotify"=>"Spotify", 
+			"steam"=>"Steam", 
+			"telegram"=>"Telegram", 
+			"tiktok"=>"TikTok", 
+			"tinder"=>"Tinder", 
+			"twitch"=>"Twitch", 
+			"twitter"=>"Twitter", 
+			"viber"=>"Viber", 
+			"vimeo"=>"Vimeo", 
+			"vk"=>"VK.com", 
+			"wechat"=>"WeChat", 
+			"weibo"=>"Weibo", 
+			"whatsapp"=>"WhatsApp", 
+			"youtube"=>"YouTube"
+		];
+	}
 	
 	public static function cron($_eqlogic_id = null) {
 		$eqLogics = ($_eqlogic_id !== null) ? array(eqLogic::byId($_eqlogic_id)) : eqLogic::byType('AdGuard', true);
@@ -84,6 +86,7 @@ class AdGuard extends eqLogic {
 				log::add('AdGuard', 'info', 'Création de l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ')');
 				$eqp = new AdGuard();
 				$eqp->setEqType_name('AdGuard');
+				if($eq['object_id']) $eqp->setObject_id($eq['object_id']);
 				$eqp->setLogicalId($eq['logicalId']);
 				$eqp->setName($eq['name']);
 				foreach($eq['configuration'] as $c => $v) {
@@ -330,6 +333,13 @@ class AdGuard extends eqLogic {
 		$newCmd->setType($cmd['type']);
 		if (isset($cmd['configuration'])) {
 			foreach ($cmd['configuration'] as $configuration_type => $configuration_value) {
+				if($configuration_type == 'listValue' && strpos($cmd['logicalId'],'service_') !== false) {
+					$list=[];
+					foreach(AdGuard::serviceList() as $val => $label) {
+						array_push($list,$val.'|'.$label);
+					}
+					$configuration_value=join(';',$list);
+				}
 				$newCmd->setConfiguration($configuration_type, $configuration_value);
 			}
 		}
@@ -411,6 +421,7 @@ class AdGuard extends eqLogic {
 					"logicalId"=>$client['name'],
 					"enable"=>1,
 					"visible"=>1,
+					"object_id"=>$this->getObject_id(),
 					"configuration"=>[
 						"server"=>$this->getId(),
 						"type"=>'Client'
@@ -426,6 +437,18 @@ class AdGuard extends eqLogic {
 				$eqLogic=eqlogic::byId($serverId);
 			}
 		}*/
+	}
+	public function preRemove() {
+		if($this->getConfiguration('type','') == "AdGuardGlobal") {
+			$eqLogics = eqLogic::byType('AdGuard');
+			foreach ($eqLogics as $eqLogic) {
+				if($eqLogic->getConfiguration('type','') != "Client") continue;
+				
+				if($eqLogic->getConfiguration('server','') == $this->getId()) { // if this bridgedAccessory logicalId contains this bridge logicalId
+					$eqLogic->remove();
+				}
+			}
+		}
 	}
 }
 
@@ -447,6 +470,7 @@ class AdGuardCmd extends cmd {
 		$eqLogic = $this->getEqlogic();
 		$type = $eqLogic->getConfiguration('type','');
 		$logical = $this->getLogicalId();
+		$cmd=null;
 		$params=null;
 		$sleep=null;
 		if ($logical != 'refresh'){
@@ -495,6 +519,8 @@ class AdGuardCmd extends cmd {
 				// block everything for a client (first rule !) : ||*^$client='Nebz iPhone',important 
 				// Use the backslash (\) to escape quotes (" and '), commas (,), and pipes (|) in client name
 			}
+			
+			if(!$cmd) return false;
 			
 			if($type == 'AdGuardGlobal') {
 				$AdGuardinfo=$eqLogic->postAdGuard($cmd,$params);
