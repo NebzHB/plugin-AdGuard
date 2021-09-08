@@ -445,12 +445,11 @@ class AdGuardCmd extends cmd {
 			return '';
 		}
 		$eqLogic = $this->getEqlogic();
-
+		$type = $eqLogic->getConfiguration('type','');
 		$logical = $this->getLogicalId();
 		$params=null;
 		$sleep=null;
 		if ($logical != 'refresh'){
-
 			switch ($logical) {
 				case 'protection_disable':
 					$cmd = 'dns_config';
@@ -493,13 +492,34 @@ class AdGuardCmd extends cmd {
 				case 'reset_stats':
 					$cmd = 'stats_reset';
 				break;
+				// block everything for a client (first rule !) : ||*^$client='Nebz iPhone',important 
+				// Use the backslash (\) to escape quotes (" and '), commas (,), and pipes (|) in client name
 			}
 			
-			$AdGuardinfo=$eqLogic->postAdGuard($cmd,$params);
-			log::add('AdGuard','debug','Exec '.$cmd.' avec params '.json_encode($params).' '.$AdGuardinfo);
-			if($sleep) sleep($sleep);
+			if($type == 'AdGuardGlobal') {
+				$AdGuardinfo=$eqLogic->postAdGuard($cmd,$params);
+				log::add('AdGuard','debug','Exec '.$cmd.' avec params '.json_encode($params).' '.$AdGuardinfo);
+				if($sleep) sleep($sleep);
+			} else {
+				$serverId = $eqLogic->getConfiguration('server','');
+				if($serverId) {
+					$eqLogicServer=eqlogic::byId($serverId);
+					$AdGuardinfo=$eqLogicServer->postAdGuard($cmd,$params);
+					log::add('AdGuard','debug','Exec '.$cmd.' avec params '.json_encode($params).' '.$AdGuardinfo);
+					if($sleep) sleep($sleep);
+				}
+			}
 		}
-		$eqLogic->getAdGuardInfo();
+		
+		if($type == 'AdGuardGlobal') {
+			$eqLogic->getAdGuardInfo();
+		} else {
+			$serverId = $eqLogic->getConfiguration('server','');
+			if($serverId) {
+				$eqLogicServer=eqlogic::byId($serverId);
+				$eqLogicServer->getAdGuardInfo();
+			}
+		}
 	}
 
 	/************************Getteur Setteur****************************/
