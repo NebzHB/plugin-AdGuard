@@ -78,11 +78,20 @@ class AdGuard extends eqLogic {
 			}
 		}
 	}	
-	
+	public static function nameExists($name,$objectId=null) {
+		$allAdGuard = eqLogic::byObjectId($objectId);
+		foreach ($allAdGuard as $u) {
+			if ($name == $u->getName()) return true;
+		}
+		return false;
+	}
 	public static function createEq($eq,$event=true) {
 		$eqp = eqlogic::byLogicalId($eq['logicalId'],'AdGuard');
 		if (!is_object($eqp)){
 			if($eq['name']) {
+				if(AdGuard::nameExists($eq['name'],$eq['object_id'])) {
+					$eq['name']=$eq['name'].'_'.$eq['serverName'];
+				}
 				log::add('AdGuard', 'info', 'Création de l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ')');
 				$eqp = new AdGuard();
 				$eqp->setEqType_name('AdGuard');
@@ -274,7 +283,7 @@ class AdGuard extends eqLogic {
 			
 			// clients
 			foreach($AdGuardinfo['clients']['clients'] as $client) {
-				$eqp = eqLogic::byLogicalId($client['name'],'AdGuard');
+				$eqp = eqLogic::byLogicalId($this->getId().'-'.$client['name'],'AdGuard');
 				// filtering
 				$client_filtering_enabled = $eqp->getCmd(null, 'client_filtering_enabled');
 				$eqp->checkAndUpdateCmd($client_filtering_enabled, (($client['filtering_enabled']===true)?1:0));
@@ -422,14 +431,15 @@ class AdGuard extends eqLogic {
 			foreach($clients['clients'] as $client) {
 				$eq = [
 					"name"=>$client['name'],
-					"logicalId"=>$client['name'],
+					"logicalId"=>$this->getId().'-'.$client['name'],
 					"enable"=>1,
 					"visible"=>1,
 					"object_id"=>$this->getObject_id(),
 					"configuration"=>[
 						"server"=>$this->getId(),
 						"type"=>'Client'
-					]
+					],
+					"serverName"=>$this->getName()
 				];
 				self::createEq($eq);
 			}
