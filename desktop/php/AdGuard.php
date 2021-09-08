@@ -102,7 +102,7 @@ $eqLogics = eqLogic::byType('AdGuard');
                 <div class="col-lg-4">
                   <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
 				  <span class="eqLogicAttr hidden" data-l1key="configuration" data-l2key="type"></span>
-                  <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement}}"/>
+                  <input type="text" class="eqLogicAttr form-control" id="eqName" data-l1key="name" placeholder="{{Nom de l'équipement}}"/>
                 </div>
               </div>
               <div class="form-group">
