@@ -72,3 +72,66 @@ function addCmdToTable(_cmd) {
     jeedom.cmd.changeType($('#table_cmd tbody tr:last'), init(_cmd.subType));
 }
 
+$('body').on('AdGuard::includeDevice', function(_event,_options) {
+    console.log("includeDevice received");
+    if (modifyWithoutSave) {
+        $('#div_inclusionAlert').showAlert({message: '{{Un client vient d\'être ajouté. Réactualisation de la page}}', level: 'warning'});
+    } else {
+            window.location.reload();        
+    }
+});
+
+$('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',function(a){
+	var type = $(this).text();
+	if(type){
+		if(type == "Client") {
+			$('#ipDevice').hide();
+			$('#userDevice').hide();
+			$('#passDevice').hide();
+			$('#cronDevice').hide();
+			$('a[data-action=remove]').hide();
+			$('a[data-action=save]').addClass('roundedRight');
+			//add save roundedRight
+		}
+		else {
+			$('#ipDevice').show();
+			$('#userDevice').show();
+			$('#passDevice').show();
+			$('#cronDevice').show();
+			$('a[data-action=remove]').show();
+			$('a[data-action=save]').removeClass('roundedRight');
+			//remove save roundedRight
+		}
+	}
+});
+
+for(var i=1;i<50;i++) {
+	if($('#in_searchEqlogic'+i).length) {
+		$('#in_searchEqlogic'+i).off('keyup').keyup(function() {
+			var n = this.id.replace('in_searchEqlogic','');
+			var search = $(this).value().toLowerCase();
+			search = search.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+			if(search == ''){
+				$('.eqLogicDisplayCard.cont'+n).show();
+				$('.eqLogicThumbnailContainer.cont'+n).packery();
+				return;
+			}
+			$('.eqLogicDisplayCard.cont'+n).hide();
+			$('.eqLogicDisplayCard.cont'+n+' .name').each(function(){
+				var text = $(this).text().toLowerCase();
+				text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+				if(text.indexOf(search) >= 0){
+					$(this).closest('.eqLogicDisplayCard.cont'+n).show();
+				}
+			});
+			$('.eqLogicThumbnailContainer.cont'+n).packery();
+		});
+		$('#bt_resetEqlogicSearch'+i).on('click', function() {
+			var n = this.id.replace('bt_resetEqlogicSearch','');
+			$('#in_searchEqlogic'+n).val('');
+			$('#in_searchEqlogic'+n).keyup();
+		});
+	} else if(i>2){
+		break;
+	}
+}
