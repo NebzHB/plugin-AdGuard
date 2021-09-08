@@ -207,6 +207,50 @@
 			"logicalId": "safesearch_disable",
 			"value": "safesearch_enabled"
 		}, {
+			"name": "Bloquer un service",
+			"type": "action",
+			"subtype": "select",
+			"display": {
+				"icon": "<i class=\"fas fa-user-slash\"></i>"
+			},
+			"configuration": {
+				"listValue":null
+			},
+			"isVisible": 1,
+			"logicalId": "service_block"
+		}, {
+			"name": "Débloquer un service",
+			"type": "action",
+			"subtype": "select",
+			"display": {
+				"icon": "<i class=\"fas fa-user\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"configuration": {
+				"listValue":null
+			},
+			"isVisible": 1,
+			"logicalId": "service_unblock"
+		}, {
+			"name": "Bloquer tous les services",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"icon": "<i class=\"fas fa-users-slash\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "services_block"
+		}, {
+			"name": "Débloquer tous les services",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"icon": "<i class=\"fas fa-users\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "services_unblock"
+		}, {
 			"name": "Réinitialiser Statistiques",
 			"type": "action",
 			"subtype": "other",
