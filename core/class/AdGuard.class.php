@@ -511,11 +511,11 @@ class AdGuardCmd extends cmd {
 				break;
 				case 'filtering_enable':
 					$cmd = 'filtering/config';
-					$params = ["enabled" => true];
+					$params = ["enabled" => true,"interval"=> 24];
 				break;
 				case 'filtering_disable':
 					$cmd = 'filtering/config';
-					$params = ["enabled" => false];
+					$params = ["enabled" => false,"interval"=> 24];
 				break;
 				case 'safebrowsing_enable':
 					$cmd = 'safebrowsing/enable';
