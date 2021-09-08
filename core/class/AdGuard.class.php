@@ -530,6 +530,29 @@ class AdGuardCmd extends cmd {
 				case 'reset_stats':
 					$cmd = 'stats_reset';
 				break;
+				case 'service_block':
+					$blocked_services=$eqLogic->getAdGuard('blocked_services/list');
+					array_push($blocked_services,$_options['select']);
+					$new_blocked_services=array_unique($blocked_services,SORT_STRING);
+					$cmd='blocked_services/set';
+					$params=$new_blocked_services;
+				break;
+				case 'service_unblock':
+					$blocked_services=$eqLogic->getAdGuard('blocked_services/list');
+					if (($key = array_search($_options['select'], $blocked_services)) !== false) {
+						array_splice($blocked_services,$key,1);
+						$cmd='blocked_services/set';
+						$params=$blocked_services;
+					}
+				break;
+				case 'services_block':
+					$cmd='blocked_services/set';
+					$params=array_keys(AdGuard::serviceList());
+				break;
+				case 'services_unblock':
+					$cmd='blocked_services/set';
+					$params=[];
+				break;
 				// block everything for a client (first rule !) : ||*^$client='Nebz iPhone',important 
 				// Use the backslash (\) to escape quotes (" and '), commas (,), and pipes (|) in client name
 			}
