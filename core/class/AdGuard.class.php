@@ -360,7 +360,7 @@ class AdGuard extends eqLogic {
 		$newCmd = $this->getCmd(null, $cmd['logicalId']);
 		if (!is_object($newCmd)) {
 			log::add('AdGuard', 'debug', 'Création commande:' . $cmd['logicalId']);
-			$newCmd = new unifiCmd();
+			$newCmd = new AdGuardCmd();
 			$newCmd->setLogicalId($cmd['logicalId']);
 			$newCmd->setIsVisible($cmd['isVisible']);
 			$newCmd->setOrder($order);
