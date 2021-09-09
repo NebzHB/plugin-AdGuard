@@ -89,11 +89,20 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',functio
 			$('#userDevice').hide();
 			$('#passDevice').hide();
 			$('#cronDevice').hide();
-			$('a[data-action=remove]').hide();
-			$('a[data-action=save]').addClass('roundedRight');
-			$('#eqName').prop('readonly', true);
+			
+			$('#eqName').addClass('disabled');
 			$('#eqName').attr('title', '{{Doit être modifié dans AdGuard Home}}');
 			//add save roundedRight
+			setTimeout(function(){
+				console.log($('.eqLogicAttr[data-l1key=isEnable]').is(':checked'));
+				if($('.eqLogicAttr[data-l1key=isEnable]').is(':checked')) {
+					$('a[data-action=remove]').hide();
+					$('a[data-action=save]').addClass('roundedRight');
+				} else {
+					$('a[data-action=remove]').show();
+					$('a[data-action=save]').removeClass('roundedRight');
+				}
+			},100);
 		}
 		else {
 			$('#ipDevice').show();
@@ -102,7 +111,7 @@ $('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',functio
 			$('#cronDevice').show();
 			$('a[data-action=remove]').show();
 			$('a[data-action=save]').removeClass('roundedRight');
-			$('#eqName').prop('readonly', false);
+			$('#eqName').removeClass('disabled');
 			$('#eqName').attr('title','{{Nom de l\'équipement}}');
 			//remove save roundedRight
 		}
