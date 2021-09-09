@@ -164,13 +164,16 @@ class AdGuard extends eqLogic {
 		$user = $this->getConfiguration('user','');
 		$pass = $this->getConfiguration('password','');
 		
+		if(!$ip || !$user || !$pass) return false;
+		
 		$request_http = new com_http($url,$user,$pass);
 		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
 		$request_http->setHeader(array(
 			'Content-Type: application/json',
 			'Accept application/json, text/plain, */*'
 		));
-		$request_http->setPost(json_encode($params));
+		$params=((is_array($params))?json_encode($params):$params);
+		$request_http->setPost($params);
 				
 		try {		
 			$AdGuardinfo=$request_http->exec(10,1);
@@ -196,6 +199,8 @@ class AdGuard extends eqLogic {
 		
 		$user = $this->getConfiguration('user','');
 		$pass = $this->getConfiguration('password','');
+		
+		if(!$ip || !$user || !$pass) return false;
 		
 		$request_http = new com_http($url,$user,$pass);
 		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
@@ -268,6 +273,20 @@ class AdGuard extends eqLogic {
 			// safesearch
 			$safesearch_enabled = $this->getCmd(null, 'safesearch_enabled');
 			$this->checkAndUpdateCmd($safesearch_enabled, (($AdGuardinfo['safesearch']['enabled']===true)?1:0));
+			// blocked_services
+			$blocked_services = $this->getCmd(null, 'blocked_services');
+			$this->checkAndUpdateCmd($blocked_services, json_encode($AdGuardinfo['blocked_services']));
+			
+			// internet_block
+			$blocked_internet = $this->getCmd(null, 'blocked_internet');
+			$blockString='||*^$important';
+			$filtering_status=$AdGuardinfo['filtering'];
+			$ruleList=implode("\n",$filtering_status['user_rules']);
+			if(strpos($ruleList,$blockString) !== false) {
+				$this->checkAndUpdateCmd($blocked_internet, 1);
+			} else {
+				$this->checkAndUpdateCmd($blocked_internet, 0);
+			}
 			
 			// stats
 			$stats = AdGuard::getStructure('stats');
@@ -284,28 +303,43 @@ class AdGuard extends eqLogic {
 			// clients
 			foreach($AdGuardinfo['clients']['clients'] as $client) {
 				$eqp = eqLogic::byLogicalId($this->getId().'-'.$client['name'],'AdGuard');
-				// filtering
-				$client_filtering_enabled = $eqp->getCmd(null, 'client_filtering_enabled');
-				$eqp->checkAndUpdateCmd($client_filtering_enabled, (($client['filtering_enabled']===true)?1:0));
-				// safebrowsing
-				$client_safebrowsing_enabled = $eqp->getCmd(null, 'client_safebrowsing_enabled');
-				$eqp->checkAndUpdateCmd($client_safebrowsing_enabled, (($client['safebrowsing_enabled']===true)?1:0));
-				// parental
-				$client_parental_enabled = $eqp->getCmd(null, 'client_parental_enabled');
-				$eqp->checkAndUpdateCmd($client_parental_enabled, (($client['parental_enabled']===true)?1:0));
-				// safesearch
-				$client_safesearch_enabled = $eqp->getCmd(null, 'client_safesearch_enabled');
-				$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safesearch_enabled']===true)?1:0));
-				// client_use_global_blocked_services
-				$client_use_global_blocked_services = $eqp->getCmd(null, 'client_use_global_blocked_services');
-				$eqp->checkAndUpdateCmd($client_use_global_blocked_services, (($client['use_global_blocked_services']===true)?1:0));
-				// client_use_global_settings
-				$client_use_global_settings = $eqp->getCmd(null, 'client_use_global_settings');
-				$eqp->checkAndUpdateCmd($client_use_global_settings, (($client['use_global_settings']===true)?1:0));
+				
+				if(is_object($eqp)) {
+					// filtering
+					$client_filtering_enabled = $eqp->getCmd(null, 'client_filtering_enabled');
+					$eqp->checkAndUpdateCmd($client_filtering_enabled, (($client['filtering_enabled']===true)?1:0));
+					// safebrowsing
+					$client_safebrowsing_enabled = $eqp->getCmd(null, 'client_safebrowsing_enabled');
+					$eqp->checkAndUpdateCmd($client_safebrowsing_enabled, (($client['safebrowsing_enabled']===true)?1:0));
+					// parental
+					$client_parental_enabled = $eqp->getCmd(null, 'client_parental_enabled');
+					$eqp->checkAndUpdateCmd($client_parental_enabled, (($client['parental_enabled']===true)?1:0));
+					// safesearch
+					$client_safesearch_enabled = $eqp->getCmd(null, 'client_safesearch_enabled');
+					$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safesearch_enabled']===true)?1:0));
+					// client_use_global_blocked_services
+					$client_use_global_blocked_services = $eqp->getCmd(null, 'client_use_global_blocked_services');
+					$eqp->checkAndUpdateCmd($client_use_global_blocked_services, (($client['use_global_blocked_services']===true)?1:0));
+					// client_use_global_settings
+					$client_use_global_settings = $eqp->getCmd(null, 'client_use_global_settings');
+					$eqp->checkAndUpdateCmd($client_use_global_settings, (($client['use_global_settings']===true)?1:0));
+					// client_blocked_services
+					$client_blocked_services = $eqp->getCmd(null, 'client_blocked_services');
+					$eqp->checkAndUpdateCmd($client_blocked_services, json_encode($client['blocked_services']));
+					// client_blocked_internet
+					$client_blocked_internet = $eqp->getCmd(null, 'client_blocked_internet');
+					
+					$name=addcslashes(addslashes($client['name']), ',|');
+					$blockString="||*^\$client='".$name."',important";
+					$filtering_status=$AdGuardinfo['filtering'];
+					$ruleList=implode("\n",$filtering_status['user_rules']);
+					if(strpos($ruleList,$blockString) !== false) {
+						$eqp->checkAndUpdateCmd($client_blocked_internet, 1);
+					} else {
+						$eqp->checkAndUpdateCmd($client_blocked_internet, 0);
+					}
+				} 
 			}
-
-			$this->setConfiguration('blocked_services',$AdGuardinfo['blocked_services']);
-			$this->save(true);
 			
 			$online = $this->getCmd(null, 'online');
 			if (is_object($online)) {
@@ -427,30 +461,40 @@ class AdGuard extends eqLogic {
 				$this->createCmd($cmd,$order);		
 			}
 			
+			$clientList=[];
 			$clients=$this->getAdGuard('clients');
-			foreach($clients['clients'] as $client) {
-				$eq = [
-					"name"=>$client['name'],
-					"logicalId"=>$this->getId().'-'.$client['name'],
-					"enable"=>1,
-					"visible"=>1,
-					"object_id"=>$this->getObject_id(),
-					"configuration"=>[
-						"server"=>$this->getId(),
-						"type"=>'Client'
-					],
-					"serverName"=>$this->getName()
-				];
-				self::createEq($eq);
+			if($clients) {
+				foreach($clients['clients'] as $client) {
+					$eq = [
+						"name"=>$client['name'],
+						"logicalId"=>$this->getId().'-'.$client['name'],
+						"enable"=>1,
+						"visible"=>1,
+						"object_id"=>$this->getObject_id(),
+						"configuration"=>[
+							"server"=>$this->getId(),
+							"type"=>'Client'
+						],
+						"serverName"=>$this->getName()
+					];
+					self::createEq($eq);
+					array_push($clientList,$this->getId().'-'.$client['name']);
+				}
+			}
+			$eqLogics = eqLogic::byType('AdGuard');
+			foreach ($eqLogics as $eqLogic) {
+				if($eqLogic->getConfiguration('type','') != 'Client') continue;
+				if($eqLogic->getConfiguration('server','') != $this->getId()) continue;
+				
+				if(!in_array($eqLogic->getLogicalId(),$clientList)) {
+					log::add('AdGuard','info','Pas trouvé dans la liste de clients de AdGuard : '.$eqLogic->getLogicalId().' -> désactivation de l\'équipement');
+					$eqLogic->setIsEnable(0);
+					$eqLogic->save(true);
+				}
 			}
 			
 			$this->getAdGuardInfo();
-		} /*else {
-			$serverId=$this->getConfiguration('server',null);
-			if($serverId) {
-				$eqLogic=eqlogic::byId($serverId);
-			}
-		}*/
+		}
 	}
 	public function preRemove() {
 		if($this->getConfiguration('type','') == "AdGuardGlobal") {
@@ -541,6 +585,7 @@ class AdGuardCmd extends cmd {
 					$cmd = 'stats_reset';
 				break;
 				case 'service_block':
+					if($_options['select'] == "") break;
 					$blocked_services=$AdGuard->getAdGuard('blocked_services/list');
 					array_push($blocked_services,$_options['select']);
 					$new_blocked_services=array_unique($blocked_services,SORT_STRING);
@@ -563,10 +608,79 @@ class AdGuardCmd extends cmd {
 					$cmd='blocked_services/set';
 					$params=[];
 				break;
+				case 'internet_block':
+					$blockString='||*^$important';
+					$filtering_status=$AdGuard->getAdGuard('filtering/status');
+					$ruleList=implode("\n",$filtering_status['user_rules']);
+					if(count($filtering_status['user_rules'])) {
+						$blockString.="\n";
+					}
+					$cmd="filtering/set_rules";
+					$params=$blockString.$ruleList;
+				break;
+				case 'internet_unblock':
+					$blockString='||*^$important';
+					$filtering_status=$AdGuard->getAdGuard('filtering/status');
+					$ruleList=implode("\n",$filtering_status['user_rules']);
+					if(strpos($ruleList,$blockString."\n") !== false) {
+						$blockString.="\n";
+					}
+					$cmd="filtering/set_rules";
+					$params=str_replace($blockString,"",$ruleList);
+					if($params == "") $params=[];
+				break;
+				case 'add_custom_rule':
+					$blockString=$_options['message'];
+					$filtering_status=$AdGuard->getAdGuard('filtering/status');
+					$ruleList=implode("\n",$filtering_status['user_rules']);
+					if(count($filtering_status['user_rules'])) {
+						$blockString.="\n";
+					}
+					$cmd="filtering/set_rules";
+					$params=$blockString.$ruleList;
+				break;
+				case 'del_custom_rule':
+					$blockString=$_options['message'];
+					$filtering_status=$AdGuard->getAdGuard('filtering/status');
+					$ruleList=implode("\n",$filtering_status['user_rules']);
+					if(strpos($ruleList,$blockString."\n") !== false) {
+						$blockString.="\n";
+					}
+					$cmd="filtering/set_rules";
+					$params=str_replace($blockString,"",$ruleList);
+					if($params == "") $params=[];
+				break;
+				
 				// block everything for a client (first rule !) : ||*^$client='Nebz iPhone',important 
 				// Use the backslash (\) to escape quotes (" and '), commas (,), and pipes (|) in client name
 				
 				// CLIENT
+				case 'client_use_global_settings_enable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['use_global_settings']=true;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_use_global_settings_disable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['use_global_settings']=false;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
 				case 'client_filtering_enable':
 					$name=explode('-',$eqLogic->getLogicalId());
 					$name=$name[1];
@@ -593,6 +707,196 @@ class AdGuardCmd extends cmd {
 						}
 					}
 				break;
+				case 'client_safebrowsing_enable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['safebrowsing_enabled']=true;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_safebrowsing_disable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['safebrowsing_enabled']=false;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_parental_enable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['parental_enabled']=true;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_parental_disable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['parental_enabled']=false;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_safesearch_enable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['safesearch_enabled']=true;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_safesearch_disable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['safesearch_enabled']=false;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_use_global_blocked_services_enable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['use_global_blocked_services']=true;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_use_global_blocked_services_disable':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['use_global_blocked_services']=false;
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_service_block':
+					if($_options['select'] == "") break;
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							if(!is_array($client['blocked_services'])) $client['blocked_services']=[];
+							array_push($client['blocked_services'],$_options['select']);
+							$client['blocked_services']=array_unique($client['blocked_services'],SORT_STRING);
+							$cmd='clients/update';
+							$params=["name"=>$client['name'],"data"=>$client];
+						}
+					}
+				break;
+				case 'client_service_unblock':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							if (($key = array_search($_options['select'], $client['blocked_services'])) !== false) {
+								array_splice($client['blocked_services'],$key,1);
+								$cmd='clients/update';
+								$params=["name"=>$client['name'],"data"=>$client];
+								break;
+							}
+						}
+					}
+				break;
+				case 'client_services_block':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['blocked_services']=array_keys(AdGuard::serviceList());
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_services_unblock':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							$client['blocked_services']=[];
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_internet_block':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=addcslashes(addslashes($name[1]), ',|');
+					$blockString="||*^\$client='".$name."',important";
+					$filtering_status=$AdGuard->getAdGuard('filtering/status');
+					$ruleList=implode("\n",$filtering_status['user_rules']);
+					$cmd="filtering/set_rules";
+					if(count($filtering_status['user_rules'])) {
+						$blockString.="\n";
+					}
+					$params=$blockString.$ruleList;
+				break;
+				case 'client_internet_unblock':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=addcslashes(addslashes($name[1]), ',|');
+					$blockString="||*^\$client='".$name."',important";
+					$filtering_status=$AdGuard->getAdGuard('filtering/status');
+					$ruleList=implode("\n",$filtering_status['user_rules']);
+					if(strpos($ruleList,$blockString."\n") !== false) {
+						$blockString.="\n";
+					}
+					$cmd="filtering/set_rules";
+					$params=str_replace($blockString,"",$ruleList);
+					if($params == "") $params=[];
+				break;
+				/*
+				@@||app-measurement.com^$important
+				@@||www.littlefabrics.com^$important
+				@@||self.events.data.microsoft.com^$important
+				*/
 			}
 			
 			if(!$cmd) return false;
