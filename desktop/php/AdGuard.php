@@ -168,13 +168,13 @@ $eqLogics = eqLogic::byType('AdGuard');
           </form>
         </div>
 
-        <form class="form-horizontal col-sm-3">
+        <!--<form class="form-horizontal col-sm-3">
           <fieldset>
             <div class="form-group">
               <img src="plugins/AdGuard/plugin_info/AdGuard_icon.png" style="height: 200px;" />
             </div>
           </fieldset>
-        </form>
+        </form>-->
       </div>
     </div>
     <div role="tabpanel" class="tab-pane" id="commandtab">
