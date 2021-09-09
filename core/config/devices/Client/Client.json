@@ -203,6 +203,92 @@
 			"isVisible": 1,
 			"logicalId": "client_use_global_blocked_services_disable",
 			"value": "client_use_global_blocked_services"
+		}, {
+			"name": "Services Bloqués",
+			"type": "info",
+			"subtype": "string",
+			"display": {
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_blocked_services"
+		}, {
+			"name": "Bloquer un service",
+			"type": "action",
+			"subtype": "select",
+			"display": {
+				"icon": "<i class=\"fas fa-user-slash\"></i>"
+			},
+			"configuration": {
+				"listValue":null
+			},
+			"isVisible": 1,
+			"logicalId": "client_service_block"
+		}, {
+			"name": "Débloquer un service",
+			"type": "action",
+			"subtype": "select",
+			"display": {
+				"icon": "<i class=\"fas fa-user\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"configuration": {
+				"listValue":null
+			},
+			"isVisible": 1,
+			"logicalId": "client_service_unblock"
+		}, {
+			"name": "Bloquer tous les services",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"icon": "<i class=\"fas fa-users-slash\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_services_block"
+		}, {
+			"name": "Débloquer tous les services",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"icon": "<i class=\"fas fa-users\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_services_unblock"
+		}, {
+			"name": "Statut Internet Bloqué via DNS",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_blocked_internet"
+		}, {
+			"name": "Bloquer tout internet via DNS",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-phone-slash\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_internet_block"
+		}, {
+			"name": "Débloquer tout internet via DNS",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-phone\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_internet_unblock"
 		}
 	]
 }
