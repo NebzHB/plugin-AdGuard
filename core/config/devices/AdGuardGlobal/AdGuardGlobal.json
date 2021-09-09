@@ -207,6 +207,16 @@
 			"logicalId": "safesearch_disable",
 			"value": "safesearch_enabled"
 		}, {
+			"name": "Services Bloqués",
+			"type": "info",
+			"subtype": "string",
+			"display": {
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "blocked_services"
+		}, {
 			"name": "Bloquer un service",
 			"type": "action",
 			"subtype": "select",
@@ -250,6 +260,61 @@
 			},
 			"isVisible": 1,
 			"logicalId": "services_unblock"
+		}, {
+			"name": "Statut Internet Bloqué via DNS",
+			"type": "info",
+			"subtype": "binary",
+			"display": {
+				"generic_type": "SWITCH_STATE",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "blocked_internet"
+		}, {
+			"name": "Bloquer tout internet via DNS",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_ON",
+				"icon": "<i class=\"fas fa-phone-slash\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "internet_block"
+		}, {
+			"name": "Débloquer tout internet via DNS",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"generic_type": "SWITCH_OFF",
+				"icon": "<i class=\"fas fa-phone\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "internet_unblock"
+		}, {
+			"name": "Ajouter une rêgle filtrage personnalisée",
+			"type": "action",
+			"subtype": "message",
+			"display": {
+				"title_disable":1,
+				"message_placeholder":"Ajouter une rêgle filtrage personnalisée",
+				"icon": "<i class=\"fas fa-comment-slash\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "add_custom_rule"
+		}, {
+			"name": "Retirer une rêgle filtrage personnalisée",
+			"type": "action",
+			"subtype": "message",
+			"display": {
+				"title_disable":1,
+				"message_placeholder":"Retirer une rêgle filtrage personnalisée",
+				"icon": "<i class=\"fas fa-comment\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "del_custom_rule"
 		}, {
 			"name": "Réinitialiser Statistiques",
 			"type": "action",
