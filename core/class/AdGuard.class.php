@@ -173,6 +173,7 @@ class AdGuard extends eqLogic {
 			'Accept application/json, text/plain, */*'
 		));
 		$params=((is_array($params))?json_encode($params):$params);
+		$params=(($params==null)?[]:$params);
 		$request_http->setPost($params);
 				
 		try {		
