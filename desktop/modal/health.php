@@ -27,7 +27,7 @@ $eqLogics = AdGuard::byType('AdGuard');
 			<th>{{Equipement}}</th>
 			<th>{{ID}}</th>
 			<th>{{Type}}</th>
-			<th>{{Adresse}}</th>
+			<th>{{Adresse IP}}</th>
 			<th>{{Update dispo ?}}</th>
 			<th>{{Protection ?}}</th>
 			<th>{{Filtrage ?}}</th>
