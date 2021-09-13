@@ -111,7 +111,7 @@ class AdGuard extends eqLogic {
 			}
 		} else {
 			if($eq['name']) {
-				log::add('AdGuard', 'info', 'Modification de l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ')');	
+				log::add('AdGuard', 'debug', 'Modification de l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ')');	
 				foreach($eq['configuration'] as $c => $v) {
 					$eqp->setConfiguration($c, $v);
 				}
@@ -177,8 +177,10 @@ class AdGuard extends eqLogic {
 		$request_http->setPost($params);
 				
 		try {		
+			log::add('AdGuard','info','Exécution commande '.$cmd);
+			log::add('AdGuard','debug','Exécution commande '.$cmd.' avec params '.json_encode($params));
 			$AdGuardinfo=$request_http->exec(10,1);
-			if($AdGuardinfo) log::add('AdGuard','debug',"raw return : ".$AdGuardinfo);
+			if($AdGuardinfo) log::add('AdGuard','debug',"Retour brut : ".$AdGuardinfo);
 		} catch (Exception $e) {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
 			$online = $this->getCmd(null, 'online');
@@ -188,6 +190,10 @@ class AdGuard extends eqLogic {
 		}
 		if(trim($AdGuardinfo) == "Forbidden") {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
+			$online = $this->getCmd(null, 'online');
+			if (is_object($online)) {
+				$this->checkAndUpdateCmd($online, '0');
+			}
 		}
 		if(trim($AdGuardinfo) == "404 page not found") {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, la commande n'existe pas ! Message : ".$AdGuardinfo);
@@ -215,7 +221,10 @@ class AdGuard extends eqLogic {
 		));
 		
 		try {		
+			log::add('AdGuard','info','Exécution commande '.$cmd);
+			log::add('AdGuard','debug','Exécution commande '.$cmd.' avec params '.json_encode($params));
 			$AdGuardinfo=$request_http->exec(10,1);
+			
 		} catch (Exception $e) {
 			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
 			$online = $this->getCmd(null, 'online');
@@ -225,6 +234,10 @@ class AdGuard extends eqLogic {
 		}
 		if(trim($AdGuardinfo) == "Forbidden") {
 			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
+			$online = $this->getCmd(null, 'online');
+			if (is_object($online)) {
+				$this->checkAndUpdateCmd($online, '0');
+			}
 		}
 		if(trim($AdGuardinfo) == "404 page not found") {
 			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd, la commande n'existe pas ! Message : ".$AdGuardinfo);
@@ -265,7 +278,8 @@ class AdGuard extends eqLogic {
 			$AdGuardinfo=$this->getAdGuardStatut();
 			if(!$AdGuardinfo) return;
 
-			log::add('AdGuard','debug','recu:'.json_encode($AdGuardinfo));
+			log::add('AdGuard','info','Reçu info de AdGuard Home');
+			log::add('AdGuard','debug','Reçu:'.json_encode($AdGuardinfo));
 			
 			$protection_enabled = $this->getCmd(null, 'protection_enabled');
 			$this->checkAndUpdateCmd($protection_enabled, (($AdGuardinfo['protection_enabled']===true)?1:0));
@@ -371,7 +385,7 @@ class AdGuard extends eqLogic {
 
 		$newCmd = $this->getCmd(null, $cmd['logicalId']);
 		if (!is_object($newCmd)) {
-			log::add('AdGuard', 'debug', 'Création commande:' . $cmd['logicalId']);
+			log::add('AdGuard', 'info', 'Création commande:' . $cmd['logicalId']);
 			$newCmd = new AdGuardCmd();
 			$newCmd->setLogicalId($cmd['logicalId']);
 			$newCmd->setIsVisible($cmd['isVisible']);
@@ -913,11 +927,8 @@ class AdGuardCmd extends cmd {
 			
 			if(!$cmd) return false;
 			
-
 			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params);
-			log::add('AdGuard','debug','Exec '.$cmd.' avec params '.json_encode($params).' | '.$AdGuardinfo);
 			if($sleep) sleep($sleep);
-			
 		}
 		
 		$AdGuard->getAdGuardInfo();
