@@ -131,8 +131,8 @@ class AdGuard extends eqLogic {
 				return ["num_dns_queries"=>"Requêtes DNS",
 						"num_blocked_filtering"=>"Bloqués par Filtres",
 						"num_replaced_safebrowsing"=>"Tentatives de malware-hameçonnage bloquées",
+						"num_replaced_parental"=>"Sites à contenu adulte bloqués",						
 						"num_replaced_safesearch"=>"Recherches sécurisées forcées",
-						"num_replaced_parental"=>"Sites à contenu adulte bloqués",
 						"avg_processing_time"=>"Temps moyen de traitement"
 					];
 			break;
