@@ -221,8 +221,6 @@ class AdGuard extends eqLogic {
 		));
 		
 		try {		
-			log::add('AdGuard','info','Exécution commande '.$cmd);
-			log::add('AdGuard','debug','Exécution commande '.$cmd.' avec params '.json_encode($params));
 			$AdGuardinfo=$request_http->exec(10,1);
 			
 		} catch (Exception $e) {
