@@ -181,6 +181,10 @@ class AdGuard extends eqLogic {
 			if($AdGuardinfo) log::add('AdGuard','debug',"raw return : ".$AdGuardinfo);
 		} catch (Exception $e) {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
+			$online = $this->getCmd(null, 'online');
+			if (is_object($online)) {
+				$this->checkAndUpdateCmd($online, '0');
+			}
 		}
 		if(trim($AdGuardinfo) == "Forbidden") {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
@@ -214,6 +218,10 @@ class AdGuard extends eqLogic {
 			$AdGuardinfo=$request_http->exec(10,1);
 		} catch (Exception $e) {
 			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
+			$online = $this->getCmd(null, 'online');
+			if (is_object($online)) {
+				$this->checkAndUpdateCmd($online, '0');
+			}
 		}
 		if(trim($AdGuardinfo) == "Forbidden") {
 			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
