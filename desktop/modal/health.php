@@ -241,9 +241,9 @@ function displayHealthLine($eqLogic,$tab='') {
 	if (is_object($onlineCmd)) {
 		$online = $onlineCmd->execCmd();
 		if($online == 1) {
-			$online_status='<span class="label label-success" style="font-size : 1em; cursor : default;width:100%">{{OK}}</span>';
+			$online_status='<span class="label label-success" style="font-size : 1em; cursor : default;width:100%">{{OUI}}</span>';
 		} else {
-			$online_status='<span class="label label-danger" style="font-size : 1em; cursor : default;width:100%">{{KO}}</span>';
+			$online_status='<span class="label label-danger" style="font-size : 1em; cursor : default;width:100%">{{NON}}</span>';
 		}
 	} else {
 		$online_status='<span class="label label-primary" style="font-size : 1em; cursor : default;width:100%">{{Client}}</span>';
