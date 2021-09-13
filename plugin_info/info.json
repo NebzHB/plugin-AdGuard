@@ -1,7 +1,7 @@
 {
 	"id" : "AdGuard",
 	"name" : "AdGuard Home",
-	"description" : "Plugin permettant d'activer ou désactiver votre serveur AdGuard Home. Un interrupteur pour le désactiver et quelques chiffres, laissez-moi savoir si vous avez besoin de plus (en fonction de ce que l'API permet)",
+	"description" : "Plugin permettant d'activer ou désactiver votre serveur AdGuard Home. De gérer les clients Et beaucoup plus !!",
 	"licence" : "AGPL",
 	"author" : "Nebz",
 	"hasDependency" : false,
