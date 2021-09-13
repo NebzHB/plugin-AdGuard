@@ -219,7 +219,7 @@ class AdGuard extends eqLogic {
 			'Content-Type: application/json',
 			'Accept application/json, text/plain, */*'
 		));
-		
+		$AdGuardinfo='';
 		try {		
 			$AdGuardinfo=$request_http->exec(10,1);
 			
