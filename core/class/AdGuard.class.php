@@ -82,7 +82,7 @@ class AdGuard extends eqLogic {
 		foreach (eqLogic::byType('AdGuard') as $AdGuard) {
 			if($AdGuard->getConfiguration('type','') == 'AdGuardGlobal') $AdGuard->save();
 		}
-	}-
+	}
 	public static function nameExists($name,$objectId=null) {
 		$allAdGuard = eqLogic::byObjectId($objectId);
 		foreach ($allAdGuard as $u) {
