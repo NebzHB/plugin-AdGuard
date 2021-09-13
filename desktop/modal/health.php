@@ -27,7 +27,7 @@ $eqLogics = AdGuard::byType('AdGuard');
 			<th>{{Equipement}}</th>
 			<th>{{ID}}</th>
 			<th>{{Type}}</th>
-			<th>{{Adresse IP}}</th>
+			<th>{{IP / Global ?}}</th>
 			<th>{{Update dispo ?}}</th>
 			<th>{{Protection ?}}</th>
 			<th>{{Filtrage ?}}</th>
@@ -66,7 +66,21 @@ function displayHealthLine($eqLogic,$tab='') {
 	echo '<td>'.$tab.'<a href="' . $eqLogic->getLinkToConfiguration() . '" style="text-decoration: none;">' . $eqLogic->getHumanName(true) . ((!$eqLogic->getIsvisible())?'&nbsp;<i class="fas fa-eye-slash"></i>':''). '</a></td>';
 	echo '<td><span class="label label-info" style="font-size : 1em;width:100%">' . $eqLogic->getId() . '</span></td>';
 	echo '<td><span class="label label-info" style="font-size : 1em;width:100%">' . $type . '</span></td>';
-	echo '<td><span class="label label-info" style="font-size : 1em;width:100%">' . $eqLogic->getConfiguration('ip') . '</span></td>';
+	if($type == 'Client') {
+		
+		$client_use_global_settings = $eqLogic->getCmd(null, 'client_use_global_settings');
+		if (is_object($client_use_global_settings)) {
+			$client_use_global_settings = $client_use_global_settings->execCmd();
+			if($client_use_global_settings == 1) {
+				$client_use_global_settings_status='<span class="label label-info" style="font-size : 1em; cursor : default;width:100%">{{OUI}}</span>';
+			} else {
+				$client_use_global_settings_status='<span class="label label-info" style="font-size : 1em; cursor : default;width:100%">{{NON}}</span>';
+			}
+		}
+		echo '<td>' . $client_use_global_settings_status . '</td>';
+	} else {
+		echo '<td><span class="label label-info" style="font-size : 1em;width:100%">' . $eqLogic->getConfiguration('ip') . '</span></td>';
+	}
 	$hasUpdateAdGuard = $eqLogic->getCmd(null, 'hasUpdateAdGuard');
 	if (is_object($hasUpdateAdGuard)) {
 		$hasUpdateAdGuard = $hasUpdateAdGuard->execCmd();
