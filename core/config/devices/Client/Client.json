@@ -289,6 +289,39 @@
 			},
 			"isVisible": 1,
 			"logicalId": "client_internet_unblock"
+		}, {
+			"name": "Statut Identifiants",
+			"type": "info",
+			"subtype": "string",
+			"display": {
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_ids"
+		}, {
+			"name": "Ajouter un identifiant",
+			"type": "action",
+			"subtype": "message",
+			"display": {
+				"title_disable":1,
+				"message_placeholder":"Ajouter un identifiant",
+				"icon": "<i class=\"fas fa-eye\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_ids_add"
+		}, {
+			"name": "Retirer un identifiant",
+			"type": "action",
+			"subtype": "message",
+			"display": {
+				"title_disable":1,
+				"message_placeholder":"Retirer un identifiant",
+				"icon": "<i class=\"fas fa-eye-slash\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "client_ids_del"
 		}
 	]
 }
