@@ -301,7 +301,7 @@ class AdGuard extends eqLogic {
 			$this->checkAndUpdateCmd($safesearch_enabled, (($AdGuardinfo['safesearch']['enabled']===true)?1:0));
 			// blocked_services
 			$blocked_services = $this->getCmd(null, 'blocked_services');
-			$this->checkAndUpdateCmd($blocked_services, json_encode($AdGuardinfo['blocked_services']));
+			$this->checkAndUpdateCmd($blocked_services, str_replace(['"','[',']','null'],'',json_encode($AdGuardinfo['blocked_services'])));
 			
 			// internet_block
 			$blocked_internet = $this->getCmd(null, 'blocked_internet');
@@ -335,7 +335,7 @@ class AdGuard extends eqLogic {
 					if(is_object($eqp)) {
 						// client_ids
 						$client_ids = $eqp->getCmd(null, 'client_ids');
-						$eqp->checkAndUpdateCmd($client_ids, json_encode($client['ids']));
+						$eqp->checkAndUpdateCmd($client_ids, str_replace(['"','[',']'],'',json_encode($client['ids'])));
 						// filtering
 						$client_filtering_enabled = $eqp->getCmd(null, 'client_filtering_enabled');
 						$eqp->checkAndUpdateCmd($client_filtering_enabled, (($client['filtering_enabled']===true)?1:0));
@@ -356,7 +356,7 @@ class AdGuard extends eqLogic {
 						$eqp->checkAndUpdateCmd($client_use_global_settings, (($client['use_global_settings']===true)?1:0));
 						// client_blocked_services
 						$client_blocked_services = $eqp->getCmd(null, 'client_blocked_services');
-						$eqp->checkAndUpdateCmd($client_blocked_services, json_encode($client['blocked_services']));
+						$eqp->checkAndUpdateCmd($client_blocked_services, str_replace(['"','[',']','null'],'',json_encode($client['blocked_services'])));
 						// client_blocked_internet
 						$client_blocked_internet = $eqp->getCmd(null, 'client_blocked_internet');
 						
