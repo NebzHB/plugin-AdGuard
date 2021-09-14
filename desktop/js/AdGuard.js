@@ -44,9 +44,16 @@ function addCmdToTable(_cmd) {
 	tr += '<span class="cmdAttr" data-l1key="display" data-l2key="icon" style="margin-left : 10px;"></span>';
 	tr += '</div>';
 	tr += '</div>';
-	tr += '<td>';
-    tr += '<span class="cmdAttr" data-l1key="configuration" data-l2key="parameters"></span>';
-    tr += '</td>'; 
+	tr += '</td>';
+	if(init(_cmd.type) == 'info') {
+		tr += '<td>';
+		tr += '<input class="form-control input-sm" type="text" data-key="value" placeholder="{{Valeur non reçue (Equipement peut-être désactivé ?)}}" readonly=true>';
+		tr += '</td>';
+	} else {
+		tr += '<td>';
+		tr += '&nbsp;';
+		tr += '</td>'; 	
+	}
 	tr += '<td>';
 	if (_cmd.logicalId != 'refresh'){
     tr += '<span><label class="checkbox-inline"><input type="checkbox" class="cmdAttr checkbox-inline" data-l1key="isVisible" checked/>{{Afficher}}</label></span> ';
@@ -70,5 +77,108 @@ function addCmdToTable(_cmd) {
     $('#table_cmd tbody').append(tr);
     $('#table_cmd tbody tr:last').setValues(_cmd, '.cmdAttr');
     jeedom.cmd.changeType($('#table_cmd tbody tr:last'), init(_cmd.subType));
+	
+	function refreshValue(val,show=true) {
+		$('.cmd[data-cmd_id=' + _cmd.id + '] .form-control[data-key=value]').value(val);
+		if(show){
+			$('.cmd[data-cmd_id=' + _cmd.id + '] .form-control[data-key=value]').attr('style','background-color:#ffff99 !important;');
+			setTimeout(function(){
+				$('.cmd[data-cmd_id=' + _cmd.id + '] .form-control[data-key=value]').attr('style','');
+			},200);
+		}
+	}
+
+	if (_cmd.id != undefined) {
+		if(init(_cmd.type) == 'info') {
+			jeedom.cmd.execute({
+				id: _cmd.id,
+				cache: 0,
+				notify: false,
+				success: function(result) {
+					refreshValue(result,false);
+			}});
+		
+		
+			// Set the update value callback
+			jeedom.cmd.update[_cmd.id] = function(_options) {
+				refreshValue(_options.display_value);
+			}
+		}
+	}
 }
 
+$('body').on('AdGuard::includeDevice', function(_event,_options) {
+    console.log("includeDevice received");
+    if (modifyWithoutSave) {
+        $('#div_inclusionAlert').showAlert({message: '{{Un client vient d\'être ajouté. Réactualisation de la page}}', level: 'warning'});
+    } else {
+            window.location.reload();        
+    }
+});
+
+$('.eqLogicAttr[data-l1key=configuration][data-l2key=type]').on('change',function(a){
+	var type = $(this).text();
+	if(type){
+		if(type == "Client") {
+			$('#ipDevice').hide();
+			$('#userDevice').hide();
+			$('#passDevice').hide();
+			$('#cronDevice').hide();
+			
+			$('#eqName').addClass('disabled');
+			$('#eqName').attr('title', '{{Doit être modifié dans AdGuard Home}}');
+			//add save roundedRight
+			setTimeout(function(){
+				console.log($('.eqLogicAttr[data-l1key=isEnable]').is(':checked'));
+				if($('.eqLogicAttr[data-l1key=isEnable]').is(':checked')) {
+					$('a[data-action=remove]').hide();
+					$('a[data-action=save]').addClass('roundedRight');
+				} else {
+					$('a[data-action=remove]').show();
+					$('a[data-action=save]').removeClass('roundedRight');
+				}
+			},100);
+		}
+		else {
+			$('#ipDevice').show();
+			$('#userDevice').show();
+			$('#passDevice').show();
+			$('#cronDevice').show();
+			$('a[data-action=remove]').show();
+			$('a[data-action=save]').removeClass('roundedRight');
+			$('#eqName').removeClass('disabled');
+			$('#eqName').attr('title','{{Nom de l\'équipement}}');
+			//remove save roundedRight
+		}
+	}
+});
+
+
+for(var i=1;i<($('.searchBox').length+1);i++) {
+	if($('#in_searchEqlogic'+i).length) {
+		$('#in_searchEqlogic'+i).off('keyup').keyup(function() {
+			var n = this.id.replace('in_searchEqlogic','');
+			var search = $(this).value().toLowerCase();
+			search = search.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+			if(search == ''){
+				$('.eqLogicDisplayCard.cont'+n).show();
+				$('.eqLogicThumbnailContainer.cont'+n).packery();
+				return;
+			}
+			$('.eqLogicDisplayCard.cont'+n).hide();
+			$('.eqLogicDisplayCard.cont'+n+' .name').each(function(){
+				var text = $(this).text().toLowerCase();
+				text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+				if(text.indexOf(search) >= 0){
+					$(this).closest('.eqLogicDisplayCard.cont'+n).show();
+				}
+			});
+			$('.eqLogicThumbnailContainer.cont'+n).packery();
+		});
+		$('#bt_resetEqlogicSearch'+i).on('click', function() {
+			var n = this.id.replace('bt_resetEqlogicSearch','');
+			$('#in_searchEqlogic'+n).val('');
+			$('#in_searchEqlogic'+n).keyup();
+		});
+	}
+}

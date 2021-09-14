@@ -19,9 +19,9 @@
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 function AdGuard_update() {
-    foreach (eqLogic::byType('AdGuard') as $AdGuard) {
-		$AdGuard->save();
-    }
+	foreach (eqLogic::byType('AdGuard') as $AdGuard) {
+		if($AdGuard->getConfiguration('type','') == 'AdGuardGlobal') $AdGuard->save();
+	}
 }
 
 ?>

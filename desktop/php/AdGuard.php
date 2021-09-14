@@ -27,18 +27,53 @@ $eqLogics = eqLogic::byType('AdGuard');
       </div>
     </div>
     <legend><i class="fas fa-table"></i>  {{Mes serveurs AdGuard et clients}}</legend>
-    <div class="eqLogicThumbnailContainer">
-      <?php
-        foreach ($eqLogics as $eqLogic) {
-          $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
-          echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
-          echo '<img src="plugins/AdGuard/plugin_info/AdGuard_icon.png" />';
-          echo '<br>';
-          echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
-          echo '</div>';
-        }
-      ?>
-    </div>
+	<?php
+				$i=1;
+				foreach ($eqLogics as $eqLogicAdGuard) :
+					if($eqLogicAdGuard->getConfiguration('type','') != 'AdGuardGlobal') continue;
+		?>
+					<legend> {{<?php echo $eqLogicAdGuard->getHumanName(true)?>}}</legend>
+					<div class="input-group" style="margin-bottom:5px;">
+						<input class="form-control roundedLeft searchBox" placeholder="{{Rechercher}}" id="in_searchEqlogic<?php echo $i?>" />
+						<div class="input-group-btn">
+							<a id="bt_resetEqlogicSearch<?php echo $i?>" class="btn roundedRight" style="width:30px"><i class="fas fa-times"></i></a>
+						</div>
+					</div>
+					<div class="panel">
+						<div class="panel-body">
+							<div class="eqLogicThumbnailContainer">
+							  <?php
+								foreach ($eqLogics as $eqLogic) {
+									if($eqLogic->getConfiguration('type','') != 'AdGuardGlobal') continue;
+									if($eqLogic->getId() != $eqLogicAdGuard->getId()) continue;
+									$opacity = ($eqLogic->getIsEnable()) ? '' : ' disableCard';
+									$img=$eqLogic->getImage();
+									echo '<div class="eqLogicDisplayCard cursor cont'.$i.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+									echo '<img class="lazy" src="'.$img.'" style="min-height:75px !important;" />';	
+									echo "<br />";
+									echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+									echo '</div>';
+								}
+								foreach ($eqLogics as $eqLogic) {
+									if($eqLogic->getConfiguration('type','') != 'Client') continue;
+									if($eqLogic->getConfiguration('server','') != $eqLogicAdGuard->getId()) continue;
+									$opacity = ($eqLogic->getIsEnable()) ? '' : ' disableCard';
+									$img=$eqLogic->getImage();
+									echo '<div class="eqLogicDisplayCard cursor cont'.$i.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+									echo '<img class="lazy" src="'.$img.'" style="min-height:75px !important;" />';	
+									echo "<br />";
+									echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+									echo '</div>';
+								}
+							  ?>
+							</div>
+						</div>
+					</div>
+	<?php
+				$i++;
+				endforeach;
+
+		?>
   </div>
   <div class="col-xs-12 eqLogic" style="display: none;">
     <div class="input-group pull-right" style="display:inline-flex">
@@ -66,7 +101,8 @@ $eqLogics = eqLogic::byType('AdGuard');
                 <label class="col-lg-3 control-label">{{Nom de l'équipement}}</label>
                 <div class="col-lg-4">
                   <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
-                  <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement}}"/>
+				  <span class="eqLogicAttr hidden" data-l1key="configuration" data-l2key="type"></span>
+                  <input type="text" class="eqLogicAttr form-control" id="eqName" data-l1key="name" placeholder="{{Nom de l'équipement}}"/>
                 </div>
               </div>
               <div class="form-group">
@@ -74,11 +110,11 @@ $eqLogics = eqLogic::byType('AdGuard');
                 <div class="col-lg-4">
                   <select id="sel_object" class="eqLogicAttr form-control" data-l1key="object_id">
                     <option value="">{{Aucun}}</option>
-                      <?php
-                      foreach ((jeeObject::buildTree(null, false)) as $object) {
-											  echo '<option value="' . $object->getId() . '">' . str_repeat('&nbsp;&nbsp;', $object->getConfiguration('parentNumber')) . $object->getName() . '</option>';
-                      }
-                      ?>
+						<?php
+						foreach ((jeeObject::buildTree(null, false)) as $object) {
+							echo '<option value="' . $object->getId() . '">' . str_repeat('&nbsp;&nbsp;', $object->getConfiguration('parentNumber')) . $object->getName() . '</option>';
+						}
+						?>
                   </select>
                 </div>
               </div>
@@ -87,9 +123,9 @@ $eqLogics = eqLogic::byType('AdGuard');
                 <div class="col-sm-9">
                  <?php
                   foreach (jeedom::getConfiguration('eqLogic:category') as $key => $value) {
-                  echo '<label class="checkbox-inline">';
-                  echo '<input type="checkbox" class="eqLogicAttr" data-l1key="category" data-l2key="' . $key . '" />' . $value['name'];
-                  echo '</label>';
+					  echo '<label class="checkbox-inline">';
+					  echo '<input type="checkbox" class="eqLogicAttr" data-l1key="category" data-l2key="' . $key . '" />' . $value['name'];
+					  echo '</label>';
                   }
                   ?>
                 </div>
@@ -101,25 +137,25 @@ $eqLogics = eqLogic::byType('AdGuard');
                   <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}</label>
                 </div>
               </div>
-              <div class="form-group">
+              <div class="form-group" id="ipDevice">
                 <label class="col-sm-3 control-label">{{Ip du serveur}}</label>
                 <div class="col-sm-6">
                   <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="ip" placeholder="{{Ip du serveur AdGuard}}"/>
                 </div>
               </div>
-              <div class="form-group">
+              <div class="form-group" id="userDevice">
                 <label class="col-sm-3 control-label">{{Utilisateur}}</label>
                 <div class="col-sm-6">
                   <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="user" placeholder="{{Utilisateur de votre serveur}}"/>
                 </div>
               </div>
-			  <div class="form-group">
+			  <div class="form-group" id="passDevice">
                 <label class="col-sm-3 control-label">{{Mot de passe}}</label>
                 <div class="col-sm-6">
                   <input type="password" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="password" placeholder="{{Mot de passe de votre utilisateur}}"/>
                 </div>
               </div>
-              <div class="form-group expertModeVisible">
+              <div class="form-group expertModeVisible" id="cronDevice">
                 <label class="col-sm-3 control-label">{{Auto-actualisation (cron)}}</label>
                   <div class="col-sm-3">
                     <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="autorefresh" placeholder="*/5 * * * *"/>
@@ -132,13 +168,13 @@ $eqLogics = eqLogic::byType('AdGuard');
           </form>
         </div>
 
-        <form class="form-horizontal col-sm-3">
+        <!--<form class="form-horizontal col-sm-3">
           <fieldset>
             <div class="form-group">
               <img src="plugins/AdGuard/plugin_info/AdGuard_icon.png" style="height: 200px;" />
             </div>
           </fieldset>
-        </form>
+        </form>-->
       </div>
     </div>
     <div role="tabpanel" class="tab-pane" id="commandtab">
@@ -146,7 +182,7 @@ $eqLogics = eqLogic::byType('AdGuard');
       <table id="table_cmd" class="table table-bordered table-condensed">
         <thead>
           <tr>
-            <th>{{Nom}}</th><th>{{Options}}</th><th>{{Action}}</th>
+            <th>{{Nom}}</th><th>{{Valeurs}}</th><th>{{Action}}</th>
           </tr>
         </thead>
         <tbody></tbody>
