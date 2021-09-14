@@ -333,6 +333,9 @@ class AdGuard extends eqLogic {
 					$eqp = eqLogic::byLogicalId($this->getId().'-'.$client['name'],'AdGuard');
 					
 					if(is_object($eqp)) {
+						// client_ids
+						$client_ids = $eqp->getCmd(null, 'client_ids');
+						$eqp->checkAndUpdateCmd($client_ids, json_encode($client['ids']));
 						// filtering
 						$client_filtering_enabled = $eqp->getCmd(null, 'client_filtering_enabled');
 						$eqp->checkAndUpdateCmd($client_filtering_enabled, (($client['filtering_enabled']===true)?1:0));
@@ -920,6 +923,36 @@ class AdGuardCmd extends cmd {
 					$cmd="filtering/set_rules";
 					$params=str_replace($blockString,"",$ruleList);
 					if($params == "") $params=[];
+				break;
+				case 'client_ids_add':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							$cmd='clients/update';
+							if(count($client['ids']) == 1 && strpos($client['ids'][0], 'notused') !== false) $client['ids']=[]; // was a not used client
+							array_push($client['ids'],$_options['message']);
+							$params=["name"=>$client['name'],"data"=>$client];
+							break;
+						}
+					}
+				break;
+				case 'client_ids_del':
+					$name=explode('-',$eqLogic->getLogicalId());
+					$name=$name[1];
+					$clients=$AdGuard->getAdGuard('clients');
+					foreach($clients['clients'] as $client) {
+						if($client['name'] == $name) {
+							if (($key = array_search($_options['message'], $client['ids'])) !== false) {
+								array_splice($client['ids'],$key,1);
+								if(count($client['ids']) == 0) array_push($client['ids'],'notused'.str_pad(rand(0,1000),4,0,STR_PAD_LEFT)); // is a not used client
+								$cmd='clients/update';
+								$params=["name"=>$client['name'],"data"=>$client];
+							}
+							break;
+						}
+					}
 				break;
 				/*
 				@@||app-measurement.com^$important
