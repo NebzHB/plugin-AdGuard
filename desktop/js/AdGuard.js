@@ -47,7 +47,7 @@ function addCmdToTable(_cmd) {
 	tr += '</td>';
 	if(init(_cmd.type) == 'info') {
 		tr += '<td>';
-		tr += '<input class="form-control input-sm" type="text" data-key="value" placeholder="{{Valeur non reçue (Equipement peut-être désactivé ?)}}" readonly=true>';
+		tr += '<input class="form-control input-sm" type="text" data-key="value" placeholder="{{-Aucune Valeur-}}" readonly=true>';
 		tr += '</td>';
 	} else {
 		tr += '<td>';
