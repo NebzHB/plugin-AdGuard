@@ -290,7 +290,7 @@
 			"isVisible": 1,
 			"logicalId": "client_internet_unblock"
 		}, {
-			"name": "Statut Identifiants",
+			"name": "Identifiant(s)",
 			"type": "info",
 			"subtype": "string",
 			"display": {
