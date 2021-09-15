@@ -138,7 +138,7 @@ $eqLogics = eqLogic::byType('AdGuard');
                 </div>
               </div>
               <div class="form-group" id="ipDevice">
-                <label class="col-sm-3 control-label">{{Ip du serveur}}</label>
+                <label class="col-sm-3 control-label help" data-help="{{Si vous avez modifié le port par défaut (80) vous pouvez ajouter votre port ici sous la forme ip:port. Sinon juste l'ip}}">{{Ip du serveur}}</label>
                 <div class="col-sm-6">
                   <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="ip" placeholder="{{Ip du serveur AdGuard}}"/>
                 </div>
