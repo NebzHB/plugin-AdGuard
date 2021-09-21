@@ -210,7 +210,7 @@ function displayHealthLine($eqLogic,$tab='') {
 				if (is_object($client_blocked_services)) {
 					$client_blocked_services = $client_blocked_services->execCmd();
 					if($client_blocked_services != '') {
-						$blocked_services_status='<span class="label label-success" style="font-size : 1em; cursor : default;width:100%" title=\''.$client_blocked_services.'\'>{{OUI*}}</span>';
+						$blocked_services_status='<span class="label label-success" style="font-size : 1em; cursor : default;width:100%" title=\''.$client_blocked_services.'\'>{{OUI}}</span>';
 					} else {
 						$blocked_services_status='<span class="label label-danger" style="font-size : 1em; cursor : default;width:100%">{{NON}}</span>';
 					}
