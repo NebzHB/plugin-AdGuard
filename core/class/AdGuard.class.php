@@ -84,7 +84,7 @@ class AdGuard extends eqLogic {
 		}
 	}
 	public static function nameExists($name,$objectId=null) {
-		$allAdGuard = eqLogic::byObjectId($objectId);
+		$allAdGuard = eqLogic::byObjectId($objectId,false);
 		foreach ($allAdGuard as $u) {
 			if ($name == $u->getName()) return true;
 		}
