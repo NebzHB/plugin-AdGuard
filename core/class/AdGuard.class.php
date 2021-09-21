@@ -86,6 +86,7 @@ class AdGuard extends eqLogic {
 	public static function nameExists($name,$objectId=null) {
 		$allAdGuard = eqLogic::byObjectId($objectId);
 		foreach ($allAdGuard as $u) {
+			log::add('AdGuard', 'debug', 'Comparaison de ' . $name .' et '. $u->getName() . ' = '.($name == $u->getName()));
 			if ($name == $u->getName()) return true;
 		}
 		return false;
@@ -94,6 +95,7 @@ class AdGuard extends eqLogic {
 		$eqp = eqlogic::byLogicalId($eq['logicalId'],'AdGuard');
 		if (!is_object($eqp)){
 			if($eq['name']) {
+				log::add('AdGuard', 'debug', 'Vérification si ' . $eq['name'] .' existe déjà dans '. $eq['object_id'] . ')');
 				if(AdGuard::nameExists($eq['name'],$eq['object_id'])) {
 					$eq['name']=$eq['name'].'_'.$eq['serverName'];
 				}
