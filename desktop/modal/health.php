@@ -200,13 +200,21 @@ function displayHealthLine($eqLogic,$tab='') {
 			$blocked_services_status='<span class="label label-danger" style="font-size : 1em; cursor : default;width:100%">{{NON}}</span>';
 		}
 	} else {
-		$client_blocked_services = $eqLogic->getCmd(null, 'client_blocked_services');
-		if (is_object($client_blocked_services)) {
-			$client_blocked_services = $client_blocked_services->execCmd();
-			if($client_blocked_services != '') {
-				$blocked_services_status='<span class="label label-success" style="font-size : 1em; cursor : default;width:100%" title=\''.$client_blocked_services.'\'>{{OUI}}</span>';
+		$client_use_global_blocked_services = $eqLogic->getCmd(null, 'client_use_global_blocked_services');
+		if (is_object($client_use_global_blocked_services)) {
+			$client_use_global_blocked_services = $client_use_global_blocked_services->execCmd();
+			if($client_use_global_blocked_services == 1) {
+				$blocked_services_status='<span class="label label-primary" style="font-size : 1em; cursor : default;width:100%">{{GLOBAL}}</span>';
 			} else {
-				$blocked_services_status='<span class="label label-danger" style="font-size : 1em; cursor : default;width:100%">{{NON}}</span>';
+				$client_blocked_services = $eqLogic->getCmd(null, 'client_blocked_services');
+				if (is_object($client_blocked_services)) {
+					$client_blocked_services = $client_blocked_services->execCmd();
+					if($client_blocked_services != '') {
+						$blocked_services_status='<span class="label label-success" style="font-size : 1em; cursor : default;width:100%" title=\''.$client_blocked_services.'\'>{{OUI*}}</span>';
+					} else {
+						$blocked_services_status='<span class="label label-danger" style="font-size : 1em; cursor : default;width:100%">{{NON}}</span>';
+					}
+				}
 			}
 		}
 	}
