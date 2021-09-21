@@ -95,7 +95,9 @@ class AdGuard extends eqLogic {
 		if (!is_object($eqp)){
 			if($eq['name']) {
 				if(AdGuard::nameExists($eq['name'],$eq['object_id'])) {
+					$name=$eq['name'];
 					$eq['name']=$eq['name'].'_'.$eq['serverName'];
+					log::add('AdGuard', 'debug', "Nom en double " . $name . " renommé en " . $eq['name']);
 				}
 				log::add('AdGuard', 'info', 'Création de l\'équipement ' . $eq['name'] .'('. $eq['logicalId'] . ')');
 				$eqp = new AdGuard();
