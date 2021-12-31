@@ -326,6 +326,15 @@ class AdGuard extends eqLogic {
 			}
 			
 			// updates
+			if($AdGuardinfo['version']['can_autoupdate']) { // if new version -> update new_version number
+				$newVersion = $this->getCmd(null, 'newVersion');
+				$this->checkAndUpdateCmd($newVersion, $AdGuardinfo['version']['new_version']);
+			} else { // update current version number
+				$currentVersion = $this->getCmd(null, 'currentVersion');
+				$this->checkAndUpdateCmd($currentVersion, $AdGuardinfo['version']['new_version']);
+				$newVersion = $this->getCmd(null, 'newVersion');
+				$this->checkAndUpdateCmd($newVersion, '');
+			}
 			$hasUpdateAdGuard = $this->getCmd(null, 'hasUpdateAdGuard');
 			$this->checkAndUpdateCmd($hasUpdateAdGuard, (($AdGuardinfo['version']['can_autoupdate']===true)?1:0));
 			
