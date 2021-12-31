@@ -38,6 +38,26 @@
 			"isVisible": 1,
 			"logicalId": "UpdateAdGuard"
 		}, {
+			"name": "Version Actuelle",
+			"type": "info",
+			"subtype": "string",
+			"display": {
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "currentVersion"
+		}, {
+			"name": "Nouvelle Version",
+			"type": "info",
+			"subtype": "string",
+			"display": {
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "newVersion"
+		}, {
 			"name": "Statut protection",
 			"type": "info",
 			"subtype": "binary",
