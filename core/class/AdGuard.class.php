@@ -216,7 +216,7 @@ class AdGuard extends eqLogic {
 		$url.=(($params && count($params))?"?".http_build_query($params):'');
 		
 		$user = $this->getConfiguration('user','');
-		$pass = urlencode($this->getConfiguration('password',''));
+		$pass = $this->getConfiguration('password','');
 		
 		if(!$ip || !$user || !$pass) return false;
 		
