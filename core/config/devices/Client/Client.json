@@ -277,7 +277,8 @@
 				"icon": "<i class=\"fas fa-phone-slash\"></i>"
 			},
 			"isVisible": 1,
-			"logicalId": "client_internet_block"
+			"logicalId": "client_internet_block",
+			"value": "client_blocked_internet"
 		}, {
 			"name": "Débloquer tout internet via DNS",
 			"type": "action",
@@ -288,7 +289,8 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
-			"logicalId": "client_internet_unblock"
+			"logicalId": "client_internet_unblock",
+			"value": "client_blocked_internet"
 		}, {
 			"name": "Identifiant(s)",
 			"type": "info",
