@@ -32,7 +32,7 @@ $eqLogics = eqLogic::byType('AdGuard');
 				foreach ($eqLogics as $eqLogicAdGuard) :
 					if($eqLogicAdGuard->getConfiguration('type','') != 'AdGuardGlobal') continue;
 		?>
-					<legend> {{<?php echo $eqLogicAdGuard->getHumanName(true)?>}}</legend>
+					<legend> <?php echo $eqLogicAdGuard->getHumanName(true)?></legend>
 					<div class="input-group" style="margin-bottom:5px;">
 						<input class="form-control roundedLeft searchBox" placeholder="{{Rechercher}}" id="in_searchEqlogic<?php echo $i?>" />
 						<div class="input-group-btn">

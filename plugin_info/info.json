@@ -17,6 +17,6 @@
 	"link" : {
 		"forum":"https://community.jeedom.com/tag/plugin-AdGuard"
 	},
-	"languages" : ["fr_FR","en_US"],
+	"languages" : ["fr_FR","en_US","es_ES"],
 	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile","v4","atlas"]
 }
