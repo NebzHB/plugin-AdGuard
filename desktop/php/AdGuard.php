@@ -139,7 +139,7 @@ $eqLogics = eqLogic::byType('AdGuard');
               </div>
               <div class="form-group" id="ipDevice">
                 <label class="col-sm-3 control-label help" data-help="{{Si vous avez modifié le port par défaut (80) vous pouvez ajouter votre port ici sous la forme ip:port. Sinon juste l'ip}}">{{Ip du serveur}}</label>
-                <div class="col-sm-6">
+                <div class="col-sm-4">
 		  <div class="input-group">
 		    <select class="eqLogicAttr form-control roundedLeft" data-l1key="configuration" data-l2key="proto">
 			<option value="http" selected>HTTP</option>
@@ -152,13 +152,13 @@ $eqLogics = eqLogic::byType('AdGuard');
               </div>
               <div class="form-group" id="userDevice">
                 <label class="col-sm-3 control-label">{{Utilisateur}}</label>
-                <div class="col-sm-6">
+                <div class="col-sm-4">
                   <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="user" placeholder="{{Utilisateur de votre serveur}}"/>
                 </div>
               </div>
 			  <div class="form-group" id="passDevice">
                 <label class="col-sm-3 control-label">{{Mot de passe}}</label>
-                <div class="col-sm-6">
+                <div class="col-sm-4">
                   <input type="password" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="password" placeholder="{{Mot de passe de votre utilisateur}}"/>
                 </div>
               </div>
