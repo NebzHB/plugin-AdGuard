@@ -164,9 +164,10 @@ class AdGuard extends eqLogic {
     	}
 	
 	public function postAdGuard($cmd,$params) {
+		$proto=$this->getConfiguration('proto','http');
 		$ip = $this->getConfiguration('ip','');
 		
-		$url = 'http://' . $ip . '/control/'.$cmd;
+		$url = $proto.'://' . $ip . '/control/'.$cmd;
 		
 		$user = $this->getConfiguration('user','');
 		$pass = $this->getConfiguration('password','');
@@ -174,6 +175,7 @@ class AdGuard extends eqLogic {
 		if(!$ip || !$user || !$pass) return false;
 		
 		$request_http = new com_http($url,$user,$pass);
+		$request_http->setNoSslCheck(true);
 		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
 		$request_http->setHeader(array(
 			'Content-Type: application/json',
@@ -210,9 +212,10 @@ class AdGuard extends eqLogic {
 	}
 	
 	public function getAdGuard($cmd,$params=null) {
+		$proto=$this->getConfiguration('proto','http');
 		$ip = $this->getConfiguration('ip','');
 		
-		$url = 'http://' . $ip . '/control/'.$cmd;
+		$url = $proto.'://' . $ip . '/control/'.$cmd;
 		$url.=(($params && count($params))?"?".http_build_query($params):'');
 		
 		$user = $this->getConfiguration('user','');
@@ -221,6 +224,7 @@ class AdGuard extends eqLogic {
 		if(!$ip || !$user || !$pass) return false;
 		
 		$request_http = new com_http($url,$user,$pass);
+		$request_http->setNoSslCheck(true);
 		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
 		$request_http->setHeader(array(
 			'Content-Type: application/json',
