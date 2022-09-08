@@ -332,7 +332,7 @@ class AdGuard extends eqLogic {
 			}
 			
 			// updates
-			if(!$AdGuardinfo['version']['disabled']) {
+			if($AdGuardinfo['version'] !== null && !$AdGuardinfo['version']['disabled']) {
 				if($AdGuardinfo['version']['can_autoupdate']) { // if new version -> update new_version number
 					$newVersion = $this->getCmd(null, 'newVersion');
 					$this->checkAndUpdateCmd($newVersion, $AdGuardinfo['version']['new_version']);
@@ -344,6 +344,14 @@ class AdGuard extends eqLogic {
 				}
 				$hasUpdateAdGuard = $this->getCmd(null, 'hasUpdateAdGuard');
 				$this->checkAndUpdateCmd($hasUpdateAdGuard, (($AdGuardinfo['version']['can_autoupdate']===true)?1:0));
+			}elseif($AdGuardinfo['version'] === null) {
+				$currentVersion = $this->getCmd(null, 'currentVersion');
+				$this->checkAndUpdateCmd($currentVersion, __("Inconnu", __FILE__));
+				$newVersion = $this->getCmd(null, 'newVersion');
+				$this->checkAndUpdateCmd($newVersion, '');
+				$hasUpdateAdGuard = $this->getCmd(null, 'hasUpdateAdGuard');
+				$this->checkAndUpdateCmd($hasUpdateAdGuard, 0);
+				log::add('AdGuard','info','version.json pas disponible sur AdGuard, version inconnue');
 			}
 			// clients
 			if(is_array($AdGuardinfo['clients']['clients'])) {
