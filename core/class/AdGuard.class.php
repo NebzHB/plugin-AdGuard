@@ -24,7 +24,8 @@ class AdGuard extends eqLogic {
 	public static function serviceList() {
 		return [
 			"9gag"=>"9Gag", 
-			"amazon"=>"Amazon", 
+			"amazon"=>"Amazon",
+			"bilibili"=>"Bilibili",
 			"cloudflare"=>"CloudFlare", 
 			"dailymotion"=>"Dailymotion", 
 			"discord"=>"Discord", 
@@ -233,12 +234,13 @@ class AdGuard extends eqLogic {
 		$AdGuardinfo='';
 		try {		
 			$AdGuardinfo=$request_http->exec(10,1);
-			
 		} catch (Exception $e) {
-			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
-			$online = $this->getCmd(null, 'online');
-			if (is_object($online)) {
-				$this->checkAndUpdateCmd($online, '0');
+			if($cmd != 'version.json') {
+				log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
+				$online = $this->getCmd(null, 'online');
+				if (is_object($online)) {
+					$this->checkAndUpdateCmd($online, '0');
+				}
 			}
 		}
 		if(trim($AdGuardinfo) == "Forbidden") {
@@ -330,7 +332,7 @@ class AdGuard extends eqLogic {
 			}
 			
 			// updates
-			if(!$AdGuardinfo['version']['disabled']) {
+			if($AdGuardinfo['version'] !== null && !$AdGuardinfo['version']['disabled']) {
 				if($AdGuardinfo['version']['can_autoupdate']) { // if new version -> update new_version number
 					$newVersion = $this->getCmd(null, 'newVersion');
 					$this->checkAndUpdateCmd($newVersion, $AdGuardinfo['version']['new_version']);
@@ -342,6 +344,14 @@ class AdGuard extends eqLogic {
 				}
 				$hasUpdateAdGuard = $this->getCmd(null, 'hasUpdateAdGuard');
 				$this->checkAndUpdateCmd($hasUpdateAdGuard, (($AdGuardinfo['version']['can_autoupdate']===true)?1:0));
+			}elseif($AdGuardinfo['version'] === null) {
+				$currentVersion = $this->getCmd(null, 'currentVersion');
+				$this->checkAndUpdateCmd($currentVersion, __("Inconnu", __FILE__));
+				$newVersion = $this->getCmd(null, 'newVersion');
+				$this->checkAndUpdateCmd($newVersion, '');
+				$hasUpdateAdGuard = $this->getCmd(null, 'hasUpdateAdGuard');
+				$this->checkAndUpdateCmd($hasUpdateAdGuard, 0);
+				log::add('AdGuard','info','version.json pas disponible sur AdGuard, version inconnue');
 			}
 			// clients
 			if(is_array($AdGuardinfo['clients']['clients'])) {
