@@ -24,7 +24,8 @@ class AdGuard extends eqLogic {
 	public static function serviceList() {
 		return [
 			"9gag"=>"9Gag", 
-			"amazon"=>"Amazon", 
+			"amazon"=>"Amazon",
+			"bilibili"=>"Bilibili",
 			"cloudflare"=>"CloudFlare", 
 			"dailymotion"=>"Dailymotion", 
 			"discord"=>"Discord", 
@@ -233,12 +234,13 @@ class AdGuard extends eqLogic {
 		$AdGuardinfo='';
 		try {		
 			$AdGuardinfo=$request_http->exec(10,1);
-			
 		} catch (Exception $e) {
-			log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
-			$online = $this->getCmd(null, 'online');
-			if (is_object($online)) {
-				$this->checkAndUpdateCmd($online, '0');
+			if($cmd != 'version.json') {
+				log::add('AdGuard','error',"Impossible de communiquer GET avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
+				$online = $this->getCmd(null, 'online');
+				if (is_object($online)) {
+					$this->checkAndUpdateCmd($online, '0');
+				}
 			}
 		}
 		if(trim($AdGuardinfo) == "Forbidden") {
