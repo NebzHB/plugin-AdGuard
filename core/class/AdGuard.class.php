@@ -22,6 +22,8 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 class AdGuard extends eqLogic {
 	/***************************Attributs*******************************/	
 	public static function serviceList() {
+		$serviceList=self::getServicesList();
+		if($serviceList !== null) { return $serviceList; }
 		return [
 			"9gag"=>"9Gag", 
 			"amazon"=>"Amazon",
@@ -62,6 +64,34 @@ class AdGuard extends eqLogic {
 		];
 	}
 	
+	public static function setServicesList($services) {
+		// get existing services to compare with the new list, if different, update all eqLogics 
+		$preServices=self::serviceList();
+		$ret=false;
+		if($services && is_array($services) && count($services) && count($preServices) != count($services)) {
+			log::add('AdGuard', 'info', __('Des nouveaux services ont été ajoutés à AdGuard, mise à jour du cache des services et des commandes', __FILE__).'('.(count($services)-count($preServices)).')');
+			exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
+			exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
+			$ret = file_put_contents(dirname(__FILE__) . '/../../data/services.json', json_encode($services, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+			
+			foreach (eqLogic::byType('AdGuard') as $AdGuard) {
+				$AdGuard->save();
+			}
+		}
+		
+		return (($ret === false) ? false : true);
+	}
+
+	public static function getServicesList() {
+		exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
+		exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
+		exec('touch ' . dirname(__FILE__) . '/../../data/services.json');
+		exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
+		exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
+		
+		return json_decode(file_get_contents(dirname(__FILE__) . '/../../data/services.json') , true);
+	}
+	
 	public static function cron($_eqlogic_id = null) {
 		$eqLogics = ($_eqlogic_id !== null) ? array(eqLogic::byId($_eqlogic_id)) : eqLogic::byType('AdGuard', true);
 		foreach ($eqLogics as $AdGuard) {
@@ -71,7 +101,7 @@ class AdGuard extends eqLogic {
 				try {
 					$c = new Cron\CronExpression(checkAndFixCron($autorefresh), new Cron\FieldFactory);
 					if ($c->isDue()) {
-						$AdGuard->getAdGuardInfo();
+						$AdGuard->getAdGuardInfo(true);
 					}
 				} catch (Exception $exc) {
 					log::add('AdGuard', 'error', __('Expression cron non valide pour ', __FILE__) . $AdGuard->getHumanName() . ' : ' . $autorefresh);
@@ -278,11 +308,20 @@ class AdGuard extends eqLogic {
 		$AdGuardinfo['clients']['auto_clients']="deleted";
 		$AdGuardinfo['clients']['supported_tags']="deleted";
 		$AdGuardinfo['blocked_services']=$this->getAdGuard('blocked_services/list');
+		
+		$temp_services_list=$this->getAdGuard('blocked_services/all');
+		$AdGuardinfo['services_list']=[];
+		if($temp_services_list && is_array($temp_services_list)) {
+			foreach($temp_services_list['blocked_services'] as $i=>$s) {
+				$AdGuardinfo['services_list'][$temp_services_list['blocked_services'][$i]['id']]=$temp_services_list['blocked_services'][$i]['name'];
+			}
+		}
+		$temp_services_list=null;
 
 		return $AdGuardinfo;
 	}
 	
-	public function getAdGuardInfo() {
+	public function getAdGuardInfo($allowListServices=false) {
 		if(!$this->getIsEnable()) return;
 		try {
 				
@@ -310,6 +349,11 @@ class AdGuard extends eqLogic {
 			// blocked_services
 			$blocked_services = $this->getCmd(null, 'blocked_services');
 			$this->checkAndUpdateCmd($blocked_services, str_replace(['"','[',']','null'],'',json_encode($AdGuardinfo['blocked_services'])));
+			
+			// write new servicesList if it's the cron only (to avoid infinite loop with postSave
+			if($allowListServices) {
+				self::setServicesList($AdGuardinfo['services_list']);
+			}
 			
 			// internet_block
 			$blocked_internet = $this->getCmd(null, 'blocked_internet');
@@ -551,7 +595,7 @@ class AdGuard extends eqLogic {
 				}
 			}
 			
-			$this->getAdGuardInfo();
+			$this->getAdGuardInfo(false);
 		}
 	}
 	public function preRemove() {
@@ -993,7 +1037,7 @@ class AdGuardCmd extends cmd {
 			if($sleep) sleep($sleep);
 		}
 		
-		$AdGuard->getAdGuardInfo();
+		$AdGuard->getAdGuardInfo(true);
 	}
 
 	/************************Getteur Setteur****************************/
