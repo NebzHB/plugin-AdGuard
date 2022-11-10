@@ -208,11 +208,17 @@ class AdGuard extends eqLogic {
 		$request_http = new com_http($url,$user,$pass);
 		$request_http->setNoSslCheck(true);
 		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
-		$request_http->setHeader(array(
-			'Content-Type: application/json',
-			'Accept application/json, text/plain, */*'
-		));
 		$params=((is_array($params))?json_encode($params):$params);
+		if($params==null) {
+			$request_http->setHeader(array(
+				'Accept application/json, text/plain, */*'
+			));
+		} else {
+			$request_http->setHeader(array(
+				'Content-Type: application/json',
+				'Accept application/json, text/plain, */*'
+			));	
+		}
 		$params=(($params==null)?[]:$params);
 		$request_http->setPost($params);
 				
