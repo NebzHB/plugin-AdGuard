@@ -211,6 +211,7 @@ class AdGuard extends eqLogic {
 		$params=((is_array($params))?json_encode($params):$params);
 		if($params==null) {
 			$request_http->setHeader(array(
+				'Content-Type: text/plain',
 				'Accept application/json, text/plain, */*'
 			));
 		} else {
