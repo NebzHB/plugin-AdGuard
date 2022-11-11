@@ -756,7 +756,7 @@ class AdGuardCmd extends cmd {
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
 					array_unshift($filtering_status['user_rules'],$blockString);
 					$cmd="filtering/set_rules";
-					$params=$filtering_status['user_rules'];
+					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'internet_unblock':
 					$blockString='||*^$important';
@@ -766,15 +766,15 @@ class AdGuardCmd extends cmd {
 						array_splice($filtering_status['user_rules'],$ruleIndex,1);
 					}
 					$cmd="filtering/set_rules";
-					$params=$filtering_status['user_rules'];
-					if($params == "") $params=[];
+					$params=["rules"=>$filtering_status['user_rules']];
+					//if($params == "") $params=[];
 				break;
 				case 'add_custom_rule':
 					$blockString=$_options['message'];
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
 					array_unshift($filtering_status['user_rules'],$blockString);
 					$cmd="filtering/set_rules";
-					$params=$filtering_status['user_rules'];
+					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'del_custom_rule':
 					$blockString=$_options['message'];
@@ -784,8 +784,8 @@ class AdGuardCmd extends cmd {
 						array_splice($filtering_status['user_rules'],$ruleIndex,1);
 					}
 					$cmd="filtering/set_rules";
-					$params=$filtering_status['user_rules'];
-					if($params == "") $params=[];
+					$params=["rules"=>$filtering_status['user_rules']];
+					//if($params == "") $params=[];
 				break;
 				
 				// block everything for a client (first rule !) : ||*^$client='Nebz iPhone',important 
@@ -1009,25 +1009,21 @@ class AdGuardCmd extends cmd {
 					$name=addcslashes(addslashes($name[1]), ',|');
 					$blockString="||*^\$client='".$name."',important";
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
+					array_unshift($filtering_status['user_rules'],$blockString);
 					$cmd="filtering/set_rules";
-					if(count($filtering_status['user_rules'])) {
-						$blockString.="\n";
-					}
-					$params=$blockString.$ruleList;
+					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'client_internet_unblock':
 					$name=explode('-',$eqLogic->getLogicalId());
 					$name=addcslashes(addslashes($name[1]), ',|');
 					$blockString="||*^\$client='".$name."',important";
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(strpos($ruleList,$blockString."\n") !== false) {
-						$blockString.="\n";
+					$ruleIndex=array_search($blockString,$filtering_status['user_rules']);
+					if($ruleIndex !== false) {
+						array_splice($filtering_status['user_rules'],$ruleIndex,1);
 					}
 					$cmd="filtering/set_rules";
-					$params=str_replace($blockString,"",$ruleList);
-					if($params == "") $params=[];
+					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'client_ids_add':
 					$name=explode('-',$eqLogic->getLogicalId());
