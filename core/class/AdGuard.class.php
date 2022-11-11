@@ -205,27 +205,53 @@ class AdGuard extends eqLogic {
 		
 		if(!$ip || !$user || !$pass) return false;
 		
-		$request_http = new com_http($url,$user,$pass);
-		$request_http->setNoSslCheck(true);
-		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
+		//$request_http = new com_http($url,$user,$pass);
+		
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_HEADER, false);
+		curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+		
+		//$request_http->setNoSslCheck(true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		
+		
 		$params=((is_array($params))?json_encode($params):$params);
 		if($params==null) {
-			$request_http->setHeader(array(
+			$header=array(
 				'Accept application/json, text/plain, */*'
-			));
+			);
 		} else {
-			$request_http->setHeader(array(
+			$header=array(
 				'Content-Type: application/json',
 				'Accept application/json, text/plain, */*'
-			));	
+			);	
 		}
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
+		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+		curl_setopt($ch, CURLOPT_USERPWD, $user . ':' . $pass);
+		//$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		
 		//$params=(($params==null)?[]:$params);
-		$request_http->setPost($params);
+		//$request_http->setPost($params);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		if($params!=null) {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+		}
 				
 		try {		
 			log::add('AdGuard','info','Exécution commande '.$cmd);
 			log::add('AdGuard','debug','Exécution commande '.$cmd.' avec params '.json_encode($params));
-			$AdGuardinfo=$request_http->exec(10,1);
+			//$AdGuardinfo=$request_http->exec(10,1);
+			$AdGuardinfo = curl_exec($ch);
+			if (!isset($AdGuardinfo)) {
+				$AdGuardinfo = '';
+			}
 			if($AdGuardinfo) log::add('AdGuard','debug',"Retour brut : ".$AdGuardinfo);
 		} catch (Exception $e) {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
@@ -234,6 +260,8 @@ class AdGuard extends eqLogic {
 				$this->checkAndUpdateCmd($online, '0');
 			}
 		}
+		curl_close($ch);
+		$ch=null;
 		if(trim($AdGuardinfo) == "Forbidden") {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
 			$online = $this->getCmd(null, 'online');
