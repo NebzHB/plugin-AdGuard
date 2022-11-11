@@ -754,43 +754,37 @@ class AdGuardCmd extends cmd {
 				case 'internet_block':
 					$blockString='||*^$important';
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(count($filtering_status['user_rules'])) {
-						$blockString.="\n";
-					}
+					array_unshift($filtering_status['user_rules'],$blockString);
 					$cmd="filtering/set_rules";
-					$params=$blockString.$ruleList;
+					$params=$filtering_status['user_rules'];
 				break;
 				case 'internet_unblock':
 					$blockString='||*^$important';
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(strpos($ruleList,$blockString."\n") !== false) {
-						$blockString.="\n";
+					$ruleIndex=array_search($blockString,$filtering_status['user_rules']);
+					if($ruleIndex !== false) {
+						array_splice($filtering_status['user_rules'],$ruleIndex,1);
 					}
 					$cmd="filtering/set_rules";
-					$params=str_replace($blockString,"",$ruleList);
+					$params=$filtering_status['user_rules'];
 					if($params == "") $params=[];
 				break;
 				case 'add_custom_rule':
 					$blockString=$_options['message'];
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(count($filtering_status['user_rules'])) {
-						$blockString.="\n";
-					}
+					array_unshift($filtering_status['user_rules'],$blockString);
 					$cmd="filtering/set_rules";
-					$params=$blockString.$ruleList;
+					$params=$filtering_status['user_rules'];
 				break;
 				case 'del_custom_rule':
 					$blockString=$_options['message'];
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(strpos($ruleList,$blockString."\n") !== false) {
-						$blockString.="\n";
+					$ruleIndex=array_search($blockString,$filtering_status['user_rules']);
+					if($ruleIndex !== false) {
+						array_splice($filtering_status['user_rules'],$ruleIndex,1);
 					}
 					$cmd="filtering/set_rules";
-					$params=str_replace($blockString,"",$ruleList);
+					$params=$filtering_status['user_rules'];
 					if($params == "") $params=[];
 				break;
 				
