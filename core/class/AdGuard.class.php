@@ -253,6 +253,14 @@ class AdGuard extends eqLogic {
 				$AdGuardinfo = '';
 			}
 			if($AdGuardinfo) log::add('AdGuard','debug',"Retour brut : ".$AdGuardinfo);
+			if (isset($ch) && is_resource($ch)) {
+				$curl_error = curl_error($ch);
+				curl_close($ch);
+				if ($curl_error) {
+					throw new Exception(__('Echec de la requête HTTP :', __FILE__) . ' ' . $url . ' cURL error : ' . $curl_error, 404);
+				}
+			}
+			$ch=null;
 		} catch (Exception $e) {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
 			$online = $this->getCmd(null, 'online');
@@ -260,8 +268,7 @@ class AdGuard extends eqLogic {
 				$this->checkAndUpdateCmd($online, '0');
 			}
 		}
-		curl_close($ch);
-		$ch=null;
+		
 		if(trim($AdGuardinfo) == "Forbidden") {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
 			$online = $this->getCmd(null, 'online');
