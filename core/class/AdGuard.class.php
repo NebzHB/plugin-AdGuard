@@ -205,22 +205,62 @@ class AdGuard extends eqLogic {
 		
 		if(!$ip || !$user || !$pass) return false;
 		
-		$request_http = new com_http($url,$user,$pass);
-		$request_http->setNoSslCheck(true);
-		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
-		$request_http->setHeader(array(
-			'Content-Type: application/json',
-			'Accept application/json, text/plain, */*'
-		));
+		//$request_http = new com_http($url,$user,$pass);
+		
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_HEADER, false);
+		curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+		
+		//$request_http->setNoSslCheck(true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		
+		
 		$params=((is_array($params))?json_encode($params):$params);
-		$params=(($params==null)?[]:$params);
-		$request_http->setPost($params);
+		if($params==null) {
+			$header=array(
+				'Accept application/json, text/plain, */*'
+			);
+		} else {
+			$header=array(
+				'Content-Type: application/json',
+				'Accept application/json, text/plain, */*'
+			);	
+		}
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
+		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+		curl_setopt($ch, CURLOPT_USERPWD, $user . ':' . $pass);
+		//$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		
+		//$params=(($params==null)?[]:$params);
+		//$request_http->setPost($params);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		if($params!=null) {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+		}
 				
 		try {		
 			log::add('AdGuard','info','Exécution commande '.$cmd);
 			log::add('AdGuard','debug','Exécution commande '.$cmd.' avec params '.json_encode($params));
-			$AdGuardinfo=$request_http->exec(10,1);
+			//$AdGuardinfo=$request_http->exec(10,1);
+			$AdGuardinfo = curl_exec($ch);
+			if (!isset($AdGuardinfo)) {
+				$AdGuardinfo = '';
+			}
 			if($AdGuardinfo) log::add('AdGuard','debug',"Retour brut : ".$AdGuardinfo);
+			if (isset($ch) && is_resource($ch)) {
+				$curl_error = curl_error($ch);
+				curl_close($ch);
+				if ($curl_error) {
+					throw new Exception(__('Echec de la requête HTTP :', __FILE__) . ' ' . $url . ' cURL error : ' . $curl_error, 404);
+				}
+			}
+			$ch=null;
 		} catch (Exception $e) {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
 			$online = $this->getCmd(null, 'online');
@@ -228,6 +268,7 @@ class AdGuard extends eqLogic {
 				$this->checkAndUpdateCmd($online, '0');
 			}
 		}
+		
 		if(trim($AdGuardinfo) == "Forbidden") {
 			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, vérifiez vos crédentials ! Message : ".$AdGuardinfo);
 			$online = $this->getCmd(null, 'online');
@@ -713,44 +754,38 @@ class AdGuardCmd extends cmd {
 				case 'internet_block':
 					$blockString='||*^$important';
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(count($filtering_status['user_rules'])) {
-						$blockString.="\n";
-					}
+					array_unshift($filtering_status['user_rules'],$blockString);
 					$cmd="filtering/set_rules";
-					$params=$blockString.$ruleList;
+					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'internet_unblock':
 					$blockString='||*^$important';
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(strpos($ruleList,$blockString."\n") !== false) {
-						$blockString.="\n";
+					$ruleIndex=array_search($blockString,$filtering_status['user_rules']);
+					if($ruleIndex !== false) {
+						array_splice($filtering_status['user_rules'],$ruleIndex,1);
 					}
 					$cmd="filtering/set_rules";
-					$params=str_replace($blockString,"",$ruleList);
-					if($params == "") $params=[];
+					$params=["rules"=>$filtering_status['user_rules']];
+					//if($params == "") $params=[];
 				break;
 				case 'add_custom_rule':
 					$blockString=$_options['message'];
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(count($filtering_status['user_rules'])) {
-						$blockString.="\n";
-					}
+					array_unshift($filtering_status['user_rules'],$blockString);
 					$cmd="filtering/set_rules";
-					$params=$blockString.$ruleList;
+					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'del_custom_rule':
 					$blockString=$_options['message'];
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(strpos($ruleList,$blockString."\n") !== false) {
-						$blockString.="\n";
+					$ruleIndex=array_search($blockString,$filtering_status['user_rules']);
+					if($ruleIndex !== false) {
+						array_splice($filtering_status['user_rules'],$ruleIndex,1);
 					}
 					$cmd="filtering/set_rules";
-					$params=str_replace($blockString,"",$ruleList);
-					if($params == "") $params=[];
+					$params=["rules"=>$filtering_status['user_rules']];
+					//if($params == "") $params=[];
 				break;
 				
 				// block everything for a client (first rule !) : ||*^$client='Nebz iPhone',important 
@@ -974,25 +1009,21 @@ class AdGuardCmd extends cmd {
 					$name=addcslashes(addslashes($name[1]), ',|');
 					$blockString="||*^\$client='".$name."',important";
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
+					array_unshift($filtering_status['user_rules'],$blockString);
 					$cmd="filtering/set_rules";
-					if(count($filtering_status['user_rules'])) {
-						$blockString.="\n";
-					}
-					$params=$blockString.$ruleList;
+					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'client_internet_unblock':
 					$name=explode('-',$eqLogic->getLogicalId());
 					$name=addcslashes(addslashes($name[1]), ',|');
 					$blockString="||*^\$client='".$name."',important";
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
-					$ruleList=implode("\n",$filtering_status['user_rules']);
-					if(strpos($ruleList,$blockString."\n") !== false) {
-						$blockString.="\n";
+					$ruleIndex=array_search($blockString,$filtering_status['user_rules']);
+					if($ruleIndex !== false) {
+						array_splice($filtering_status['user_rules'],$ruleIndex,1);
 					}
 					$cmd="filtering/set_rules";
-					$params=str_replace($blockString,"",$ruleList);
-					if($params == "") $params=[];
+					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'client_ids_add':
 					$name=explode('-',$eqLogic->getLogicalId());
