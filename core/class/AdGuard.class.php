@@ -194,6 +194,18 @@ class AdGuard extends eqLogic {
         	return $return;
     	}
 	
+	// Encrypt in DB
+	public function decrypt() {
+		$this->setConfiguration('ip', utils::decrypt($this->getConfiguration('ip')));
+		$this->setConfiguration('user', utils::decrypt($this->getConfiguration('user')));
+		$this->setConfiguration('password', utils::decrypt($this->getConfiguration('password')));
+	}
+	public function encrypt() {
+		$this->setConfiguration('ip', utils::encrypt($this->getConfiguration('ip')));
+		$this->setConfiguration('user', utils::encrypt($this->getConfiguration('user')));
+		$this->setConfiguration('password', utils::encrypt($this->getConfiguration('password')));
+	}
+	
 	public function postAdGuard($cmd,$params) {
 		$proto=$this->getConfiguration('proto','http');
 		$ip = $this->getConfiguration('ip','');
