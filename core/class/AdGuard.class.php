@@ -920,7 +920,7 @@ class AdGuardCmd extends cmd {
 					foreach($clients['clients'] as $client) {
 						if($client['name'] == $name) {
 							$cmd='clients/update';
-							$client['safesearch']=["enabled" => true,"bing" => true, "duckduckgo" => true, "google" => true, "pixabay" => true, "yandex" => true, "youtube" => true];
+							$client['safe_search']=["enabled" => true,"bing" => true, "duckduckgo" => true, "google" => true, "pixabay" => true, "yandex" => true, "youtube" => true];
 							$params=["name"=>$client['name'],"data"=>$client];
 							break;
 						}
@@ -933,7 +933,7 @@ class AdGuardCmd extends cmd {
 					foreach($clients['clients'] as $client) {
 						if($client['name'] == $name) {
 							$cmd='clients/update';
-							$client['safesearch']=["enabled" => false,"bing" => false, "duckduckgo" => false, "google" => false, "pixabay" => false, "yandex" => false, "youtube" => false];
+							$client['safe_search']=["enabled" => false,"bing" => false, "duckduckgo" => false, "google" => false, "pixabay" => false, "yandex" => false, "youtube" => false];
 							$params=["name"=>$client['name'],"data"=>$client];
 							break;
 						}
