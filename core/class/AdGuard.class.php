@@ -206,7 +206,7 @@ class AdGuard extends eqLogic {
 		$this->setConfiguration('password', utils::encrypt($this->getConfiguration('password')));
 	}
 	
-	public function postAdGuard($cmd,$params) {
+	public function postAdGuard($cmd,$params,$type="POST") {
 		$proto=$this->getConfiguration('proto','http');
 		$ip = $this->getConfiguration('ip','');
 		
@@ -251,7 +251,7 @@ class AdGuard extends eqLogic {
 		
 		//$params=(($params==null)?[]:$params);
 		//$request_http->setPost($params);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type); // type=POST by default
 		if($params!=null) {
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 		}
@@ -694,6 +694,7 @@ class AdGuardCmd extends cmd {
 		$cmd=null;
 		$params=null;
 		$sleep=null;
+		$type=null;
 		if ($logical != 'refresh'){
 			switch ($logical) {
 				case 'protection_disable':
@@ -733,10 +734,12 @@ class AdGuardCmd extends cmd {
 				case 'safesearch_enable':
 					$cmd = 'safesearch/settings';
 					$params = ["enabled" => true,"bing" => true, "duckduckgo" => true, "google" => true, "pixabay" => true, "yandex" => true, "youtube" => true];
+					$type = "PUT";
 				break;
 				case 'safesearch_disable':
 					$cmd = 'safesearch/settings';
 					$params = ["enabled" => false,"bing" => false, "duckduckgo" => false, "google" => false, "pixabay" => false, "yandex" => false, "youtube" => false];
+					$type = "PUT";
 				break;
 				case 'reset_stats':
 					$cmd = 'stats_reset';
@@ -1078,7 +1081,7 @@ class AdGuardCmd extends cmd {
 			
 			if(!$cmd) return false;
 			
-			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params);
+			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params,$type);
 			if($sleep) sleep($sleep);
 		}
 		
