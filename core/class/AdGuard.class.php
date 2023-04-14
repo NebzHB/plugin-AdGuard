@@ -470,7 +470,7 @@ class AdGuard extends eqLogic {
 						$eqp->checkAndUpdateCmd($client_parental_enabled, (($client['parental_enabled']===true)?1:0));
 						// safesearch
 						$client_safesearch_enabled = $eqp->getCmd(null, 'client_safesearch_enabled');
-						$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safesearch']['enabled']===true)?1:0));
+						$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safe_search']['enabled']===true)?1:0));
 						// client_use_global_blocked_services
 						$client_use_global_blocked_services = $eqp->getCmd(null, 'client_use_global_blocked_services');
 						$eqp->checkAndUpdateCmd($client_use_global_blocked_services, (($client['use_global_blocked_services']===true)?1:0));
