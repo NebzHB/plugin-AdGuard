@@ -470,7 +470,7 @@ class AdGuard extends eqLogic {
 						$eqp->checkAndUpdateCmd($client_parental_enabled, (($client['parental_enabled']===true)?1:0));
 						// safesearch
 						$client_safesearch_enabled = $eqp->getCmd(null, 'client_safesearch_enabled');
-						$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safesearch_enabled']===true)?1:0));
+						$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safesearch']['enabled']===true)?1:0));
 						// client_use_global_blocked_services
 						$client_use_global_blocked_services = $eqp->getCmd(null, 'client_use_global_blocked_services');
 						$eqp->checkAndUpdateCmd($client_use_global_blocked_services, (($client['use_global_blocked_services']===true)?1:0));
@@ -698,11 +698,11 @@ class AdGuardCmd extends cmd {
 			switch ($logical) {
 				case 'protection_disable':
 					$cmd = 'dns_config';
-					$params = ["protection_enabled" => false];
+					$params = ["protection" => ["enabled" => false]];
 				break;
 				case 'protection_enable':
 					$cmd = 'dns_config';
-					$params = ["protection_enabled" => true];
+					$params = ["protection" => ["enabled" => true]];
 				break;
 				case 'UpdateAdGuard':
 					$cmd = 'update';
@@ -731,10 +731,12 @@ class AdGuardCmd extends cmd {
 					$cmd = 'parental/disable';
 				break;
 				case 'safesearch_enable':
-					$cmd = 'safesearch/enable';
+					$cmd = 'safesearch/settings';
+					$params = ["enabled" => true,"bing" => true, "duckduckgo" => true, "google" => true, "pixabay" => true, "yandex" => true, "youtube" => true];
 				break;
 				case 'safesearch_disable':
-					$cmd = 'safesearch/disable';
+					$cmd = 'safesearch/settings';
+					$params = ["enabled" => false,"bing" => false, "duckduckgo" => false, "google" => false, "pixabay" => false, "yandex" => false, "youtube" => false];
 				break;
 				case 'reset_stats':
 					$cmd = 'stats_reset';
@@ -915,7 +917,7 @@ class AdGuardCmd extends cmd {
 					foreach($clients['clients'] as $client) {
 						if($client['name'] == $name) {
 							$cmd='clients/update';
-							$client['safesearch_enabled']=true;
+							$client['safesearch']=["enabled" => true,"bing" => true, "duckduckgo" => true, "google" => true, "pixabay" => true, "yandex" => true, "youtube" => true];
 							$params=["name"=>$client['name'],"data"=>$client];
 							break;
 						}
@@ -928,7 +930,7 @@ class AdGuardCmd extends cmd {
 					foreach($clients['clients'] as $client) {
 						if($client['name'] == $name) {
 							$cmd='clients/update';
-							$client['safesearch_enabled']=false;
+							$client['safesearch']=["enabled" => false,"bing" => false, "duckduckgo" => false, "google" => false, "pixabay" => false, "yandex" => false, "youtube" => false];
 							$params=["name"=>$client['name'],"data"=>$client];
 							break;
 						}
