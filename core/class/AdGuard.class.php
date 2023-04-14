@@ -697,12 +697,12 @@ class AdGuardCmd extends cmd {
 		if ($logical != 'refresh'){
 			switch ($logical) {
 				case 'protection_disable':
-					$cmd = 'dns_config';
-					$params = ["protection" => ["enabled" => false]];
+					$cmd = 'protection';
+					$params = ["enabled" => false];
 				break;
 				case 'protection_enable':
-					$cmd = 'dns_config';
-					$params = ["protection" => ["enabled" => true]];
+					$cmd = 'protection';
+					$params = ["enabled" => true];
 				break;
 				case 'UpdateAdGuard':
 					$cmd = 'update';
