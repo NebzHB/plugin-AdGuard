@@ -694,7 +694,7 @@ class AdGuardCmd extends cmd {
 		$cmd=null;
 		$params=null;
 		$sleep=null;
-		$type=null;
+		$type='POST';
 		if ($logical != 'refresh'){
 			switch ($logical) {
 				case 'protection_disable':
