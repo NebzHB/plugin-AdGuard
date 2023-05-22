@@ -122,7 +122,7 @@ class AdGuard extends eqLogic {
 		return false;
 	}
 	public static function createEq($eq,$event=true) {
-		$eqp = eqlogic::byLogicalId($eq['logicalId'],'AdGuard');
+		$eqp = eqLogic::byLogicalId($eq['logicalId'],'AdGuard');
 		if (!is_object($eqp)){
 			if($eq['name']) {
 				if(AdGuard::nameExists($eq['name'],$eq['object_id'])) {
@@ -685,7 +685,7 @@ class AdGuardCmd extends cmd {
 		if($type == "Client") {
 			$serverId = $eqLogic->getConfiguration('server','');
 			if($serverId) {
-				$AdGuard=eqlogic::byId($serverId);
+				$AdGuard=eqLogic::byId($serverId);
 			}
 		} else {
 			$AdGuard=$eqLogic;
