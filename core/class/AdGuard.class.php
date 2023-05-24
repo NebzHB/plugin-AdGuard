@@ -122,7 +122,7 @@ class AdGuard extends eqLogic {
 		return false;
 	}
 	public static function createEq($eq,$event=true) {
-		$eqp = eqlogic::byLogicalId($eq['logicalId'],'AdGuard');
+		$eqp = eqLogic::byLogicalId($eq['logicalId'],'AdGuard');
 		if (!is_object($eqp)){
 			if($eq['name']) {
 				if(AdGuard::nameExists($eq['name'],$eq['object_id'])) {
@@ -194,7 +194,19 @@ class AdGuard extends eqLogic {
         	return $return;
     	}
 	
-	public function postAdGuard($cmd,$params) {
+	// Encrypt in DB
+	public function decrypt() {
+		$this->setConfiguration('ip', utils::decrypt($this->getConfiguration('ip')));
+		$this->setConfiguration('user', utils::decrypt($this->getConfiguration('user')));
+		$this->setConfiguration('password', utils::decrypt($this->getConfiguration('password')));
+	}
+	public function encrypt() {
+		$this->setConfiguration('ip', utils::encrypt($this->getConfiguration('ip')));
+		$this->setConfiguration('user', utils::encrypt($this->getConfiguration('user')));
+		$this->setConfiguration('password', utils::encrypt($this->getConfiguration('password')));
+	}
+	
+	public function postAdGuard($cmd,$params,$type="POST") {
 		$proto=$this->getConfiguration('proto','http');
 		$ip = $this->getConfiguration('ip','');
 		
@@ -239,7 +251,7 @@ class AdGuard extends eqLogic {
 		
 		//$params=(($params==null)?[]:$params);
 		//$request_http->setPost($params);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type); // type=POST by default
 		if($params!=null) {
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 		}
@@ -281,6 +293,10 @@ class AdGuard extends eqLogic {
 		}
 		
 		return json_decode($AdGuardinfo,true);
+	}
+	
+	public function putAdGuard($cmd,$params) {
+		$this->postAdGuard($cmd,$params,"PUT");	
 	}
 	
 	public function getAdGuard($cmd,$params=null) {
@@ -458,7 +474,7 @@ class AdGuard extends eqLogic {
 						$eqp->checkAndUpdateCmd($client_parental_enabled, (($client['parental_enabled']===true)?1:0));
 						// safesearch
 						$client_safesearch_enabled = $eqp->getCmd(null, 'client_safesearch_enabled');
-						$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safesearch_enabled']===true)?1:0));
+						$eqp->checkAndUpdateCmd($client_safesearch_enabled, (($client['safe_search']['enabled']===true)?1:0));
 						// client_use_global_blocked_services
 						$client_use_global_blocked_services = $eqp->getCmd(null, 'client_use_global_blocked_services');
 						$eqp->checkAndUpdateCmd($client_use_global_blocked_services, (($client['use_global_blocked_services']===true)?1:0));
@@ -673,7 +689,7 @@ class AdGuardCmd extends cmd {
 		if($type == "Client") {
 			$serverId = $eqLogic->getConfiguration('server','');
 			if($serverId) {
-				$AdGuard=eqlogic::byId($serverId);
+				$AdGuard=eqLogic::byId($serverId);
 			}
 		} else {
 			$AdGuard=$eqLogic;
@@ -682,15 +698,16 @@ class AdGuardCmd extends cmd {
 		$cmd=null;
 		$params=null;
 		$sleep=null;
+		$type='POST';
 		if ($logical != 'refresh'){
 			switch ($logical) {
 				case 'protection_disable':
-					$cmd = 'dns_config';
-					$params = ["protection_enabled" => false];
+					$cmd = 'protection';
+					$params = ["enabled" => false];
 				break;
 				case 'protection_enable':
-					$cmd = 'dns_config';
-					$params = ["protection_enabled" => true];
+					$cmd = 'protection';
+					$params = ["enabled" => true];
 				break;
 				case 'UpdateAdGuard':
 					$cmd = 'update';
@@ -719,10 +736,14 @@ class AdGuardCmd extends cmd {
 					$cmd = 'parental/disable';
 				break;
 				case 'safesearch_enable':
-					$cmd = 'safesearch/enable';
+					$cmd = 'safesearch/settings';
+					$params = ["enabled" => true,"bing" => true, "duckduckgo" => true, "google" => true, "pixabay" => true, "yandex" => true, "youtube" => true];
+					$type = "PUT";
 				break;
 				case 'safesearch_disable':
-					$cmd = 'safesearch/disable';
+					$cmd = 'safesearch/settings';
+					$params = ["enabled" => false,"bing" => false, "duckduckgo" => false, "google" => false, "pixabay" => false, "yandex" => false, "youtube" => false];
+					$type = "PUT";
 				break;
 				case 'reset_stats':
 					$cmd = 'stats_reset';
@@ -903,7 +924,7 @@ class AdGuardCmd extends cmd {
 					foreach($clients['clients'] as $client) {
 						if($client['name'] == $name) {
 							$cmd='clients/update';
-							$client['safesearch_enabled']=true;
+							$client['safe_search']=["enabled" => true,"bing" => true, "duckduckgo" => true, "google" => true, "pixabay" => true, "yandex" => true, "youtube" => true];
 							$params=["name"=>$client['name'],"data"=>$client];
 							break;
 						}
@@ -916,7 +937,7 @@ class AdGuardCmd extends cmd {
 					foreach($clients['clients'] as $client) {
 						if($client['name'] == $name) {
 							$cmd='clients/update';
-							$client['safesearch_enabled']=false;
+							$client['safe_search']=["enabled" => false,"bing" => false, "duckduckgo" => false, "google" => false, "pixabay" => false, "yandex" => false, "youtube" => false];
 							$params=["name"=>$client['name'],"data"=>$client];
 							break;
 						}
@@ -1064,7 +1085,7 @@ class AdGuardCmd extends cmd {
 			
 			if(!$cmd) return false;
 			
-			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params);
+			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params,$type);
 			if($sleep) sleep($sleep);
 		}
 		
