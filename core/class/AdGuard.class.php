@@ -295,6 +295,10 @@ class AdGuard extends eqLogic {
 		return json_decode($AdGuardinfo,true);
 	}
 	
+	public function putAdGuard($cmd,$params) {
+		$this->postAdGuard($cmd,$params,"PUT");	
+	}
+	
 	public function getAdGuard($cmd,$params=null) {
 		$proto=$this->getConfiguration('proto','http');
 		$ip = $this->getConfiguration('ip','');
