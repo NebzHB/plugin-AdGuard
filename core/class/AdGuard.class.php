@@ -364,7 +364,7 @@ class AdGuard extends eqLogic {
 		$AdGuardinfo['clients']=$this->getAdGuard('clients');
 		$AdGuardinfo['clients']['auto_clients']="deleted";
 		$AdGuardinfo['clients']['supported_tags']="deleted";
-		$AdGuardinfo['blocked_services']=$this->getAdGuard('blocked_services/list');
+		$AdGuardinfo['blocked_services']=$this->getAdGuard('blocked_services/get');
 		
 		$temp_services_list=$this->getAdGuard('blocked_services/all');
 		$AdGuardinfo['services_list']=[];
@@ -405,7 +405,7 @@ class AdGuard extends eqLogic {
 			$this->checkAndUpdateCmd($safesearch_enabled, (($AdGuardinfo['safesearch']['enabled']===true)?1:0));
 			// blocked_services
 			$blocked_services = $this->getCmd(null, 'blocked_services');
-			$this->checkAndUpdateCmd($blocked_services, str_replace(['"','[',']','null'],'',json_encode($AdGuardinfo['blocked_services'])));
+			$this->checkAndUpdateCmd($blocked_services, str_replace(['"','[',']','null'],'',json_encode($AdGuardinfo['blocked_services']['ids'])));
 			
 			// write new servicesList if it's the cron only (to avoid infinite loop with postSave
 			if($allowListServices) {
@@ -750,27 +750,31 @@ class AdGuardCmd extends cmd {
 				break;
 				case 'service_block':
 					if($_options['select'] == "") break;
-					$blocked_services=$AdGuard->getAdGuard('blocked_services/list');
-					array_push($blocked_services,$_options['select']);
-					$new_blocked_services=array_unique($blocked_services,SORT_STRING);
-					$cmd='blocked_services/set';
-					$params=$new_blocked_services;
+					$blocked_services=$AdGuard->getAdGuard('blocked_services/get');
+					array_push($blocked_services['ids'],$_options['select']);
+					$new_blocked_services=array_unique($blocked_services['ids'],SORT_STRING);
+					$cmd='blocked_services/update';
+					$params= ["ids"=>$new_blocked_services];
+					$type = "PUT";
 				break;
 				case 'service_unblock':
-					$blocked_services=$AdGuard->getAdGuard('blocked_services/list');
-					if (($key = array_search($_options['select'], $blocked_services)) !== false) {
-						array_splice($blocked_services,$key,1);
-						$cmd='blocked_services/set';
+					$blocked_services=$AdGuard->getAdGuard('blocked_services/get');
+					if (($key = array_search($_options['select'], $blocked_services['ids'])) !== false) {
+						array_splice($blocked_services['ids'],$key,1);
+						$cmd='blocked_services/update';
 						$params=$blocked_services;
+						$type = "PUT";
 					}
 				break;
 				case 'services_block':
-					$cmd='blocked_services/set';
-					$params=array_keys(AdGuard::serviceList());
+					$cmd='blocked_services/update';
+					$params=["ids"=>array_keys(AdGuard::serviceList())];
+					$type = "PUT";
 				break;
 				case 'services_unblock':
-					$cmd='blocked_services/set';
-					$params=[];
+					$cmd='blocked_services/update';
+					$params=["ids"=>[]];
+					$type = "PUT";
 				break;
 				case 'internet_block':
 					$blockString='||*^$important';
