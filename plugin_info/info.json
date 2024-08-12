@@ -1,7 +1,14 @@
 {
 	"id": "AdGuard",
 	"name": "AdGuard Home",
-	"description": "Plugin permettant d'activer ou désactiver votre serveur AdGuard Home. De gérer les clients Et beaucoup plus !!",
+	"description": {
+		"fr_FR": "Plugin permettant d'activer ou désactiver votre serveur AdGuard Home. De gérer les clients Et beaucoup plus !!",
+		"en_US": "Plugin to activate or deactivate your AdGuard Home server, manage customers and much more!",
+		"es_ES": "Plugin que le permite activar o desactivar su servidor AdGuard Home, gestionar clientes y ¡mucho más!",
+		"de_DE": "Plugin zum Aktivieren oder Deaktivieren Ihres AdGuard Home Servers. Zum Verwalten von Clients Und vieles mehr!!!",
+		"it_IT": "Plugin che consente di attivare o disattivare il server AdGuard Home, gestire i clienti e molto altro ancora!",
+		"pt_PT": "Plugin que lhe permite ativar ou desativar o seu servidor AdGuard Home, gerir clientes e muito mais!"
+	},
 	"licence": "AGPL",
 	"author": "Nebz",
 	"hasDependency": false,
