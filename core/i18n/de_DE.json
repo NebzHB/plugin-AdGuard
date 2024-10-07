@@ -69,5 +69,8 @@
         "Utilisateur de votre serveur": "Benutzer Ihres Servers",
         "Valeurs": "Werte",
         "Visible": "Sichtbar"
+    },
+    "plugins\/AdGuard\/plugin_info\/configuration.php": {
+        "Communauté": "Community"
     }
 }
