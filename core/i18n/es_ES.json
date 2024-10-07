@@ -45,6 +45,7 @@
         "Auto-actualisation (cron)": "Auto-actualización (cron)",
         "Catégorie": "Categoría",
         "Commandes": "Ordenes",
+        "Community": "Comunidad",
         "Configuration": "Configuración",
         "Configuration avancée": "Configuración avanzada",
         "Equipement": "Dispositivo",
@@ -57,6 +58,7 @@
         "Nom": "Nombre",
         "Nom de l'équipement": "Nombre del dispositivo",
         "Objet parent": "Objeto padre",
+        "Ouvrir une demande d'aide sur le forum communautaire": "Abrir una solicitud de ayuda en el foro de la comunidad",
         "Rechercher": "Buscar",
         "Santé": "Salud",
         "Sauvegarder": "Guardar",
@@ -67,5 +69,8 @@
         "Utilisateur de votre serveur": "El usuario de tu servidor",
         "Valeurs": "Valores",
         "Visible": "Visible"
+    },
+    "plugins\/AdGuard\/plugin_info\/configuration.php": {
+        "Communauté": "Comunidad"
     }
 }

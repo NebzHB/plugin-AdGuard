@@ -63,7 +63,14 @@ class AdGuard extends eqLogic {
 			"youtube"=>"YouTube"
 		];
 	}
-	
+	public static function getConfigForCommunity()
+	{
+		$update=update::byTypeAndLogicalId('plugin',__CLASS__);
+		$ver=$update->getLocalVersion();
+		$conf=$update->getConfiguration();
+		$CommunityInfo="```\n== Jeedom ".jeedom::version()." sur ".trim(shell_exec("lsb_release -d -s")).'/'.trim(shell_exec('dpkg --print-architecture')).'/'.trim(shell_exec('arch')).'/'.trim(shell_exec('getconf LONG_BIT'))."bits aka '".jeedom::getHardwareName()."' ".__CLASS__." (".$conf['version'].") ".$ver." (avant:".config::byKey('previousVersion',__CLASS__,'inconnu',true).")\n```";
+		return $CommunityInfo;
+	}
 	public static function setServicesList($services) {
 		// get existing services to compare with the new list, if different, update all eqLogics 
 		$preServices=self::serviceList();
