@@ -23,3 +23,7 @@ if (!isConnect()) {
     die();
 }
 ?>
+<script>
+    var CommunityButton = document.querySelector('#createCommunityPost > span');
+	if(CommunityButton) {CommunityButton.innerHTML = " {{Communauté}}";}
+</script>
