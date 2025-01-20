@@ -711,13 +711,8 @@ class AdGuardCmd extends cmd {
 				case 'protection_disable':
 					$cmd = 'protection';
 					$params = ["enabled" => false];
-					if(isset($_options['message']) ) { //if not set, no duration
-						if(is_numeric($_options['message']) && $_options['message']>=1) { 
-							$params['duration'] = ((int) $_options['message']) *60*1000;
-						}
-						else{
-							log::add('AdGuard','warning','La durée de la protection (optionnelle) doit être un nombre entier supérieur ou égal à 1');
-						}
+					if(isset($_options['select']) && is_numeric($_options['select']) && $_options['select']>0 ) { 
+						$params['duration'] = $_options['select']*1000;
 					}
 				break;
 				case 'protection_enable':
