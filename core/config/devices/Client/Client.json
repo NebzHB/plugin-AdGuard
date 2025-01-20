@@ -1,6 +1,6 @@
 {
 	"commands": [{
-			"name": "Statut Utiliser les Paramètres Généraux",
+			"name": "{{Statut Utiliser les Paramètres Généraux}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -11,7 +11,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_use_global_settings"
 		}, {
-			"name": "Activer Utiliser les Paramètres Généraux",
+			"name": "{{Activer Utiliser les Paramètres Généraux}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -22,7 +22,7 @@
 			"logicalId": "client_use_global_settings_enable",
 			"value": "client_use_global_settings"
 		}, {
-			"name": "Désactiver Utiliser les Paramètres Généraux",
+			"name": "{{Désactiver Utiliser les Paramètres Généraux}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -34,7 +34,7 @@
 			"logicalId": "client_use_global_settings_disable",
 			"value": "client_use_global_settings"
 		}, {
-			"name": "Statut Filtrage",
+			"name": "{{Statut Filtrage}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -45,7 +45,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_filtering_enabled"
 		}, {
-			"name": "Activer le Filtrage",
+			"name": "{{Activer le Filtrage}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -56,7 +56,7 @@
 			"logicalId": "client_filtering_enable",
 			"value": "client_filtering_enabled"
 		}, {
-			"name": "Désactiver le Filtrage",
+			"name": "{{Désactiver le Filtrage}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -68,7 +68,7 @@
 			"logicalId": "client_filtering_disable",
 			"value": "client_filtering_enabled"
 		}, {
-			"name": "Statut Sécurité de navigation",
+			"name": "{{Statut Sécurité de navigation}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -79,7 +79,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_safebrowsing_enabled"
 		}, {
-			"name": "Activer la Sécurité de navigation",
+			"name": "{{Activer la Sécurité de navigation}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -90,7 +90,7 @@
 			"logicalId": "client_safebrowsing_enable",
 			"value": "client_safebrowsing_enabled"
 		}, {
-			"name": "Désactiver la Sécurité de navigation",
+			"name": "{{Désactiver la Sécurité de navigation}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -102,7 +102,7 @@
 			"logicalId": "client_safebrowsing_disable",
 			"value": "client_safebrowsing_enabled"
 		}, {
-			"name": "Statut Contrôle Parental",
+			"name": "{{Statut Contrôle Parental}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -113,7 +113,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_parental_enabled"
 		}, {
-			"name": "Activer le Contrôle Parental",
+			"name": "{{Activer le Contrôle Parental}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -124,7 +124,7 @@
 			"logicalId": "client_parental_enable",
 			"value": "client_parental_enabled"
 		}, {
-			"name": "Désactiver le Contrôle Parental",
+			"name": "{{Désactiver le Contrôle Parental}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -136,7 +136,7 @@
 			"logicalId": "client_parental_disable",
 			"value": "client_parental_enabled"
 		}, {
-			"name": "Statut Recherche Sécurisée",
+			"name": "{{Statut Recherche Sécurisée}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -147,7 +147,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_safesearch_enabled"
 		}, {
-			"name": "Activer la Recherche Sécurisée",
+			"name": "{{Activer la Recherche Sécurisée}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -158,7 +158,7 @@
 			"logicalId": "client_safesearch_enable",
 			"value": "client_safesearch_enabled"
 		}, {
-			"name": "Désactiver la Recherche Sécurisée",
+			"name": "{{Désactiver la Recherche Sécurisée}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -170,7 +170,7 @@
 			"logicalId": "client_safesearch_disable",
 			"value": "client_safesearch_enabled"
 		}, {
-			"name": "Statut Utiliser les services bloqués globlaux",
+			"name": "{{Statut Utiliser les services bloqués globlaux}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -181,7 +181,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_use_global_blocked_services"
 		}, {
-			"name": "Activer Utiliser les services bloqués globlaux",
+			"name": "{{Activer Utiliser les services bloqués globlaux}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -192,7 +192,7 @@
 			"logicalId": "client_use_global_blocked_services_enable",
 			"value": "client_use_global_blocked_services"
 		}, {
-			"name": "Désactiver Utiliser les services bloqués globlaux",
+			"name": "{{Désactiver Utiliser les services bloqués globlaux}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -204,7 +204,7 @@
 			"logicalId": "client_use_global_blocked_services_disable",
 			"value": "client_use_global_blocked_services"
 		}, {
-			"name": "Services Bloqués",
+			"name": "{{Services Bloqués}}",
 			"type": "info",
 			"subtype": "string",
 			"display": {
@@ -214,7 +214,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_blocked_services"
 		}, {
-			"name": "Bloquer un service",
+			"name": "{{Bloquer un service}}",
 			"type": "action",
 			"subtype": "select",
 			"display": {
@@ -226,7 +226,7 @@
 			"isVisible": 1,
 			"logicalId": "client_service_block"
 		}, {
-			"name": "Débloquer un service",
+			"name": "{{Débloquer un service}}",
 			"type": "action",
 			"subtype": "select",
 			"display": {
@@ -239,7 +239,7 @@
 			"isVisible": 1,
 			"logicalId": "client_service_unblock"
 		}, {
-			"name": "Bloquer tous les services",
+			"name": "{{Bloquer tous les services}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -248,7 +248,7 @@
 			"isVisible": 1,
 			"logicalId": "client_services_block"
 		}, {
-			"name": "Débloquer tous les services",
+			"name": "{{Débloquer tous les services}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -258,7 +258,7 @@
 			"isVisible": 1,
 			"logicalId": "client_services_unblock"
 		}, {
-			"name": "Statut Internet Bloqué via DNS",
+			"name": "{{Statut Internet Bloqué via DNS}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -269,7 +269,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_blocked_internet"
 		}, {
-			"name": "Bloquer tout internet via DNS",
+			"name": "{{Bloquer tout internet via DNS}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -280,7 +280,7 @@
 			"logicalId": "client_internet_block",
 			"value": "client_blocked_internet"
 		}, {
-			"name": "Débloquer tout internet via DNS",
+			"name": "{{Débloquer tout internet via DNS}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -292,7 +292,7 @@
 			"logicalId": "client_internet_unblock",
 			"value": "client_blocked_internet"
 		}, {
-			"name": "Identifiant(s)",
+			"name": "{{Identifiant(s)}}",
 			"type": "info",
 			"subtype": "string",
 			"display": {
@@ -302,7 +302,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_ids"
 		}, {
-			"name": "Ajouter un identifiant",
+			"name": "{{Ajouter un identifiant}}",
 			"type": "action",
 			"subtype": "message",
 			"display": {
@@ -313,7 +313,7 @@
 			"isVisible": 1,
 			"logicalId": "client_ids_add"
 		}, {
-			"name": "Retirer un identifiant",
+			"name": "{{Retirer un identifiant}}",
 			"type": "action",
 			"subtype": "message",
 			"display": {
