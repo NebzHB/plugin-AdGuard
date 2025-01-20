@@ -497,7 +497,7 @@ class AdGuard extends eqLogic {
 						$name=addcslashes(addslashes($client['name']), ',|');
 						$blockString="||*^\$client='".$name."',important";
 						$filtering_status=$AdGuardinfo['filtering'];
-						$ruleList=implode("\n",$filtering_status['user_rules']);
+						$ruleList=implode("\n",(array)$filtering_status['user_rules']);
 						if(strpos($ruleList,$blockString) !== false) {
 							$eqp->checkAndUpdateCmd($client_blocked_internet, 1);
 						} else {
