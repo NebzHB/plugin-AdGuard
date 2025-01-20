@@ -186,13 +186,15 @@ class AdGuard extends eqLogic {
 	
 	public static function devicesParameters($type = '') {
 		$path = dirname(__FILE__) . '/../config/devices/' . $type;
-
 		if (!is_dir($path)) {
 			return false;
 		}
 		try {
 			$file = $path . '/' . $type.'.json';
 			$content = file_get_contents($file);
+			if($content) {
+				$content=translate::exec($content,realpath($file));
+			}
 			$return = json_decode($content, true);
 		} catch (Exception $e) {
 			return false;
