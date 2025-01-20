@@ -711,6 +711,9 @@ class AdGuardCmd extends cmd {
 				case 'protection_disable':
 					$cmd = 'protection';
 					$params = ["enabled" => false];
+					if(isset($_options['select']) && is_numeric($_options['select']) && $_options['select']>0 ) { 
+						$params['duration'] = $_options['select']*1000;
+					}
 				break;
 				case 'protection_enable':
 					$cmd = 'protection';

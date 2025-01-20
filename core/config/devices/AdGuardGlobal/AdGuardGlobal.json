@@ -82,11 +82,14 @@
 		}, {
 			"name": "Désactiver la protection",
 			"type": "action",
-			"subtype": "other",
+			"subtype": "select",
 			"display": {
 				"generic_type": "SWITCH_OFF",
-				"icon": "<i class=\"fas fa-stop\"></i>",
+				"icon": "<i class=\"fas fa-timer-outline\"></i>",
 				"forceReturnLineAfter": 1
+			},
+			"configuration": {
+				"listValue":"0|Infini;30|30 secondes;60|1 minute;600|10 minutes;3600|1 heure;86400|24 heures"
 			},
 			"isVisible": 1,
 			"logicalId": "protection_disable",
