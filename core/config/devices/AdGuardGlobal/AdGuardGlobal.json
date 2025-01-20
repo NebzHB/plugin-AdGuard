@@ -82,11 +82,13 @@
 		}, {
 			"name": "Désactiver la protection",
 			"type": "action",
-			"subtype": "other",
+			"subtype": "message",
 			"display": {
 				"generic_type": "SWITCH_OFF",
 				"icon": "<i class=\"fas fa-stop\"></i>",
-				"forceReturnLineAfter": 1
+				"forceReturnLineAfter": 1,
+				"title_disable": 1,
+				"message_placeholder": "Durée (en min)"
 			},
 			"isVisible": 1,
 			"logicalId": "protection_disable",
