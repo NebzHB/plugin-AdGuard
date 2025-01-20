@@ -532,12 +532,12 @@ class AdGuard extends eqLogic {
 			$newCmd->setLogicalId($cmd['logicalId']);
 			$newCmd->setIsVisible($cmd['isVisible']);
 			$newCmd->setOrder($order);
-			$newCmd->setName(__($cmd['name'], __FILE__));
 			$newCmd->setEqLogic_id($this->getId());
 		}
 		else {
 			log::add('AdGuard', 'debug', 'Modification commande:' . $cmd['logicalId']);
 		}
+		$newCmd->setName($cmd['name']);
 		if (isset($cmd['unit'])) {
 			$newCmd->setUnite($cmd['unit']);
 		}
