@@ -424,7 +424,7 @@ class AdGuard extends eqLogic {
 			$blockString='||*^$important';
 			$filtering_status=$AdGuardinfo['filtering'];
 			if(!is_array($filtering_status['user_rules'])) $filtering_status['user_rules']=[];
-			$ruleList=implode("\n",$filtering_status['user_rules']);
+			$ruleList=implode("\n",(array)$filtering_status['user_rules']);
 			if(strpos($ruleList,$blockString) !== false) {
 				$this->checkAndUpdateCmd($blocked_internet, 1);
 			} else {
