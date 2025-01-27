@@ -531,6 +531,7 @@ class AdGuard extends eqLogic {
 			$newCmd = new AdGuardCmd();
 			$newCmd->setLogicalId($cmd['logicalId']);
 			$newCmd->setIsVisible($cmd['isVisible']);
+			$newCmd->setIsHistorized($cmd['isHistorized']);
 			$newCmd->setOrder($order);
 			$newCmd->setEqLogic_id($this->getId());
 		}
