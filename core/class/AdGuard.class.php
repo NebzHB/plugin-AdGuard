@@ -530,8 +530,10 @@ class AdGuard extends eqLogic {
 			log::add('AdGuard', 'info', 'Création commande:' . $cmd['logicalId']);
 			$newCmd = new AdGuardCmd();
 			$newCmd->setLogicalId($cmd['logicalId']);
+			$newCmd->setType($cmd['type']);
+			$newCmd->setSubType($cmd['subtype']);
 			$newCmd->setIsVisible($cmd['isVisible']);
-			$newCmd->setIsHistorized($cmd['isHistorized']);
+			if($cmd['type'] == 'info' && isset($cmd['isHistorized'])) $newCmd->setIsHistorized($cmd['isHistorized']);
 			$newCmd->setOrder($order);
 			$newCmd->setEqLogic_id($this->getId());
 		}
@@ -542,7 +544,6 @@ class AdGuard extends eqLogic {
 		if (isset($cmd['unit'])) {
 			$newCmd->setUnite($cmd['unit']);
 		}
-		$newCmd->setType($cmd['type']);
 		if (isset($cmd['configuration'])) {
 			foreach ($cmd['configuration'] as $configuration_type => $configuration_value) {
 				if($configuration_type == 'listValue' && strpos($cmd['logicalId'],'service_') !== false) {
@@ -572,7 +573,7 @@ class AdGuard extends eqLogic {
 				}
 			}
 		}
-		$newCmd->setSubType($cmd['subtype']);
+		
 		if ($cmd['type'] == 'action' && isset($cmd['value'])) {
 			$linkStatus = $this->getCmd(null, $cmd['value']);
 			if (is_object($linkStatus)) $newCmd->setValue($linkStatus->getId());
