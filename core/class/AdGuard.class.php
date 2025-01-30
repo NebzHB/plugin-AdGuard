@@ -186,13 +186,15 @@ class AdGuard extends eqLogic {
 	
 	public static function devicesParameters($type = '') {
 		$path = dirname(__FILE__) . '/../config/devices/' . $type;
-
 		if (!is_dir($path)) {
 			return false;
 		}
 		try {
 			$file = $path . '/' . $type.'.json';
 			$content = file_get_contents($file);
+			if($content) {
+				$content=translate::exec($content,realpath($file));
+			}
 			$return = json_decode($content, true);
 		} catch (Exception $e) {
 			return false;
@@ -424,7 +426,7 @@ class AdGuard extends eqLogic {
 			$blockString='||*^$important';
 			$filtering_status=$AdGuardinfo['filtering'];
 			if(!is_array($filtering_status['user_rules'])) $filtering_status['user_rules']=[];
-			$ruleList=implode("\n",$filtering_status['user_rules']);
+			$ruleList=implode("\n",(array)$filtering_status['user_rules']);
 			if(strpos($ruleList,$blockString) !== false) {
 				$this->checkAndUpdateCmd($blocked_internet, 1);
 			} else {
@@ -497,7 +499,7 @@ class AdGuard extends eqLogic {
 						$name=addcslashes(addslashes($client['name']), ',|');
 						$blockString="||*^\$client='".$name."',important";
 						$filtering_status=$AdGuardinfo['filtering'];
-						$ruleList=implode("\n",$filtering_status['user_rules']);
+						$ruleList=implode("\n",(array)$filtering_status['user_rules']);
 						if(strpos($ruleList,$blockString) !== false) {
 							$eqp->checkAndUpdateCmd($client_blocked_internet, 1);
 						} else {
@@ -528,18 +530,20 @@ class AdGuard extends eqLogic {
 			log::add('AdGuard', 'info', 'Création commande:' . $cmd['logicalId']);
 			$newCmd = new AdGuardCmd();
 			$newCmd->setLogicalId($cmd['logicalId']);
+			$newCmd->setType($cmd['type']);
+			$newCmd->setSubType($cmd['subtype']);
 			$newCmd->setIsVisible($cmd['isVisible']);
+			if($cmd['type'] == 'info' && isset($cmd['isHistorized'])) $newCmd->setIsHistorized($cmd['isHistorized']);
 			$newCmd->setOrder($order);
-			$newCmd->setName(__($cmd['name'], __FILE__));
 			$newCmd->setEqLogic_id($this->getId());
 		}
 		else {
 			log::add('AdGuard', 'debug', 'Modification commande:' . $cmd['logicalId']);
 		}
+		$newCmd->setName($cmd['name']);
 		if (isset($cmd['unit'])) {
 			$newCmd->setUnite($cmd['unit']);
 		}
-		$newCmd->setType($cmd['type']);
 		if (isset($cmd['configuration'])) {
 			foreach ($cmd['configuration'] as $configuration_type => $configuration_value) {
 				if($configuration_type == 'listValue' && strpos($cmd['logicalId'],'service_') !== false) {
@@ -569,7 +573,7 @@ class AdGuard extends eqLogic {
 				}
 			}
 		}
-		$newCmd->setSubType($cmd['subtype']);
+		
 		if ($cmd['type'] == 'action' && isset($cmd['value'])) {
 			$linkStatus = $this->getCmd(null, $cmd['value']);
 			if (is_object($linkStatus)) $newCmd->setValue($linkStatus->getId());
@@ -711,6 +715,9 @@ class AdGuardCmd extends cmd {
 				case 'protection_disable':
 					$cmd = 'protection';
 					$params = ["enabled" => false];
+					if(isset($_options['select']) && is_numeric($_options['select']) && $_options['select']>0 ) { 
+						$params['duration'] = $_options['select']*1000;
+					}
 				break;
 				case 'protection_enable':
 					$cmd = 'protection';

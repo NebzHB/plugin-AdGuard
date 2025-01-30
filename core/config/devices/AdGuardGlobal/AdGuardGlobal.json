@@ -1,6 +1,6 @@
 {
 	"commands": [{
-			"name": "Rafraichir",
+			"name": "{{Rafraichir}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -9,7 +9,7 @@
 			"isVisible": 1,
 			"logicalId": "refresh"
 		}, {
-			"name": "Online",
+			"name": "{{En Ligne}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -20,14 +20,14 @@
 			"isHistorized": 0,
 			"logicalId": "online"
 		}, {
-			"name": "Update AdGuard Dispo",
+			"name": "{{Mise à jour AdGuard Disponible}}",
 			"type": "info",
 			"subtype": "binary",
 			"isVisible": 1,
 			"isHistorized": 0,
 			"logicalId": "hasUpdateAdGuard"
 		},{
-			"name": "Update AdGuard",
+			"name": "{{Mise à jour AdGuard}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -38,7 +38,7 @@
 			"isVisible": 1,
 			"logicalId": "UpdateAdGuard"
 		}, {
-			"name": "Version Actuelle",
+			"name": "{{Version Actuelle}}",
 			"type": "info",
 			"subtype": "string",
 			"display": {
@@ -48,7 +48,7 @@
 			"isHistorized": 0,
 			"logicalId": "currentVersion"
 		}, {
-			"name": "Nouvelle Version",
+			"name": "{{Nouvelle Version}}",
 			"type": "info",
 			"subtype": "string",
 			"display": {
@@ -58,7 +58,7 @@
 			"isHistorized": 0,
 			"logicalId": "newVersion"
 		}, {
-			"name": "Statut protection",
+			"name": "{{Statut protection}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -69,7 +69,7 @@
 			"isHistorized": 0,
 			"logicalId": "protection_enabled"
 		}, {
-			"name": "Activer la protection",
+			"name": "{{Activer la protection}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -80,19 +80,22 @@
 			"logicalId": "protection_enable",
 			"value": "protection_enabled"
 		}, {
-			"name": "Désactiver la protection",
+			"name": "{{Désactiver la protection}}",
 			"type": "action",
-			"subtype": "other",
+			"subtype": "select",
 			"display": {
 				"generic_type": "SWITCH_OFF",
 				"icon": "<i class=\"fas fa-stop\"></i>",
 				"forceReturnLineAfter": 1
 			},
+			"configuration": {
+				"listValue":"0|{{Jusqu'à réactivation}};30|{{30 secondes}};60|{{1 minute}};600|{{10 minutes}};3600|{{1 heure}};86400|{{24 heures}}"
+			},
 			"isVisible": 1,
 			"logicalId": "protection_disable",
 			"value": "protection_enabled"
 		}, {
-			"name": "Statut Filtrage Global",
+			"name": "{{Statut Filtrage Global}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -103,7 +106,7 @@
 			"isHistorized": 0,
 			"logicalId": "filtering_enabled"
 		}, {
-			"name": "Activer le Filtrage Global",
+			"name": "{{Activer le Filtrage Global}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -114,7 +117,7 @@
 			"logicalId": "filtering_enable",
 			"value": "filtering_enabled"
 		}, {
-			"name": "Désactiver le Filtrage Global",
+			"name": "{{Désactiver le Filtrage Global}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -126,7 +129,7 @@
 			"logicalId": "filtering_disable",
 			"value": "filtering_enabled"
 		}, {
-			"name": "Statut Sécurité de navigation Globale",
+			"name": "{{Statut Sécurité de navigation Globale}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -137,7 +140,7 @@
 			"isHistorized": 0,
 			"logicalId": "safebrowsing_enabled"
 		}, {
-			"name": "Activer la Sécurité de navigation Globale",
+			"name": "{{Activer la Sécurité de navigation Globale}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -148,7 +151,7 @@
 			"logicalId": "safebrowsing_enable",
 			"value": "safebrowsing_enabled"
 		}, {
-			"name": "Désactiver la Sécurité de navigation Globale",
+			"name": "{{Désactiver la Sécurité de navigation Globale}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -160,7 +163,7 @@
 			"logicalId": "safebrowsing_disable",
 			"value": "safebrowsing_enabled"
 		}, {
-			"name": "Statut Contrôle Parental Global",
+			"name": "{{Statut Contrôle Parental Global}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -171,7 +174,7 @@
 			"isHistorized": 0,
 			"logicalId": "parental_enabled"
 		}, {
-			"name": "Activer le Contrôle Parental Global",
+			"name": "{{Activer le Contrôle Parental Global}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -182,7 +185,7 @@
 			"logicalId": "parental_enable",
 			"value": "parental_enabled"
 		}, {
-			"name": "Désactiver le Contrôle Parental Global",
+			"name": "{{Désactiver le Contrôle Parental Global}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -194,7 +197,7 @@
 			"logicalId": "parental_disable",
 			"value": "parental_enabled"
 		}, {
-			"name": "Statut Recherche Sécurisée Globale",
+			"name": "{{Statut Recherche Sécurisée Globale}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -205,7 +208,7 @@
 			"isHistorized": 0,
 			"logicalId": "safesearch_enabled"
 		}, {
-			"name": "Activer la Recherche Sécurisée Globale",
+			"name": "{{Activer la Recherche Sécurisée Globale}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -216,7 +219,7 @@
 			"logicalId": "safesearch_enable",
 			"value": "safesearch_enabled"
 		}, {
-			"name": "Désactiver la Recherche Sécurisée Globale",
+			"name": "{{Désactiver la Recherche Sécurisée Globale}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -228,7 +231,7 @@
 			"logicalId": "safesearch_disable",
 			"value": "safesearch_enabled"
 		}, {
-			"name": "Services Bloqués",
+			"name": "{{Services Bloqués}}",
 			"type": "info",
 			"subtype": "string",
 			"display": {
@@ -238,7 +241,7 @@
 			"isHistorized": 0,
 			"logicalId": "blocked_services"
 		}, {
-			"name": "Bloquer un service",
+			"name": "{{Bloquer un service}}",
 			"type": "action",
 			"subtype": "select",
 			"display": {
@@ -250,7 +253,7 @@
 			"isVisible": 1,
 			"logicalId": "service_block"
 		}, {
-			"name": "Débloquer un service",
+			"name": "{{Débloquer un service}}",
 			"type": "action",
 			"subtype": "select",
 			"display": {
@@ -263,7 +266,7 @@
 			"isVisible": 1,
 			"logicalId": "service_unblock"
 		}, {
-			"name": "Bloquer tous les services",
+			"name": "{{Bloquer tous les services}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -272,7 +275,7 @@
 			"isVisible": 1,
 			"logicalId": "services_block"
 		}, {
-			"name": "Débloquer tous les services",
+			"name": "{{Débloquer tous les services}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -282,7 +285,7 @@
 			"isVisible": 1,
 			"logicalId": "services_unblock"
 		}, {
-			"name": "Statut Internet Bloqué via DNS",
+			"name": "{{Statut Internet Bloqué via DNS}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -293,7 +296,7 @@
 			"isHistorized": 0,
 			"logicalId": "blocked_internet"
 		}, {
-			"name": "Bloquer tout internet via DNS",
+			"name": "{{Bloquer tout internet via DNS}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -303,7 +306,7 @@
 			"isVisible": 1,
 			"logicalId": "internet_block"
 		}, {
-			"name": "Débloquer tout internet via DNS",
+			"name": "{{Débloquer tout internet via DNS}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -314,7 +317,7 @@
 			"isVisible": 1,
 			"logicalId": "internet_unblock"
 		}, {
-			"name": "Ajouter une rêgle filtrage personnalisée",
+			"name": "{{Ajouter une rêgle filtrage personnalisée}}",
 			"type": "action",
 			"subtype": "message",
 			"display": {
@@ -325,7 +328,7 @@
 			"isVisible": 1,
 			"logicalId": "add_custom_rule"
 		}, {
-			"name": "Retirer une rêgle filtrage personnalisée",
+			"name": "{{Retirer une rêgle filtrage personnalisée}}",
 			"type": "action",
 			"subtype": "message",
 			"display": {
@@ -337,7 +340,7 @@
 			"isVisible": 1,
 			"logicalId": "del_custom_rule"
 		}, {
-			"name": "Réinitialiser Statistiques",
+			"name": "{{Réinitialiser Statistiques}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
