@@ -241,12 +241,12 @@ class AdGuard extends eqLogic {
 		$params=((is_array($params))?json_encode($params):$params);
 		if($params==null) {
 			$header=array(
-				'Accept application/json, text/plain, */*'
+				'Accept: application/json, text/plain, */*'
 			);
 		} else {
 			$header=array(
 				'Content-Type: application/json',
-				'Accept application/json, text/plain, */*'
+				'Accept: application/json, text/plain, */*'
 			);	
 		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
@@ -265,25 +265,23 @@ class AdGuard extends eqLogic {
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 		}
 				
+		$AdGuardinfo = '';
 		try {		
 			log::add('AdGuard','info','Exécution commande '.$cmd);
 			log::add('AdGuard','debug','Exécution commande '.$cmd.' avec params '.json_encode($params));
 			//$AdGuardinfo=$request_http->exec(10,1);
-			$AdGuardinfo = curl_exec($ch);
-			if (!isset($AdGuardinfo)) {
-				$AdGuardinfo = '';
+			$result = curl_exec($ch);
+			// En PHP 8, $ch est un objet CurlHandle (plus une ressource) : on lit l'erreur sans tester is_resource()
+			$curl_errno = curl_errno($ch);
+			$curl_error = curl_error($ch);
+			$ch = null; // libère le handle (curl_close est sans effet depuis PHP 8)
+			if ($result === false || $curl_errno) {
+				throw new Exception(__('Echec de la requête HTTP :', __FILE__) . ' ' . $url . ' cURL error : ' . $curl_error, 404);
 			}
+			$AdGuardinfo = (string) $result;
 			if($AdGuardinfo) log::add('AdGuard','debug',"Retour brut : ".$AdGuardinfo);
-			if (isset($ch) && is_resource($ch)) {
-				$curl_error = curl_error($ch);
-				curl_close($ch);
-				if ($curl_error) {
-					throw new Exception(__('Echec de la requête HTTP :', __FILE__) . ' ' . $url . ' cURL error : ' . $curl_error, 404);
-				}
-			}
-			$ch=null;
 		} catch (Exception $e) {
-			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd ! Message : ".json_encode($e));
+			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd ! Message : ".$e->getMessage());
 			$online = $this->getCmd(null, 'online');
 			if (is_object($online)) {
 				$this->checkAndUpdateCmd($online, '0');
@@ -325,7 +323,7 @@ class AdGuard extends eqLogic {
 		$request_http->setCURLOPT_HTTPAUTH(CURLAUTH_BASIC);
 		$request_http->setHeader(array(
 			'Content-Type: application/json',
-			'Accept application/json, text/plain, */*'
+			'Accept: application/json, text/plain, */*'
 		));
 		$AdGuardinfo='';
 		try {		
