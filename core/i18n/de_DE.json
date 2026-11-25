@@ -1,9 +1,24 @@
 {
     "plugins\/AdGuard\/core\/class\/AdGuard.class.php": {
+        "AdGuard Home a refusé la commande": "AdGuard Home hat den Befehl abgelehnt",
+        "AdGuard Home n\\'a pas renvoyé de réponse valide pour": "AdGuard Home hat keine gültige Antwort für",
+        "AdGuard Home n\\'a pas renvoyé l\\'intervalle de mise à jour des filtres": "AdGuard Home hat das Aktualisierungsintervall für die Filter nicht zurückgegeben",
+        "AdGuard Home ne répond pas": "AdGuard Home reagiert nicht",
+        "AdGuard Home refuse la connexion, vérifiez l\\'utilisateur et le mot de passe": "AdGuard Home lehnt die Anmeldung ab. Bitte überprüfen Sie den Benutzernamen und das Passwort.",
+        "Aucun serveur AdGuard Home associé à": "Es ist kein AdGuard Home-Server mit",
+        "Cette commande n\\'existe pas sur votre version d\\'AdGuard Home": "Dieser Befehl ist in Ihrer Version von AdGuard Home nicht vorhanden",
+        "Client introuvable dans AdGuard Home :": "Client in AdGuard Home nicht gefunden:",
+        "Configuration incomplète : adresse IP, utilisateur ou mot de passe manquant": "Unvollständige Konfiguration: IP-Adresse, Benutzername oder Passwort fehlen",
         "Des nouveaux services ont été ajoutés à AdGuard, mise à jour du cache des services et des commandes": "Neue Dienste wurden zu AdGuard hinzugefügt, Aktualisierung des Caches für Dienste und Befehle",
+        "Echec de la commande": "Fehler bei der Bestellung",
         "Echec de la requête HTTP :": "Fehler bei der HTTP Abfrage :",
         "Expression cron non valide pour ": "Ungültiger Cron-Ausdruck für",
-        "Inconnu": "Unbekannt"
+        "Identifiant de client invalide :": "Ungültige Kundennummer:",
+        "Inconnu": "Unbekannt",
+        "L\\'identifiant à ajouter est vide": "Die einzufügende Kennung ist leer",
+        "L\\'identifiant à supprimer est vide": "Die zu löschende ID ist leer",
+        "La règle à ajouter est vide": "Die hinzuzufügende Regel ist leer",
+        "La règle à supprimer est vide": "Die zu löschende Regel ist leer"
     },
     "plugins\/AdGuard\/core\/config\/devices\/AdGuardGlobal\/AdGuardGlobal.json": {
         "1 heure": "1 Stunde",

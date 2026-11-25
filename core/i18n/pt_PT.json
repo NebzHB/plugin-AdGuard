@@ -1,9 +1,24 @@
 {
     "plugins\/AdGuard\/core\/class\/AdGuard.class.php": {
+        "AdGuard Home a refusé la commande": "O AdGuard Home recusou o comando",
+        "AdGuard Home n\\'a pas renvoyé de réponse valide pour": "O AdGuard Home não devolveu uma resposta válida para",
+        "AdGuard Home n\\'a pas renvoyé l\\'intervalle de mise à jour des filtres": "O AdGuard Home não devolveu o intervalo de atualização dos filtros",
+        "AdGuard Home ne répond pas": "O AdGuard Home não responde",
+        "AdGuard Home refuse la connexion, vérifiez l\\'utilisateur et le mot de passe": "O AdGuard Home recusa a ligação; verifique o nome de utilizador e a palavra-passe",
+        "Aucun serveur AdGuard Home associé à": "Não há nenhum servidor AdGuard Home associado a",
+        "Cette commande n\\'existe pas sur votre version d\\'AdGuard Home": "Este comando não existe na sua versão do AdGuard Home",
+        "Client introuvable dans AdGuard Home :": "Cliente não encontrado no AdGuard Home:",
+        "Configuration incomplète : adresse IP, utilisateur ou mot de passe manquant": "Configuração incompleta: falta o endereço IP, o nome de utilizador ou a palavra-passe",
         "Des nouveaux services ont été ajoutés à AdGuard, mise à jour du cache des services et des commandes": "Foram adicionados novos serviços ao AdGuard e a cache de serviços e comandos foi actualizada",
+        "Echec de la commande": "Falha no comando",
         "Echec de la requête HTTP :": "Falha no pedido HTTP :",
         "Expression cron non valide pour ": "Expressão cron inválida para",
-        "Inconnu": "Desconhecido"
+        "Identifiant de client invalide :": "Identificação de cliente inválida:",
+        "Inconnu": "Desconhecido",
+        "L\\'identifiant à ajouter est vide": "O identificador a adicionar está vazio",
+        "L\\'identifiant à supprimer est vide": "O identificador a eliminar está vazio",
+        "La règle à ajouter est vide": "A regra a adicionar está vazia",
+        "La règle à supprimer est vide": "A regra a eliminar está vazia"
     },
     "plugins\/AdGuard\/core\/config\/devices\/AdGuardGlobal\/AdGuardGlobal.json": {
         "1 heure": "1 hora",

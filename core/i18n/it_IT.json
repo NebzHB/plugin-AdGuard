@@ -1,9 +1,24 @@
 {
     "plugins\/AdGuard\/core\/class\/AdGuard.class.php": {
+        "AdGuard Home a refusé la commande": "AdGuard Home ha rifiutato il comando",
+        "AdGuard Home n\\'a pas renvoyé de réponse valide pour": "AdGuard Home non ha restituito una risposta valida per",
+        "AdGuard Home n\\'a pas renvoyé l\\'intervalle de mise à jour des filtres": "AdGuard Home non ha restituito l'intervallo di aggiornamento dei filtri",
+        "AdGuard Home ne répond pas": "AdGuard Home non risponde",
+        "AdGuard Home refuse la connexion, vérifiez l\\'utilisateur et le mot de passe": "AdGuard Home rifiuta la connessione, controlla nome utente e password",
+        "Aucun serveur AdGuard Home associé à": "Nessun server AdGuard Home associato a",
+        "Cette commande n\\'existe pas sur votre version d\\'AdGuard Home": "Questo comando non è disponibile nella tua versione di AdGuard Home",
+        "Client introuvable dans AdGuard Home :": "Cliente non trovato in AdGuard Home:",
+        "Configuration incomplète : adresse IP, utilisateur ou mot de passe manquant": "Configurazione incompleta: manca l'indirizzo IP, l'utente o la password",
         "Des nouveaux services ont été ajoutés à AdGuard, mise à jour du cache des services et des commandes": "Ad AdGuard sono stati aggiunti nuovi servizi e la cache dei servizi e dei comandi è stata aggiornata",
+        "Echec de la commande": "Errore durante l'ordine",
         "Echec de la requête HTTP :": "Echec de la requête HTTP :",
         "Expression cron non valide pour ": "Espressione cron non valida per",
-        "Inconnu": "Inconnu"
+        "Identifiant de client invalide :": "ID cliente non valido:",
+        "Inconnu": "Inconnu",
+        "L\\'identifiant à ajouter est vide": "Il campo da compilare è vuoto",
+        "L\\'identifiant à supprimer est vide": "L'ID da eliminare è vuoto",
+        "La règle à ajouter est vide": "La regola da aggiungere è vuota",
+        "La règle à supprimer est vide": "La regola da eliminare è vuota"
     },
     "plugins\/AdGuard\/core\/config\/devices\/AdGuardGlobal\/AdGuardGlobal.json": {
         "1 heure": "1 ora",
