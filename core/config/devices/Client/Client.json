@@ -332,7 +332,7 @@
 			"subtype": "message",
 			"display": {
 				"title_disable":1,
-				"message_placeholder":"Ajouter un identifiant",
+				"message_placeholder":"{{Ajouter un identifiant}}",
 				"icon": "<i class=\"fas fa-eye\"></i>"
 			},
 			"isVisible": 1,
@@ -343,7 +343,7 @@
 			"subtype": "message",
 			"display": {
 				"title_disable":1,
-				"message_placeholder":"Retirer un identifiant",
+				"message_placeholder":"{{Retirer un identifiant}}",
 				"icon": "<i class=\"fas fa-eye-slash\"></i>",
 				"forceReturnLineAfter": 1
 			},
@@ -355,7 +355,7 @@
 			"subtype": "message",
 			"display": {
 				"title_disable":1,
-				"message_placeholder":"Domaine à tester pour ce client",
+				"message_placeholder":"{{Domaine à tester pour ce client}}",
 				"icon": "<i class=\"fas fa-search\"></i>"
 			},
 			"isVisible": 1,
