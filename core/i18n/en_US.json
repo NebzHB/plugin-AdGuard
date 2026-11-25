@@ -1,9 +1,24 @@
 {
     "plugins\/AdGuard\/core\/class\/AdGuard.class.php": {
+        "AdGuard Home a refusé la commande": "AdGuard Home rejected the command",
+        "AdGuard Home n\\'a pas renvoyé de réponse valide pour": "AdGuard Home did not return a valid response for",
+        "AdGuard Home n\\'a pas renvoyé l\\'intervalle de mise à jour des filtres": "AdGuard Home did not return the filter update interval",
+        "AdGuard Home ne répond pas": "AdGuard Home is not responding",
+        "AdGuard Home refuse la connexion, vérifiez l\\'utilisateur et le mot de passe": "AdGuard Home is refusing to connect; please check your username and password",
+        "Aucun serveur AdGuard Home associé à": "No AdGuard Home servers associated with",
+        "Cette commande n\\'existe pas sur votre version d\\'AdGuard Home": "This command is not available in your version of AdGuard Home",
+        "Client introuvable dans AdGuard Home :": "Client not found in AdGuard Home:",
+        "Configuration incomplète : adresse IP, utilisateur ou mot de passe manquant": "Incomplete configuration: IP address, username, or password missing",
         "Des nouveaux services ont été ajoutés à AdGuard, mise à jour du cache des services et des commandes": "New services added to AdGuard, service and command cache updated",
+        "Echec de la commande": "Command Failed",
         "Echec de la requête HTTP :": "Http request failed:",
         "Expression cron non valide pour ": "Invalid cron expression for",
-        "Inconnu": "Unknown"
+        "Identifiant de client invalide :": "Invalid customer ID:",
+        "Inconnu": "Unknown",
+        "L\\'identifiant à ajouter est vide": "The ID to be added is empty",
+        "L\\'identifiant à supprimer est vide": "The ID to be deleted is empty",
+        "La règle à ajouter est vide": "The rule to be added is empty",
+        "La règle à supprimer est vide": "The rule to be deleted is empty"
     },
     "plugins\/AdGuard\/core\/config\/devices\/AdGuardGlobal\/AdGuardGlobal.json": {
         "1 heure": "1 hour",
