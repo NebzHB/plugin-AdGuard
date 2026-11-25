@@ -832,7 +832,7 @@ class AdGuardCmd extends cmd {
 				
 				// CLIENT
 				case 'client_use_global_settings_enable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -845,7 +845,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_use_global_settings_disable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -858,7 +858,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_filtering_enable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -871,7 +871,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_filtering_disable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -884,7 +884,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_safebrowsing_enable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -897,7 +897,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_safebrowsing_disable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -910,7 +910,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_parental_enable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -923,7 +923,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_parental_disable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -936,7 +936,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_safesearch_enable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -949,7 +949,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_safesearch_disable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -962,7 +962,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_use_global_blocked_services_enable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -975,7 +975,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_use_global_blocked_services_disable':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -989,7 +989,7 @@ class AdGuardCmd extends cmd {
 				break;
 				case 'client_service_block':
 					if($_options['select'] == "") break;
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -1003,7 +1003,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_service_unblock':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -1018,7 +1018,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_services_block':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -1031,7 +1031,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_services_unblock':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -1044,7 +1044,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_internet_block':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=addcslashes(addslashes($name[1]), ',|');
 					$blockString="||*^\$client='".$name."',important";
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
@@ -1053,7 +1053,7 @@ class AdGuardCmd extends cmd {
 					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'client_internet_unblock':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=addcslashes(addslashes($name[1]), ',|');
 					$blockString="||*^\$client='".$name."',important";
 					$filtering_status=$AdGuard->getAdGuard('filtering/status');
@@ -1065,7 +1065,7 @@ class AdGuardCmd extends cmd {
 					$params=["rules"=>$filtering_status['user_rules']];
 				break;
 				case 'client_ids_add':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
@@ -1079,7 +1079,7 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'client_ids_del':
-					$name=explode('-',$eqLogic->getLogicalId());
+					$name=explode('-',$eqLogic->getLogicalId(),2);
 					$name=$name[1];
 					$clients=$AdGuard->getAdGuard('clients');
 					foreach($clients['clients'] as $client) {
