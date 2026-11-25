@@ -258,6 +258,31 @@
 			"isVisible": 1,
 			"logicalId": "client_services_unblock"
 		}, {
+			"name": "{{Bloquer un groupe de services}}",
+			"type": "action",
+			"subtype": "select",
+			"display": {
+				"icon": "<i class=\"fas fa-layer-group\"></i>"
+			},
+			"configuration": {
+				"listValue":null
+			},
+			"isVisible": 1,
+			"logicalId": "client_group_block"
+		}, {
+			"name": "{{Débloquer un groupe de services}}",
+			"type": "action",
+			"subtype": "select",
+			"display": {
+				"icon": "<i class=\"fas fa-layer-group\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"configuration": {
+				"listValue":null
+			},
+			"isVisible": 1,
+			"logicalId": "client_group_unblock"
+		}, {
 			"name": "{{Statut Internet Bloqué via DNS}}",
 			"type": "info",
 			"subtype": "binary",
@@ -324,6 +349,27 @@
 			},
 			"isVisible": 1,
 			"logicalId": "client_ids_del"
+		}, {
+			"name": "{{Tester un domaine pour ce client}}",
+			"type": "action",
+			"subtype": "message",
+			"display": {
+				"title_disable":1,
+				"message_placeholder":"Domaine à tester pour ce client",
+				"icon": "<i class=\"fas fa-search\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "client_check_host"
+		}, {
+			"name": "{{Résultat du test de domaine pour ce client}}",
+			"type": "info",
+			"subtype": "string",
+			"display": {
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "client_check_host_result"
 		}
 	]
 }
