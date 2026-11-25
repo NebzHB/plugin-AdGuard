@@ -21,6 +21,7 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
 class AdGuard extends eqLogic {
 	private static $_lastError = [];
+	private static $_lastHttpCode = [];
 	/***************************Attributs*******************************/	
 	public static function serviceList() {
 		$serviceList=self::getServicesList();
@@ -216,7 +217,7 @@ class AdGuard extends eqLogic {
 		$this->setConfiguration('password', utils::encrypt($this->getConfiguration('password')));
 	}
 	
-	public function postAdGuard($cmd,$params,$type="POST") {
+	public function postAdGuard($cmd,$params,$type="POST",$_quiet404=false) {
 		$proto=$this->getConfiguration('proto','http');
 		$ip = $this->getConfiguration('ip','');
 		
@@ -226,6 +227,7 @@ class AdGuard extends eqLogic {
 		$pass = $this->getConfiguration('password','');
 
 		$this->setAdGuardLastError(null);
+		self::$_lastHttpCode[$this->getId()] = 0;
 		if(!$ip || !$user || !$pass) {
 			$this->setAdGuardLastError(__('Configuration incomplète : adresse IP, utilisateur ou mot de passe manquant', __FILE__));
 			return false;
@@ -285,6 +287,7 @@ class AdGuard extends eqLogic {
 			if ($result === false || $curl_errno) {
 				throw new Exception(__('Echec de la requête HTTP :', __FILE__) . ' ' . $url . ' cURL error : ' . $curl_error, 404);
 			}
+			self::$_lastHttpCode[$this->getId()] = $http_code;
 			$AdGuardinfo = (string) $result;
 			if($AdGuardinfo) log::add('AdGuard','debug',"Retour brut : ".$AdGuardinfo);
 		} catch (Exception $e) {
@@ -305,10 +308,11 @@ class AdGuard extends eqLogic {
 				$this->checkAndUpdateCmd($online, '0');
 			}
 		} elseif(trim($AdGuardinfo) == "404 page not found" || $http_code == 404) {
-			log::add('AdGuard','error',"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, la commande n'existe pas ! Message : ".$AdGuardinfo);
+			if (trim($AdGuardinfo) == "404 page not found") self::$_lastHttpCode[$this->getId()] = 404;
+			log::add('AdGuard',(($_quiet404) ? 'debug' : 'error'),"Impossible de communiquer POST avec le serveur AdGuard $ip $cmd, la commande n'existe pas ! Message : ".$AdGuardinfo);
 			$this->setAdGuardLastError(__('Cette commande n\'existe pas sur votre version d\'AdGuard Home', __FILE__) . ' (' . $cmd . ')');
 		} elseif($http_code >= 400) {
-			log::add('AdGuard','error',"Le serveur AdGuard $ip a refusé la commande $cmd (HTTP $http_code) ! Message : ".$AdGuardinfo);
+			log::add('AdGuard',(($_quiet404 && $http_code == 405) ? 'debug' : 'error'),"Le serveur AdGuard $ip a refusé la commande $cmd (HTTP $http_code) ! Message : ".$AdGuardinfo);
 			$this->setAdGuardLastError(__('AdGuard Home a refusé la commande', __FILE__) . ' (HTTP ' . $http_code . ')' . ((trim($AdGuardinfo) != '') ? ' : ' . trim($AdGuardinfo) : ''));
 		}
 
@@ -321,6 +325,10 @@ class AdGuard extends eqLogic {
 
 	public function setAdGuardLastError($_error) {
 		self::$_lastError[$this->getId()] = $_error;
+	}
+
+	public function getAdGuardLastHttpCode() {
+		return isset(self::$_lastHttpCode[$this->getId()]) ? self::$_lastHttpCode[$this->getId()] : 0;
 	}
 	
 	public function putAdGuard($cmd,$params) {
@@ -742,6 +750,9 @@ class AdGuardCmd extends cmd {
 		if (!isset($blocked_services['ids']) || !is_array($blocked_services['ids'])) {
 			$blocked_services['ids'] = []; // aucun service bloqué
 		}
+		if (isset($blocked_services['schedule']) && (!is_array($blocked_services['schedule']) || count($blocked_services['schedule']) == 0)) {
+			unset($blocked_services['schedule']); // un planning vide serait renvoyé en [] au lieu de {}
+		}
 		return $blocked_services;
 	}
 
@@ -794,6 +805,7 @@ class AdGuardCmd extends cmd {
 		$params=null;
 		$sleep=null;
 		$type='POST';
+		$fallback=null; // ancien appel à utiliser si la version d'AdGuard Home ne connaît pas le nouveau
 		if ($logical != 'refresh'){
 			switch ($logical) {
 				case 'protection_disable':
@@ -820,26 +832,36 @@ class AdGuardCmd extends cmd {
 					$cmd = 'filtering/config';
 					$params = ["enabled" => ($logical == 'filtering_enable'),"interval"=> $filtering_status['interval']];
 				break;
+				// AdGuard Home >= v1.0.1 : PUT /safebrowsing et PUT /parental, les anciens POST .../enable|disable sont dépréciés
 				case 'safebrowsing_enable':
-					$cmd = 'safebrowsing/enable';
-				break;
 				case 'safebrowsing_disable':
-					$cmd = 'safebrowsing/disable';
-				break;
 				case 'parental_enable':
-					$cmd = 'parental/enable';
-				break;
 				case 'parental_disable':
-					$cmd = 'parental/disable';
+					list($feature, $action) = explode('_', $logical);
+					$cmd = $feature;
+					$params = ["enabled" => ($action == 'enable')];
+					$type = "PUT";
+					$fallback = ['cmd' => $feature.'/'.$action, 'params' => null, 'type' => 'POST'];
 				break;
 				case 'safesearch_enable':
-					$cmd = 'safesearch/settings';
-					$params = ["enabled" => true,"bing" => true, "duckduckgo" => true, "google" => true, "pixabay" => true, "yandex" => true, "youtube" => true];
-					$type = "PUT";
-				break;
 				case 'safesearch_disable':
+					// on garde les choix moteur par moteur faits dans AdGuard Home, seul "enabled" change
+					$safesearch = self::fetchFromAdGuard($AdGuard, 'safesearch/status');
+					$safesearch['enabled'] = ($logical == 'safesearch_enable');
+					if ($safesearch['enabled']) {
+						$engines = ['bing', 'duckduckgo', 'ecosia', 'google', 'pixabay', 'yandex', 'youtube'];
+						$anyEngine = false;
+						foreach ($engines as $engine) {
+							if (!empty($safesearch[$engine])) $anyEngine = true;
+						}
+						if (!$anyEngine) { // aucun moteur coché (ex : désactivé par une ancienne version du plugin) -> on les active tous
+							foreach ($engines as $engine) {
+								$safesearch[$engine] = true;
+							}
+						}
+					}
 					$cmd = 'safesearch/settings';
-					$params = ["enabled" => false,"bing" => false, "duckduckgo" => false, "google" => false, "pixabay" => false, "yandex" => false, "youtube" => false];
+					$params = $safesearch;
 					$type = "PUT";
 				break;
 				case 'reset_stats':
@@ -849,9 +871,9 @@ class AdGuardCmd extends cmd {
 					if(!isset($_options['select']) || $_options['select'] == "") break;
 					$blocked_services=self::getBlockedServices($AdGuard);
 					array_push($blocked_services['ids'],$_options['select']);
-					$new_blocked_services=array_values(array_unique($blocked_services['ids'],SORT_STRING));
+					$blocked_services['ids']=array_values(array_unique($blocked_services['ids'],SORT_STRING));
 					$cmd='blocked_services/update';
-					$params= ["ids"=>$new_blocked_services];
+					$params=$blocked_services; // renvoie aussi le planning, sinon AdGuard Home l'efface
 					$type = "PUT";
 				break;
 				case 'service_unblock':
@@ -865,13 +887,11 @@ class AdGuardCmd extends cmd {
 					}
 				break;
 				case 'services_block':
-					$cmd='blocked_services/update';
-					$params=["ids"=>array_keys(AdGuard::serviceList())];
-					$type = "PUT";
-				break;
 				case 'services_unblock':
+					$blocked_services=self::getBlockedServices($AdGuard);
+					$blocked_services['ids']=(($logical == 'services_block') ? array_keys(AdGuard::serviceList()) : []);
 					$cmd='blocked_services/update';
-					$params=["ids"=>[]];
+					$params=$blocked_services; // renvoie aussi le planning, sinon AdGuard Home l'efface
 					$type = "PUT";
 				break;
 				case 'internet_block':
@@ -1030,7 +1050,11 @@ class AdGuardCmd extends cmd {
 			
 			if(!$cmd) return false;
 			
-			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params,$type);
+			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params,$type,($fallback !== null));
+			if($fallback && in_array($AdGuard->getAdGuardLastHttpCode(), [404, 405])) {
+				log::add('AdGuard','debug','Commande '.$cmd.' inconnue de cette version d\'AdGuard Home, utilisation de '.$fallback['cmd']);
+				$AdGuardinfo=$AdGuard->postAdGuard($fallback['cmd'],$fallback['params'],$fallback['type']);
+			}
 			$error=$AdGuard->getAdGuardLastError();
 			if($error) {
 				throw new Exception(__('Echec de la commande', __FILE__) . ' ' . $this->getHumanName() . ' : ' . $error);
