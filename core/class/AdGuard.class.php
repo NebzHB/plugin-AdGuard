@@ -234,7 +234,7 @@ class AdGuard extends eqLogic {
 		$this->setConfiguration('password', utils::encrypt($this->getConfiguration('password')));
 	}
 	
-	public function postAdGuard($cmd,$params,$type="POST",$_quiet404=false) {
+	public function postAdGuard($cmd,$params,$type="POST",$_quiet404=false,$_timeout=10) {
 		$proto=$this->getConfiguration('proto','http');
 		$ip = $this->getConfiguration('ip','');
 		
@@ -275,7 +275,8 @@ class AdGuard extends eqLogic {
 		}
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_TIMEOUT, $_timeout);
 		curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
 		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
 		curl_setopt($ch, CURLOPT_USERPWD, $user . ':' . $pass);
@@ -629,7 +630,8 @@ class AdGuard extends eqLogic {
 					$newCmd->setGeneric_type($display_value);
 				}
 				else {
-					if ($newCmd->getDisplay($display_type) == "") {
+					// le texte d'aide suit toujours la langue de Jeedom, les autres réglages d'affichage restent ceux de l'utilisateur
+					if ($display_type == "message_placeholder" || $newCmd->getDisplay($display_type) == "") {
 						$newCmd->setDisplay($display_type, $display_value);
 					}
 				}
@@ -874,6 +876,58 @@ class AdGuardCmd extends cmd {
 		throw new Exception(__('Client introuvable dans AdGuard Home :', __FILE__) . ' ' . $name);
 	}
 
+	/**
+	 * Active ou désactive la recherche sécurisée en gardant les choix faits moteur par moteur dans AdGuard Home.
+	 * Si on l'active alors qu'aucun moteur n'est coché (ex : désactivée par une ancienne version du plugin), on les coche tous.
+	 */
+	private static function safeSearchSettings($current, $enabled) {
+		$settings = (is_array($current)) ? $current : [];
+		$settings['enabled'] = $enabled;
+		if ($enabled) {
+			$engines = ['bing', 'duckduckgo', 'ecosia', 'google', 'pixabay', 'yandex', 'youtube'];
+			$anyEngine = false;
+			foreach ($engines as $engine) {
+				if (!empty($settings[$engine])) $anyEngine = true;
+			}
+			if (!$anyEngine) {
+				foreach ($engines as $engine) {
+					$settings[$engine] = true;
+				}
+			}
+		}
+		return $settings;
+	}
+
+	/**
+	 * Choisit l'identifiant du client à envoyer à filtering/check_host.
+	 * AdGuard Home n'y comprend qu'une adresse IP ou un ClientID : une adresse MAC n'est pas reconnue,
+	 * et pour une plage CIDR on envoie son adresse de réseau, qui en fait partie.
+	 */
+	private static function getCheckHostClientId($client) {
+		$ip = null;
+		$cidr = null;
+		$clientId = null;
+		$ids = (isset($client['ids']) && is_array($client['ids'])) ? $client['ids'] : [];
+		foreach ($ids as $id) {
+			$id = trim((string) $id);
+			if ($id === '' || strpos($id, 'notused') === 0) continue;
+			if (filter_var($id, FILTER_VALIDATE_IP) !== false) {
+				if ($ip === null) $ip = $id;
+			} elseif (strpos($id, '/') !== false) {
+				$address = explode('/', $id, 2)[0];
+				if ($cidr === null && filter_var($address, FILTER_VALIDATE_IP) !== false) $cidr = $address;
+			} elseif (preg_match('/^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$/i', $id) || preg_match('/^([0-9a-f]{4}\.){2}[0-9a-f]{4}$/i', $id)) {
+				continue; // adresse MAC
+			} elseif ($clientId === null) {
+				$clientId = $id; // ClientID (DoH, DoT, DoQ)
+			}
+		}
+		if ($ip !== null) return $ip;
+		if ($cidr !== null) return $cidr;
+		if ($clientId !== null) return $clientId;
+		throw new Exception(__('Ce client n\'a ni adresse IP, ni plage CIDR, ni ClientID : AdGuard Home ne sait pas tester un domaine avec une adresse MAC', __FILE__));
+	}
+
 	private static function clientUpdate($client) {
 		return ["name" => $client['name'], "data" => $client];
 	}
@@ -901,6 +955,7 @@ class AdGuardCmd extends cmd {
 		$params=null;
 		$sleep=null;
 		$type='POST';
+		$timeout=10; // secondes
 		$fallback=null; // ancien appel à utiliser si la version d'AdGuard Home ne connaît pas le nouveau
 		if ($logical != 'refresh'){
 			switch ($logical) {
@@ -918,6 +973,7 @@ class AdGuardCmd extends cmd {
 				case 'UpdateAdGuard':
 					$cmd = 'update';
 					$sleep=1;
+					$timeout=120; // AdGuard Home télécharge la mise à jour avant de répondre
 				break;
 				case 'filtering_enable':
 				case 'filtering_disable':
@@ -943,21 +999,8 @@ class AdGuardCmd extends cmd {
 				case 'safesearch_disable':
 					// on garde les choix moteur par moteur faits dans AdGuard Home, seul "enabled" change
 					$safesearch = self::fetchFromAdGuard($AdGuard, 'safesearch/status');
-					$safesearch['enabled'] = ($logical == 'safesearch_enable');
-					if ($safesearch['enabled']) {
-						$engines = ['bing', 'duckduckgo', 'ecosia', 'google', 'pixabay', 'yandex', 'youtube'];
-						$anyEngine = false;
-						foreach ($engines as $engine) {
-							if (!empty($safesearch[$engine])) $anyEngine = true;
-						}
-						if (!$anyEngine) { // aucun moteur coché (ex : désactivé par une ancienne version du plugin) -> on les active tous
-							foreach ($engines as $engine) {
-								$safesearch[$engine] = true;
-							}
-						}
-					}
 					$cmd = 'safesearch/settings';
-					$params = $safesearch;
+					$params = self::safeSearchSettings($safesearch, ($logical == 'safesearch_enable'));
 					$type = "PUT";
 				break;
 				case 'reset_stats':
@@ -969,6 +1012,7 @@ class AdGuardCmd extends cmd {
 				case 'filters_refresh':
 					$cmd = 'filtering/refresh';
 					$params = ["whitelist" => false];
+					$timeout = 120; // AdGuard Home télécharge toutes les listes avant de répondre
 				break;
 				case 'check_host':
 					return self::checkHost($AdGuard, $eqLogic, 'check_host_result', $_options);
@@ -1089,9 +1133,9 @@ class AdGuardCmd extends cmd {
 				break;
 				case 'client_safesearch_enable':
 				case 'client_safesearch_disable':
-					$enabled=($logical == 'client_safesearch_enable');
+					// on garde les choix moteur par moteur faits dans AdGuard Home pour ce client, seul "enabled" change
 					$client=self::getClient($AdGuard, $eqLogic);
-					$client['safe_search']=["enabled" => $enabled,"bing" => $enabled, "duckduckgo" => $enabled, "google" => $enabled, "pixabay" => $enabled, "yandex" => $enabled, "youtube" => $enabled];
+					$client['safe_search']=self::safeSearchSettings((isset($client['safe_search'])) ? $client['safe_search'] : null, ($logical == 'client_safesearch_enable'));
 					$cmd='clients/update';
 					$params=self::clientUpdate($client);
 				break;
@@ -1149,15 +1193,7 @@ class AdGuardCmd extends cmd {
 				break;
 				case 'client_check_host':
 					$client=self::getClient($AdGuard, $eqLogic);
-					$clientId=null;
-					if(isset($client['ids']) && is_array($client['ids'])) {
-						foreach($client['ids'] as $id) {
-							if(strpos($id, 'notused') === false) { $clientId=$id; break; }
-						}
-					}
-					if($clientId === null) {
-						throw new Exception(__('Ce client n\'a aucun identifiant utilisable pour le test', __FILE__));
-					}
+					$clientId=self::getCheckHostClientId($client);
 					return self::checkHost($AdGuard, $eqLogic, 'client_check_host_result', $_options, $clientId);
 				case 'client_ids_add':
 					$newId = (isset($_options['message'])) ? trim($_options['message']) : '';
@@ -1195,7 +1231,7 @@ class AdGuardCmd extends cmd {
 			
 			if(!$cmd) return false;
 			
-			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params,$type,($fallback !== null));
+			$AdGuardinfo=$AdGuard->postAdGuard($cmd,$params,$type,($fallback !== null),$timeout);
 			if($fallback && in_array($AdGuard->getAdGuardLastHttpCode(), [404, 405])) {
 				log::add('AdGuard','debug','Commande '.$cmd.' inconnue de cette version d\'AdGuard Home, utilisation de '.$fallback['cmd']);
 				$AdGuardinfo=$AdGuard->postAdGuard($fallback['cmd'],$fallback['params'],$fallback['type']);
