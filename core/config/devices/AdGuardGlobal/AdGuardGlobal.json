@@ -95,6 +95,17 @@
 			"logicalId": "protection_disable",
 			"value": "protection_enabled"
 		}, {
+			"name": "{{Pause restante}}",
+			"type": "info",
+			"subtype": "numeric",
+			"unit": "s",
+			"display": {
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "protection_disabled_duration"
+		}, {
 			"name": "{{Statut Filtrage Global}}",
 			"type": "info",
 			"subtype": "binary",
@@ -285,6 +296,31 @@
 			"isVisible": 1,
 			"logicalId": "services_unblock"
 		}, {
+			"name": "{{Bloquer un groupe de services}}",
+			"type": "action",
+			"subtype": "select",
+			"display": {
+				"icon": "<i class=\"fas fa-layer-group\"></i>"
+			},
+			"configuration": {
+				"listValue":null
+			},
+			"isVisible": 1,
+			"logicalId": "group_block"
+		}, {
+			"name": "{{Débloquer un groupe de services}}",
+			"type": "action",
+			"subtype": "select",
+			"display": {
+				"icon": "<i class=\"fas fa-layer-group\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"configuration": {
+				"listValue":null
+			},
+			"isVisible": 1,
+			"logicalId": "group_unblock"
+		}, {
 			"name": "{{Statut Internet Bloqué via DNS}}",
 			"type": "info",
 			"subtype": "binary",
@@ -348,6 +384,46 @@
 			},
 			"isVisible": 1,
 			"logicalId": "reset_stats"
+		}, {
+			"name": "{{Vider le cache DNS}}",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"icon": "<i class=\"fas fa-broom\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "cache_clear"
+		}, {
+			"name": "{{Mettre à jour les filtres}}",
+			"type": "action",
+			"subtype": "other",
+			"display": {
+				"icon": "<i class=\"fas fa-sync\"></i>",
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"logicalId": "filters_refresh"
+		}, {
+			"name": "{{Tester un domaine}}",
+			"type": "action",
+			"subtype": "message",
+			"display": {
+				"title_disable":1,
+				"message_placeholder":"Domaine à tester",
+				"icon": "<i class=\"fas fa-search\"></i>"
+			},
+			"isVisible": 1,
+			"logicalId": "check_host"
+		}, {
+			"name": "{{Résultat du test de domaine}}",
+			"type": "info",
+			"subtype": "string",
+			"display": {
+				"forceReturnLineAfter": 1
+			},
+			"isVisible": 1,
+			"isHistorized": 0,
+			"logicalId": "check_host_result"
 		}
 	]
 }
