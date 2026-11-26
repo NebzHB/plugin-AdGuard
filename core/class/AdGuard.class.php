@@ -768,7 +768,7 @@ class AdGuard extends eqLogic {
 			$protection = '<div class="ag-title">'.__("Internet", __FILE__).'</div>';
 			$protection .= '<div class="ag-state" '.$attr($state, 'protection').' data-ag_invert="1"><span class="ag-lbl-on">'.__("Autorisé", __FILE__).'</span><span class="ag-lbl-off">'.__("Bloqué via DNS", __FILE__).'</span></div>';
 			if (is_object($on) && is_object($off)) {
-				$switch = '<i class="fas fa-globe ag-switch" '.$attr($state, 'switch').' data-ag_invert="1" data-ag_on="'.$on->getId().'" data-ag_off="'.$off->getId().'" title="'.__("Bloquer / Débloquer internet pour ce client", __FILE__).'"></i>';
+				$switch = '<i class="fas fa-globe ag-switch" '.$attr($state, 'switch').' data-ag_invert="1" data-ag_on="'.$on->getId().'" data-ag_off="'.$off->getId().'" data-ag_confirm_off="'.__("Couper internet pour ce client ?", __FILE__).'" title="'.__("Bloquer / Débloquer internet pour ce client", __FILE__).'"></i>';
 				$handled = array_merge($handled, ['client_internet_block', 'client_internet_unblock']);
 			}
 		}
@@ -834,7 +834,7 @@ class AdGuard extends eqLogic {
 		$chipOn = $action('internet_block');
 		$chipOff = $action('internet_unblock');
 		if (is_object($cmd) && is_object($chipOn) && is_object($chipOff)) {
-			$chips .= '<span class="ag-chip ag-chip-danger cursor" '.$attr($cmd, 'chip').' data-ag_tip_on="'.__("Internet bloqué pour tout le réseau, cliquer pour débloquer", __FILE__).'" data-ag_tip_off="'.__("Internet autorisé, cliquer pour bloquer tout internet via DNS", __FILE__).'" data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'"><span class="ag-toggle"></span>'.__("Internet bloqué", __FILE__).'</span>';
+			$chips .= '<span class="ag-chip ag-chip-danger cursor" '.$attr($cmd, 'chip').' data-ag_tip_on="'.__("Internet bloqué pour tout le réseau, cliquer pour débloquer", __FILE__).'" data-ag_tip_off="'.__("Internet autorisé, cliquer pour bloquer tout internet via DNS", __FILE__).'" data-ag_confirm_on="'.__("Couper internet pour tout le réseau ?", __FILE__).'" data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'"><span class="ag-toggle"></span>'.__("Internet bloqué", __FILE__).'</span>';
 			$handled = array_merge($handled, ['internet_block', 'internet_unblock']);
 		}
 		if ($chips != '') $chips = '<div class="ag-chips">'.$chips.'</div>';
