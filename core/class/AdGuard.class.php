@@ -715,6 +715,34 @@ class AdGuard extends eqLogic {
 		$newCmd->save();
 	}
 	
+	/**
+	 * Question posée par les widgets avant une commande qui a l'option « Confirmer l'action » du core (actionConfirm).
+	 * Traduite ici : le core ne traduit pas les {{ }} des templates de widget de plugin.
+	 */
+	public static function confirmMessage($_cmd) {
+		switch (preg_replace('/^client_/', '', $_cmd->getLogicalId())) {
+			case 'internet_block':
+				return ($_cmd->getLogicalId() == 'client_internet_block') ? __("Couper internet pour ce client ?", __FILE__) : __("Couper internet pour tout le réseau ?", __FILE__);
+			case 'filtering_disable':
+				return __("Désactiver le filtrage ?", __FILE__);
+			case 'parental_disable':
+				return __("Désactiver le contrôle parental ?", __FILE__);
+			case 'services_block':
+				return __("Bloquer tous les services ?", __FILE__);
+			case 'services_unblock':
+				return __("Débloquer tous les services ? La liste des services bloqués sera vidée.", __FILE__);
+			case 'cache_clear':
+				return __("Vider le cache DNS d'AdGuard Home ?", __FILE__);
+			case 'filters_refresh':
+				return __("Mettre à jour les listes de filtrage maintenant ?", __FILE__);
+			case 'reset_stats':
+				return __("Réinitialiser toutes les statistiques d'AdGuard Home ? Elles seront perdues.", __FILE__);
+			case 'UpdateAdGuard':
+				return __("Mettre à jour AdGuard Home maintenant ?", __FILE__);
+		}
+		return sprintf(__("Exécuter « %s » ?", __FILE__), $_cmd->getName());
+	}
+
 	public function getImage(){
 		if ($this->getConfiguration('type','') == 'AdGuardGlobal'){
 			return 'plugins/AdGuard/plugin_info/AdGuard_icon.png';
@@ -1022,6 +1050,12 @@ class AdGuard extends eqLogic {
 		$autoHeight = ($this->getConfiguration('fixedHeight', 0) != 1);
 		$replace['#ag_autoheight#'] = ($autoHeight) ? '1' : '0';
 		if ($autoHeight) $replace['#height#'] = 'auto';
+		// questions de confirmation, par id de commande, pour toutes les commandes action (même masquées) qui ont actionConfirm
+		$confirm = ['cancel' => __("Annuler", __FILE__), 'ok' => __("Confirmer", __FILE__), 'cmds' => new stdClass()]; // stdClass : {} même vide
+		foreach($this->getCmd('action') as $cmd) {
+			if ($cmd->getConfiguration('actionConfirm') == 1) $confirm['cmds']->{$cmd->getId()} = self::confirmMessage($cmd);
+		}
+		$replace['#ag_confirm#'] = htmlspecialchars(json_encode($confirm, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
 		$replace['#ag_image#'] = $this->getImage();
 		$replace['#ag_protection#'] = $protection;
 		$replace['#ag_switch#'] = $switch;
