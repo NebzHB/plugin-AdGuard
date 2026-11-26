@@ -99,7 +99,7 @@
     },
     "plugins\/AdGuard\/core\/config\/devices\/Client\/Client.json": {
         "Activer Utiliser les Paramètres Généraux": "Activar Usar ajustes generales",
-        "Activer Utiliser les services bloqués globlaux": "Activar Utilizar servicios bloqueados globalmente",
+        "Activer Utiliser les services bloqués globaux": "Activar Utilizar servicios bloqueados globalmente",
         "Activer la Recherche Sécurisée": "Activar la búsqueda segura",
         "Activer la Sécurité de navigation": "Activar la seguridad de navegación",
         "Activer le Contrôle Parental": "Activar el control parental",
@@ -115,7 +115,7 @@
         "Débloquer un groupe de services": "Desbloquear un grupo de servicios",
         "Débloquer un service": "Desbloquear un servicio",
         "Désactiver Utiliser les Paramètres Généraux": "Desactivar Usar Ajustes Generales",
-        "Désactiver Utiliser les services bloqués globlaux": "Desactivar Utilizar servicios bloqueados globalmente",
+        "Désactiver Utiliser les services bloqués globaux": "Desactivar Utilizar servicios bloqueados globalmente",
         "Désactiver la Recherche Sécurisée": "Desactivar la búsqueda segura",
         "Désactiver la Sécurité de navigation": "Desactivar la seguridad de navegación",
         "Désactiver le Contrôle Parental": "Desactivar el control parental",
@@ -130,7 +130,7 @@
         "Statut Recherche Sécurisée": "Estado de búsqueda seguro",
         "Statut Sécurité de navigation": "Estado de seguridad de la navegación",
         "Statut Utiliser les Paramètres Généraux": "Estado Uso Ajustes generales",
-        "Statut Utiliser les services bloqués globlaux": "Estado Utilización de servicios bloqueados globalmente",
+        "Statut Utiliser les services bloqués globaux": "Estado Utilización de servicios bloqueados globalmente",
         "Tester un domaine pour ce client": "Probar un dominio para este cliente"
     },
     "plugins\/AdGuard\/desktop\/js\/AdGuard.js": {

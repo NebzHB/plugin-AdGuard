@@ -99,7 +99,7 @@
     },
     "plugins\/AdGuard\/core\/config\/devices\/Client\/Client.json": {
         "Activer Utiliser les Paramètres Généraux": "Activate Use General Settings",
-        "Activer Utiliser les services bloqués globlaux": "Activate Use global blocked services",
+        "Activer Utiliser les services bloqués globaux": "Activate Use global blocked services",
         "Activer la Recherche Sécurisée": "Activate Secure Search",
         "Activer la Sécurité de navigation": "Enable navigation security",
         "Activer le Contrôle Parental": "Activate Parental Control",
@@ -115,7 +115,7 @@
         "Débloquer un groupe de services": "Unblock a service group",
         "Débloquer un service": "Unblock a service",
         "Désactiver Utiliser les Paramètres Généraux": "Disable Use General Settings",
-        "Désactiver Utiliser les services bloqués globlaux": "Disable Use global blocked services",
+        "Désactiver Utiliser les services bloqués globaux": "Disable Use global blocked services",
         "Désactiver la Recherche Sécurisée": "Disable Secure Search",
         "Désactiver la Sécurité de navigation": "Disable Navigation Security",
         "Désactiver le Contrôle Parental": "Disable Parental Control",
@@ -130,7 +130,7 @@
         "Statut Recherche Sécurisée": "Secure search status",
         "Statut Sécurité de navigation": "Safety navigation status",
         "Statut Utiliser les Paramètres Généraux": "Status Use General Settings",
-        "Statut Utiliser les services bloqués globlaux": "Status Use global blocked services",
+        "Statut Utiliser les services bloqués globaux": "Status Use global blocked services",
         "Tester un domaine pour ce client": "Test a domain for this client"
     },
     "plugins\/AdGuard\/desktop\/js\/AdGuard.js": {
