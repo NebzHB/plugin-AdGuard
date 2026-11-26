@@ -101,13 +101,18 @@
 		.ag-widget .ag-menu-title { font-weight: 600; padding: 2px 6px 4px 6px; opacity: .8; }
 		.ag-widget .ag-menu-item { padding: 4px 6px; border-radius: 4px; white-space: nowrap; }
 		.ag-widget .ag-menu-item:hover { background: rgba(127,127,127,.2); }
+		.ag-widget .ag-confirm { width: 240px; white-space: normal; }
+		.ag-widget .ag-confirm-text { padding: 2px 2px 8px 2px; font-size: 13px; }
+		.ag-widget .ag-confirm-btns { display: flex; justify-content: flex-end; gap: 6px; }
+		.ag-widget .ag-confirm .ag-btn { height: 28px; padding: 0 12px; font-size: 13px; }
+		.ag-widget .ag-confirm .ag-btn-confirm { background: var(--al-danger-color, #e53935); color: #fff; }
 	</style>
 	<center class="widget-name">
 		<span class="warning" title="#alert_name#"><i class='#alert_icon#'></i></span>
 		<span>#name_display# <span class="object_name">#object_name#</span></span>
 	</center>
 	#ag_icons#
-	<div class="ag-body" data-ag_names="#ag_names#">
+	<div class="ag-body" data-ag_names="#ag_names#" data-ag_txt_cancel="#ag_txt_cancel#" data-ag_txt_ok="#ag_txt_ok#">
 		<div class="ag-head">
 			<img class="ag-img" src="#ag_image#" alt=""/>
 			<div class="ag-protection">#ag_protection#</div>
@@ -160,12 +165,21 @@
 				widget.classList.toggle('ag-paused', left > 0);
 				el.textContent = duration(left);
 				// fin de la pause : AdGuard Home a réactivé la protection, on actualise sans attendre le cron
-				if (fromTimer && wasPaused && left <= 0) {
-					var refresh = widget.querySelector('.ag-refresh[data-ag_exec]');
-					if (refresh) setTimeout(function() {
-						jeedom.cmd.execute({id: refresh.getAttribute('data-ag_exec'), error: function() {}});
-					}, 2000);
-				}
+				if (fromTimer && wasPaused && left <= 0) endOfPause(widget, 0);
+			};
+			// actualise jusqu'à ce que la protection soit revenue (4 essais au plus : 2 s, puis toutes les 5 s)
+			var endOfPause = function(widget, attempt) {
+				var refresh = widget.querySelector('.ag-refresh[data-ag_exec]');
+				if (!refresh || attempt > 3) return;
+				setTimeout(function() {
+					if (!document.body.contains(widget) || !widget.querySelector('.ag-state.ag-off')) return; // déjà réactivée
+					if (widget.classList.contains('ag-paused')) return; // nouvelle pause entre-temps
+					jeedom.cmd.execute({id: refresh.getAttribute('data-ag_exec'), success: function() {
+						endOfPause(widget, attempt + 1);
+					}, error: function() {
+						endOfPause(widget, attempt + 1);
+					}});
+				}, (attempt == 0) ? 2000 : 5000);
 			};
 			var apply = function(el, value) {
 				var widget = el.closest('.ag-widget');
@@ -340,7 +354,7 @@
 					} else {
 						ask(button.getAttribute('data-ag_confirm_off'), function() { // couper internet d'un client
 							jeedom.cmd.execute({id: button.getAttribute('data-ag_off')});
-						});
+						}, button);
 					}
 				});
 			}
@@ -358,7 +372,7 @@
 					var action = chip.classList.contains('ag-on') ? 'off' : 'on';
 					ask(chip.getAttribute('data-ag_confirm_' + action), function() {
 						jeedom.cmd.execute({id: chip.getAttribute('data-ag_' + action)});
-					});
+					}, chip);
 				});
 			});
 			// outils : liste ou saisie de la ligne envoyée avec la commande, puis un retour vert ou rouge sur le bouton
@@ -369,16 +383,43 @@
 					btn.classList.remove(cls);
 				}, 1200);
 			};
-			// confirmation avec la boîte de dialogue de Jeedom (jeeDialog en 4.4, sinon bootbox, sinon celle du navigateur)
-			var ask = function(question, run) {
+			// En mobile, jeeDialog est chargé mais sans sa feuille de style (celle du bureau) : sa boîte reste invisible
+			// sous la page. La confirmation se fait donc dans un popup du widget, sous l'élément touché.
+			var confirmBox = null;
+			var ask = function(question, run, anchor) {
 				if (!question) return run();
-				if (typeof jeeDialog !== 'undefined' && jeeDialog.confirm) {
-					jeeDialog.confirm(question, function(result) { if (result) run(); });
-				} else if (typeof bootbox !== 'undefined') {
-					bootbox.confirm(question, function(result) { if (result) run(); });
-				} else if (window.confirm(question)) {
-					run();
+				if (!confirmBox) {
+					var body = root.querySelector('.ag-body');
+					confirmBox = document.createElement('div');
+					confirmBox.className = 'ag-popup ag-confirm';
+					var text = document.createElement('div');
+					text.className = 'ag-confirm-text';
+					var buttons = document.createElement('div');
+					buttons.className = 'ag-confirm-btns';
+					[['0', body.getAttribute('data-ag_txt_cancel') || 'Annuler', 'ag-btn'], ['1', body.getAttribute('data-ag_txt_ok') || 'OK', 'ag-btn ag-btn-confirm']].forEach(function(answer) {
+						var b = document.createElement('button');
+						b.type = 'button';
+						b.className = answer[2];
+						b.setAttribute('data-role', 'none');
+						b.textContent = answer[1];
+						b.addEventListener('click', function() {
+							confirmBox.classList.remove('ag-open');
+							if (answer[0] == '1' && confirmBox.agRun) confirmBox.agRun();
+							confirmBox.agRun = null;
+						});
+						buttons.appendChild(b);
+					});
+					confirmBox.appendChild(text);
+					confirmBox.appendChild(buttons);
+					body.appendChild(confirmBox);
+					popup(root, confirmBox);
 				}
+				confirmBox.querySelector('.ag-confirm-text').textContent = question;
+				confirmBox.agRun = run;
+				confirmBox.classList.remove('ag-open');
+				setTimeout(function() { // après le clic en cours, qui fermerait le popup
+					open(anchor || root, confirmBox);
+				}, 0);
 			};
 			root.querySelectorAll('.ag-btn[data-ag_exec]').forEach(function(btn) {
 				btn.addEventListener('click', function() {
@@ -407,7 +448,7 @@
 					ask(btn.getAttribute('data-ag_confirm'), function() {
 						btn.classList.add('ag-busy');
 						jeedom.cmd.execute(options);
-					});
+					}, btn);
 				});
 			});
 			root.querySelectorAll('.ag-tool input.ag-field').forEach(function(field) {
@@ -476,7 +517,7 @@
 					var run = function() {
 						jeedom.cmd.execute({id: update.getAttribute('data-ag_update')});
 					};
-					ask(update.getAttribute('data-ag_confirm'), run);
+					ask(update.getAttribute('data-ag_confirm'), run, update);
 				});
 			}
 			var refresh = root.querySelector('.ag-refresh');

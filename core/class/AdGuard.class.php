@@ -169,6 +169,13 @@ class AdGuard extends eqLogic {
 		$eqLogics = ($_eqlogic_id !== null) ? array(eqLogic::byId($_eqlogic_id)) : eqLogic::byType('AdGuard', true);
 		foreach ($eqLogics as $AdGuard) {
 			if($AdGuard->getConfiguration('type','AdGuardGlobal') != 'AdGuardGlobal') continue;
+			// fin d'une pause de la protection : on relit l'état sans attendre l'auto-actualisation
+			$pauseEnd = (int) $AdGuard->getCache('pauseEnd', 0);
+			if ($_eqlogic_id === null && $pauseEnd > 0 && time() >= $pauseEnd) {
+				$AdGuard->setCache('pauseEnd', 0);
+				$AdGuard->getAdGuardInfo(true);
+				continue;
+			}
 			$autorefresh = $AdGuard->getConfiguration('autorefresh','*/5 * * * *');
 			if ($autorefresh != '') {
 				try {
@@ -512,7 +519,9 @@ class AdGuard extends eqLogic {
 			// temps de pause restant, renvoyé en millisecondes par AdGuard Home
 			$protection_disabled_duration = $this->getCmd(null, 'protection_disabled_duration');
 			$pauseMs = (isset($AdGuardinfo['protection_disabled_duration']) && is_numeric($AdGuardinfo['protection_disabled_duration'])) ? $AdGuardinfo['protection_disabled_duration'] : 0;
-			$this->checkAndUpdateCmd($protection_disabled_duration, (($AdGuardinfo['protection_enabled']===true) ? 0 : (int) ceil($pauseMs/1000)));
+			$pauseLeft = ($AdGuardinfo['protection_enabled']===true) ? 0 : (int) ceil($pauseMs/1000);
+			$this->checkAndUpdateCmd($protection_disabled_duration, $pauseLeft);
+			$this->setCache('pauseEnd', ($pauseLeft > 0) ? time() + $pauseLeft : 0); // relu par le cron à la fin de la pause
 			
 			// filtering
 			$filtering_enabled = $this->getCmd(null, 'filtering_enabled');
@@ -1012,6 +1021,8 @@ class AdGuard extends eqLogic {
 		$autoHeight = ($this->getConfiguration('fixedHeight', 0) != 1);
 		$replace['#ag_autoheight#'] = ($autoHeight) ? '1' : '0';
 		if ($autoHeight) $replace['#height#'] = 'auto';
+		$replace['#ag_txt_cancel#'] = __("Annuler", __FILE__); // boutons de la confirmation intégrée (mobile)
+		$replace['#ag_txt_ok#'] = __("Confirmer", __FILE__);
 		$replace['#ag_image#'] = $this->getImage();
 		$replace['#ag_protection#'] = $protection;
 		$replace['#ag_switch#'] = $switch;
