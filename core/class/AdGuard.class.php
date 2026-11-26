@@ -928,8 +928,19 @@ class AdGuardCmd extends cmd {
 		throw new Exception(__('Ce client n\'a ni adresse IP, ni plage CIDR, ni ClientID : AdGuard Home ne sait pas tester un domaine avec une adresse MAC', __FILE__));
 	}
 
+	/**
+	 * Champs modifiables d'un client, d'après le schéma "Client" de l'API AdGuard Home (v1.0.0).
+	 * On ne renvoie que ceux-là pour ne pas dépendre des champs en lecture seule ou retirés au fil des versions.
+	 */
+	private static $_clientWritableFields = [
+		'name', 'ids', 'use_global_settings', 'filtering_enabled', 'parental_enabled', 'safebrowsing_enabled',
+		'safe_search', 'use_global_blocked_services', 'blocked_services_schedule', 'blocked_services',
+		'upstreams', 'tags', 'ignore_querylog', 'ignore_statistics', 'upstreams_cache_enabled', 'upstreams_cache_size'
+	];
+
 	private static function clientUpdate($client) {
-		return ["name" => $client['name'], "data" => $client];
+		$data = array_intersect_key($client, array_flip(self::$_clientWritableFields));
+		return ["name" => $client['name'], "data" => $data];
 	}
 
 	public function execute($_options = null) {
