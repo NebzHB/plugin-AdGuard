@@ -270,13 +270,17 @@
 			// popups (pause et autres valeurs) : sous le bouton, sans sortir de l'écran, mêmes couleurs que le widget
 			var popups = [];
 			var open = function(button, popup) {
-				popups.forEach(function(other) {
+				// un seul popup ouvert dans la page, y compris ceux des autres widgets AdGuard
+				document.querySelectorAll('.ag-widget .ag-popup.ag-open').forEach(function(other) {
 					if (other != popup) other.classList.remove('ag-open');
 				});
 				if (popup.classList.toggle('ag-open')) {
+					// fond du widget rendu opaque : avec la transparence des widgets, le popup laisserait voir la page dessous
 					var style = window.getComputedStyle(root);
-					if (style.backgroundColor && style.backgroundColor != 'transparent' && style.backgroundColor.indexOf('rgba(0, 0, 0, 0)') == -1) {
-						popup.style.backgroundColor = style.backgroundColor;
+					var rgb = (style.backgroundColor || '').match(/rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:[\s,\/]+([\d.]+%?))?/);
+					var alpha = (rgb && rgb[4] !== undefined) ? parseFloat(rgb[4]) / (rgb[4].indexOf('%') != -1 ? 100 : 1) : 1;
+					if (rgb && alpha > 0) {
+						popup.style.backgroundColor = 'rgb(' + rgb[1] + ', ' + rgb[2] + ', ' + rgb[3] + ')';
 						popup.style.color = style.color;
 					}
 					var rect = button.getBoundingClientRect();
