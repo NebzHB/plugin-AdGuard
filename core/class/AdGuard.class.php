@@ -1003,6 +1003,10 @@ class AdGuard extends eqLogic {
 		$replace['#ag_names#'] = htmlspecialchars(json_encode(self::serviceList(), JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
 		$css = dirname(__FILE__) . '/../../data/services_icons.css';
 		$replace['#ag_icons#'] = (file_exists($css)) ? '<link rel="stylesheet" href="plugins/AdGuard/data/services_icons.css?v='.filemtime($css).'"/>' : '';
+		// hauteur : suit le contenu, sauf si l'utilisateur a choisi de garder celle du mode édition
+		$autoHeight = ($this->getConfiguration('fixedHeight', 0) != 1);
+		$replace['#ag_autoheight#'] = ($autoHeight) ? '1' : '0';
+		if ($autoHeight) $replace['#height#'] = 'auto';
 		$replace['#ag_image#'] = $this->getImage();
 		$replace['#ag_protection#'] = $protection;
 		$replace['#ag_switch#'] = $switch;
