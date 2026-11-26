@@ -343,13 +343,11 @@
 			}
 			root.querySelectorAll('.ag-chip').forEach(function(chip) {
 				chip.addEventListener('click', function() {
-					if (chip.classList.contains('ag-on')) {
-						jeedom.cmd.execute({id: chip.getAttribute('data-ag_off')});
-					} else {
-						ask(chip.getAttribute('data-ag_confirm_on'), function() { // couper internet pour tout le réseau
-							jeedom.cmd.execute({id: chip.getAttribute('data-ag_on')});
-						});
-					}
+					// confirmation éventuelle : couper internet pour tout le réseau, désactiver le filtrage ou le contrôle parental
+					var action = chip.classList.contains('ag-on') ? 'off' : 'on';
+					ask(chip.getAttribute('data-ag_confirm_' + action), function() {
+						jeedom.cmd.execute({id: chip.getAttribute('data-ag_' + action)});
+					});
 				});
 			});
 			// outils : liste ou saisie de la ligne envoyée avec la commande, puis un retour vert ou rouge sur le bouton
