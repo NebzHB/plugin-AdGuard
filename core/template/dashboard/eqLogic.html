@@ -153,12 +153,20 @@
 				});
 			};
 			// compte à rebours de la pause : AdGuard Home ne renvoie le temps restant qu'à chaque actualisation
-			var tick = function(widget) {
+			var tick = function(widget, fromTimer) {
 				var el = widget.querySelector('[data-ag_kind="pause"]');
 				if (!el) return;
 				var left = (parseFloat(el.getAttribute('data-ag_until')) - Date.now()) / 1000;
+				var wasPaused = widget.classList.contains('ag-paused');
 				widget.classList.toggle('ag-paused', left > 0);
 				el.textContent = duration(left);
+				// fin de la pause : AdGuard Home a réactivé la protection, on actualise sans attendre le cron
+				if (fromTimer && wasPaused && left <= 0) {
+					var refresh = widget.querySelector('.ag-refresh[data-ag_exec]');
+					if (refresh) setTimeout(function() {
+						jeedom.cmd.execute({id: refresh.getAttribute('data-ag_exec'), error: function() {}});
+					}, 2000);
+				}
 			};
 			var apply = function(el, value) {
 				var widget = el.closest('.ag-widget');
@@ -264,7 +272,7 @@
 					clearInterval(timer);
 					return;
 				}
-				tick(root);
+				tick(root, true);
 			}, 1000);
 
 			// popups (pause et autres valeurs) : sous le bouton, sans sortir de l'écran, mêmes couleurs que le widget
@@ -481,7 +489,8 @@
 				var fit = function() {
 					var tiles = queue.tiles;
 					queue.tiles = [];
-					if (typeof jeedomUI !== 'undefined' && jeedomUI.isEditing) return;
+					if (typeof jeedomUI !== 'undefined' && jeedomUI.isEditing) return; // dashboard et vues
+					if (typeof jeeFrontEnd !== 'undefined' && jeeFrontEnd.planEditOption && jeeFrontEnd.planEditOption.state) return; // designs
 					var step = (typeof jeedom !== 'undefined' && jeedom.theme) ? parseInt(jeedom.theme['widget::step::height']) || 10 : 10;
 					var containers = [];
 					tiles.forEach(function(tile) {
