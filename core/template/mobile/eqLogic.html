@@ -442,6 +442,8 @@
 						if (kind == 'message' && field) field.value = '';
 					};
 					options.error = function(error) {
+						// confirmation ou code demandés par le core (option « Confirmer l'action » cochée sur la commande) : il relance la commande si on accepte
+						if (error && (error.code == -32006 || error.code == -32005)) return btn.classList.remove('ag-busy');
 						flash(btn, 'ag-ko');
 						if (error && error.message && typeof jeedomUtils !== 'undefined' && jeedomUtils.showAlert) jeedomUtils.showAlert({message: error.message, level: 'danger'});
 					};
