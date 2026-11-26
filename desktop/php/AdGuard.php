@@ -147,6 +147,12 @@ $eqLogics = eqLogic::byType('AdGuard');
                   <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}</label>
                 </div>
               </div>
+              <div class="form-group">
+                <label class="col-sm-3 control-label help" data-help="{{Par défaut la hauteur du widget suit son contenu. Cochez pour garder la hauteur réglée en mode édition du dashboard.}}">{{Hauteur du widget}}</label>
+                <div class="col-sm-9">
+                  <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="fixedHeight"/>{{Fixe (celle du mode édition)}}</label>
+                </div>
+              </div>
               <div class="form-group" id="ipDevice">
                 <label class="col-sm-3 control-label help" data-help="{{Si vous avez modifié le port par défaut (80) vous pouvez ajouter votre port ici sous la forme ip:port. Sinon juste l'ip}}">{{Ip du serveur}}</label>
                 <div class="col-sm-4">

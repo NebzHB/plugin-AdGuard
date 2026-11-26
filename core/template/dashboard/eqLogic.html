@@ -1,4 +1,4 @@
-<div class="eqLogic eqLogic-widget allowResize ag-widget #eqLogic_class# #class#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width:#width#;height:#height#;#style#">
+<div class="eqLogic eqLogic-widget allowResize ag-widget #eqLogic_class# #class#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" data-ag_autoheight="#ag_autoheight#" style="width:#width#;height:#height#;#style#">
 	<style>
 		.ag-widget { min-width: 320px; }
 		.ag-widget .ag-body { padding: 4px 10px 8px 10px; text-align: left; }
@@ -461,6 +461,54 @@
 					};
 					ask(update.getAttribute('data-ag_confirm'), run);
 				});
+			}
+			// hauteur auto : le widget suit son contenu (liste des services, notes, icônes chargées après coup...).
+			// Une seule file pour tous les widgets AdGuard de la page, traitée 200 ms après le dernier changement :
+			// la grille n'est recalculée qu'une fois, même au chargement du dashboard complet.
+			// Pas en mode édition, où la taille se règle à la main ; option « Hauteur fixe » sur l'équipement pour garder celle-ci.
+			if (root.getAttribute('data-ag_autoheight') == '1') {
+				var queue = window.agAutoHeight = window.agAutoHeight || {tiles: [], timer: null};
+				var fit = function() {
+					var tiles = queue.tiles;
+					queue.tiles = [];
+					if (typeof jeedomUI !== 'undefined' && jeedomUI.isEditing) return;
+					var step = (typeof jeedom !== 'undefined' && jeedom.theme) ? parseInt(jeedom.theme['widget::step::height']) || 10 : 10;
+					var containers = [];
+					tiles.forEach(function(tile) {
+						if (!document.body.contains(tile) || !tile.offsetParent) return; // retiré ou masqué
+						var body = tile.querySelector('.ag-body');
+						var needed = Math.ceil(body.getBoundingClientRect().bottom - tile.getBoundingClientRect().top) + 4;
+						if (needed <= tile.clientHeight && tile.clientHeight - needed <= step + 10) return; // déjà à la bonne taille
+						tile.style.height = needed + 'px';
+						if (typeof jeedomUtils !== 'undefined' && typeof jeedomUtils.positionEqLogic === 'function') {
+							jeedomUtils.positionEqLogic(tile.getAttribute('data-eqLogic_id'), false); // arrondi au pas de la grille
+						}
+						var container = tile.closest('.div_displayEquipement');
+						if (container && containers.indexOf(container) == -1) containers.push(container);
+					});
+					if (typeof Packery !== 'undefined') {
+						containers.forEach(function(container) {
+							var grid = Packery.data(container);
+							if (grid) grid.layout();
+						});
+					}
+				};
+				var schedule = function() {
+					if (queue.tiles.indexOf(root) == -1) queue.tiles.push(root);
+					clearTimeout(queue.timer);
+					queue.timer = setTimeout(fit, 200);
+				};
+				schedule();
+				if (typeof ResizeObserver !== 'undefined') {
+					var observer = new ResizeObserver(function() {
+						if (!document.body.contains(root)) { // widget redessiné
+							observer.disconnect();
+							return;
+						}
+						schedule();
+					});
+					observer.observe(root.querySelector('.ag-body'));
+				}
 			}
 			var refresh = root.querySelector('.ag-refresh');
 			if (refresh) {
