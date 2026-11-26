@@ -476,6 +476,9 @@
 				var cmd = event.target.closest ? event.target.closest('.cmd[data-cmd_id]') : null;
 				if (!cmd || !root.contains(cmd) || !confirmData.cmds[cmd.getAttribute('data-cmd_id')]) return;
 				if (jeedom.cmd.disableExecute) return; // mode édition : on laisse passer le clic, le core n'exécute rien
+				// seulement les actions simples : un curseur, une liste ou un message confirmé partirait sans sa valeur.
+				// Pour ceux-là, le core pose sa question générique.
+				if ((cmd.getAttribute('data-subtype') || 'other') != 'other') return;
 				event.stopPropagation();
 				event.preventDefault();
 				run({id: cmd.getAttribute('data-cmd_id')});
