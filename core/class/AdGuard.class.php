@@ -82,6 +82,21 @@ class AdGuard extends eqLogic {
 			"streaming"=>__("Streaming", __FILE__)
 		];
 	}
+	/**
+	 * AdGuard Home ne connaît que des services bloqués : un groupe est considéré bloqué quand tous ses services le sont.
+	 * Renvoie les noms des groupes séparés par des virgules.
+	 */
+	public static function blockedGroups($blockedIds, $servicesGroups) {
+		if(!is_array($blockedIds) || !is_array($servicesGroups) || count($servicesGroups) == 0) return '';
+		$byGroup = [];
+		foreach($servicesGroups as $serviceId => $groupId) $byGroup[$groupId][] = $serviceId;
+		$names = self::serviceGroupList();
+		$blocked = [];
+		foreach($byGroup as $groupId => $services) {
+			if(count(array_diff($services, $blockedIds)) == 0) $blocked[] = (isset($names[$groupId])) ? $names[$groupId] : $groupId;
+		}
+		return implode(',', $blocked);
+	}
 	public static function getConfigForCommunity()
 	{
 		$update=update::byTypeAndLogicalId('plugin',__CLASS__);
@@ -429,9 +444,12 @@ class AdGuard extends eqLogic {
 		
 		$temp_services_list=$this->getAdGuard('blocked_services/all');
 		$AdGuardinfo['services_list']=[];
+		$AdGuardinfo['services_groups']=[];
 		if($temp_services_list && is_array($temp_services_list)) {
 			foreach($temp_services_list['blocked_services'] as $i=>$s) {
 				$AdGuardinfo['services_list'][$temp_services_list['blocked_services'][$i]['id']]=$temp_services_list['blocked_services'][$i]['name'];
+				// groupe de chaque service (AdGuard Home >= v0.107.68), pour retrouver les groupes entièrement bloqués
+				if(isset($s['group_id']) && $s['group_id'] !== '') $AdGuardinfo['services_groups'][$s['id']]=$s['group_id'];
 			}
 		}
 		$temp_services_list=null;
@@ -472,6 +490,8 @@ class AdGuard extends eqLogic {
 			// blocked_services
 			$blocked_services = $this->getCmd(null, 'blocked_services');
 			$this->checkAndUpdateCmd($blocked_services, str_replace(['"','[',']','null'],'',json_encode($AdGuardinfo['blocked_services']['ids'])));
+			$blocked_groups = $this->getCmd(null, 'blocked_groups');
+			$this->checkAndUpdateCmd($blocked_groups, self::blockedGroups($AdGuardinfo['blocked_services']['ids'], $AdGuardinfo['services_groups']));
 			
 			// write new servicesList if it's the cron only (to avoid infinite loop with postSave
 			if($allowListServices) {
@@ -550,6 +570,8 @@ class AdGuard extends eqLogic {
 						// client_blocked_services
 						$client_blocked_services = $eqp->getCmd(null, 'client_blocked_services');
 						$eqp->checkAndUpdateCmd($client_blocked_services, str_replace(['"','[',']','null'],'',json_encode($client['blocked_services'])));
+						$client_blocked_groups = $eqp->getCmd(null, 'client_blocked_groups');
+						$eqp->checkAndUpdateCmd($client_blocked_groups, self::blockedGroups($client['blocked_services'], $AdGuardinfo['services_groups']));
 						// client_blocked_internet
 						$client_blocked_internet = $eqp->getCmd(null, 'client_blocked_internet');
 						
@@ -785,6 +807,11 @@ class AdGuard extends eqLogic {
 		if ($chips != '') $chips = '<div class="ag-chips">'.$chips.'</div>';
 		if ($isClient && $chips != '') $chips .= '<div class="ag-note" data-ag_in_scope="settings"><i class="fas fa-link"></i> '.__("Ce client suit les paramètres généraux : ses réglages grisés ne s'appliquent pas", __FILE__).'</div>';
 
+		// serveur : services bloqués, comme sur les clients
+		$cmd = $find('blocked_services');
+		$groups = $find('blocked_groups');
+		if (!$isClient && is_object($cmd)) $chips .= '<div class="ag-rows"><div class="ag-row ag-row-list"><span>'.__("Services bloqués", __FILE__).'</span><b>'.$span($cmd, 'list').'</b></div>'.(is_object($groups)?'<div class="ag-row ag-row-list"><span>'.__("Groupes bloqués", __FILE__).'</span><b>'.$span($groups, 'list').'</b></div>':'').'</div>';
+
 		// client : identifiants et services bloqués (grisés quand il suit les services bloqués généraux)
 		if ($isClient) {
 			$rows = '';
@@ -792,6 +819,8 @@ class AdGuard extends eqLogic {
 			if (is_object($cmd)) $rows .= '<div class="ag-row ag-row-list"><span>'.__("Identifiant(s)", __FILE__).'</span><b>'.$span($cmd, 'list').'</b></div>';
 			$cmd = $find('client_blocked_services');
 			if (is_object($cmd)) $rows .= '<div class="ag-row ag-row-list" data-ag_in="services"><span>'.__("Services bloqués", __FILE__).'</span><b>'.$span($cmd, 'list').'</b></div>';
+			$cmd = $find('client_blocked_groups');
+			if (is_object($cmd)) $rows .= '<div class="ag-row ag-row-list" data-ag_in="services"><span>'.__("Groupes bloqués", __FILE__).'</span><b>'.$span($cmd, 'list').'</b></div>';
 			if ($rows != '') $chips .= '<div class="ag-rows">'.$rows.'</div>';
 			$chips .= '<div class="ag-note" data-ag_in_scope="services"><i class="fas fa-link"></i> '.__("Ce client suit les services bloqués généraux : sa liste grisée ne s'applique pas", __FILE__).'</div>';
 		}
