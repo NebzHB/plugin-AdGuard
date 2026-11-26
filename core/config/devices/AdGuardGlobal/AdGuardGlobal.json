@@ -252,16 +252,6 @@
 			"isHistorized": 0,
 			"logicalId": "blocked_services"
 		}, {
-			"name": "{{Groupes de services bloqués}}",
-			"type": "info",
-			"subtype": "string",
-			"display": {
-				"forceReturnLineAfter": 1
-			},
-			"isVisible": 1,
-			"isHistorized": 0,
-			"logicalId": "blocked_groups"
-		}, {
 			"name": "{{Bloquer un service}}",
 			"type": "action",
 			"subtype": "select",
