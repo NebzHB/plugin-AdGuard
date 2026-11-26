@@ -65,6 +65,9 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "client_filtering_disable",
 			"value": "client_filtering_enabled"
 		}, {
@@ -133,6 +136,9 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "client_parental_disable",
 			"value": "client_parental_enabled"
 		}, {
@@ -246,6 +252,9 @@
 				"icon": "<i class=\"fas fa-users-slash\"></i>"
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "client_services_block"
 		}, {
 			"name": "{{Débloquer tous les services}}",
@@ -256,6 +265,9 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "client_services_unblock"
 		}, {
 			"name": "{{Bloquer un groupe de services}}",
@@ -302,6 +314,9 @@
 				"icon": "<i class=\"fas fa-phone-slash\"></i>"
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "client_internet_block",
 			"value": "client_blocked_internet"
 		}, {
