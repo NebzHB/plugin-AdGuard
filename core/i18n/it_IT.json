@@ -99,7 +99,7 @@
     },
     "plugins\/AdGuard\/core\/config\/devices\/Client\/Client.json": {
         "Activer Utiliser les Paramètres Généraux": "Attivare Utilizzare le impostazioni generali",
-        "Activer Utiliser les services bloqués globlaux": "Attivare Utilizzare i servizi bloccati a livello globale",
+        "Activer Utiliser les services bloqués globaux": "Attivare Utilizzare i servizi bloccati a livello globale",
         "Activer la Recherche Sécurisée": "Attivare la ricerca sicura",
         "Activer la Sécurité de navigation": "Attivare la sicurezza della navigazione",
         "Activer le Contrôle Parental": "Attivare il controllo parentale",
@@ -115,7 +115,7 @@
         "Débloquer un groupe de services": "Sblocca un gruppo di servizi",
         "Débloquer un service": "Sbloccare un servizio",
         "Désactiver Utiliser les Paramètres Généraux": "Disabilita l'uso delle impostazioni generali",
-        "Désactiver Utiliser les services bloqués globlaux": "Disattivare Utilizzare i servizi bloccati a livello globale",
+        "Désactiver Utiliser les services bloqués globaux": "Disattivare Utilizzare i servizi bloccati a livello globale",
         "Désactiver la Recherche Sécurisée": "Disattivare la ricerca sicura",
         "Désactiver la Sécurité de navigation": "Disattivare la sicurezza della navigazione",
         "Désactiver le Contrôle Parental": "Disattivare il controllo parentale",
@@ -130,7 +130,7 @@
         "Statut Recherche Sécurisée": "Stato di ricerca sicuro",
         "Statut Sécurité de navigation": "Stato di sicurezza della navigazione",
         "Statut Utiliser les Paramètres Généraux": "Stato Utilizzare le impostazioni generali",
-        "Statut Utiliser les services bloqués globlaux": "Stato Utilizzo di servizi bloccati a livello globale",
+        "Statut Utiliser les services bloqués globaux": "Stato Utilizzo di servizi bloccati a livello globale",
         "Tester un domaine pour ce client": "Testa un dominio per questo client"
     },
     "plugins\/AdGuard\/desktop\/js\/AdGuard.js": {

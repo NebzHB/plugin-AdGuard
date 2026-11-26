@@ -170,7 +170,7 @@
 			"logicalId": "client_safesearch_disable",
 			"value": "client_safesearch_enabled"
 		}, {
-			"name": "{{Statut Utiliser les services bloqués globlaux}}",
+			"name": "{{Statut Utiliser les services bloqués globaux}}",
 			"type": "info",
 			"subtype": "binary",
 			"display": {
@@ -181,7 +181,7 @@
 			"isHistorized": 0,
 			"logicalId": "client_use_global_blocked_services"
 		}, {
-			"name": "{{Activer Utiliser les services bloqués globlaux}}",
+			"name": "{{Activer Utiliser les services bloqués globaux}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
@@ -192,7 +192,7 @@
 			"logicalId": "client_use_global_blocked_services_enable",
 			"value": "client_use_global_blocked_services"
 		}, {
-			"name": "{{Désactiver Utiliser les services bloqués globlaux}}",
+			"name": "{{Désactiver Utiliser les services bloqués globaux}}",
 			"type": "action",
 			"subtype": "other",
 			"display": {
