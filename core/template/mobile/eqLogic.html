@@ -37,6 +37,8 @@
 		.ag-widget .ag-chip-danger i { font-size: 10px; }
 		.ag-widget .ag-chip-danger.ag-on { display: inline-block; background: var(--al-danger-color, #e53935); color: #fff; }
 		.ag-widget .ag-chip-danger.ag-on i { color: #fff; }
+		.ag-widget table.ag-client-rows td:last-child { white-space: normal; word-break: break-word; font-weight: 400; }
+		.ag-widget.ag-scope-settings [data-ag_in="settings"], .ag-widget.ag-scope-services [data-ag_in="services"] { opacity: .3; }
 		.ag-widget .ag-actions { margin-top: 8px; text-align: center; }
 		.ag-widget .ag-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 11px; opacity: .8; }
 		.ag-widget .ag-foot .ag-grow { flex: 1; }
@@ -119,6 +121,7 @@
 				var widget = el.closest('.ag-widget');
 				var kind = el.getAttribute('data-ag_kind');
 				var number = parseFloat(value);
+				if (el.getAttribute('data-ag_invert') == '1') number = (number == 1) ? 0 : 1; // client : 1 = internet bloqué
 				el.setAttribute('data-ag_value', (value === null || value === undefined) ? '' : value);
 				switch (kind) {
 					case 'protection':
@@ -132,10 +135,16 @@
 						el.parentNode.classList.toggle('ag-offline', number != 1);
 						el.classList.toggle('ag-on', number == 1);
 						break;
-					case 'switch':
 					case 'chip':
+						if (el.getAttribute('data-ag_scope')) widget.classList.toggle('ag-scope-' + el.getAttribute('data-ag_scope'), number == 1);
+						el.classList.toggle('ag-on', number == 1);
+						break;
+					case 'switch':
 					case 'flag':
 						el.classList.toggle('ag-on', number == 1);
+						break;
+					case 'list':
+						el.textContent = (value === '' || value === null || value === undefined) ? '—' : String(value).split(',').join(', ');
 						break;
 					case 'text':
 						el.textContent = (value === '' || value === null || value === undefined) ? '—' : value;
@@ -229,7 +238,7 @@
 					} else if (pauseMenu) {
 						open(button, pauseMenu);
 					} else {
-						jeedom.cmd.execute({id: button.getAttribute('data-ag_off'), value: {select: '0'}});
+						jeedom.cmd.execute({id: button.getAttribute('data-ag_off')});
 					}
 				});
 			}
