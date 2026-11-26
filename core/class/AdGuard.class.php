@@ -901,11 +901,11 @@ class AdGuard extends eqLogic {
 				if (count($serviceGroups) > 0) {
 					foreach(self::serviceGroupList() + array_fill_keys(array_keys($byGroup), '') as $group => $groupName) {
 						if ($group === '' || !isset($byGroup[$group])) continue;
-						$items .= '<div class="ag-menu-item ag-pick-item ag-pick-group cursor" data-ag_value="'.htmlspecialchars($group, ENT_QUOTES, 'UTF-8').'" data-ag_group="1"><i class="fas fa-layer-group"></i><span>'.htmlspecialchars(($groupName != '') ? $groupName : $group, ENT_QUOTES, 'UTF-8').'</span></div>';
+						$items .= '<div class="ag-menu-item ag-pick-item ag-pick-group cursor" data-ag_value="'.htmlspecialchars($group, ENT_QUOTES, 'UTF-8').'" data-ag_group="1"><i class="fas fa-folder-open"></i><span>'.htmlspecialchars(($groupName != '') ? $groupName : $group, ENT_QUOTES, 'UTF-8').'</span><small>'.__("tout le groupe", __FILE__).' · '.count($byGroup[$group]).'</small></div>';
 						foreach($byGroup[$group] as $value => $label) $items .= $item($value, $label, ' ag-pick-child');
 					}
 					if (isset($byGroup[''])) {
-						$items .= '<div class="ag-pick-header">'.__("Autres services", __FILE__).'</div>';
+						$items .= '<div class="ag-pick-header"><i class="fas fa-folder"></i> '.__("Autres services", __FILE__).'</div>';
 						foreach($byGroup[''] as $value => $label) $items .= $item($value, $label, ' ag-pick-child');
 					}
 				} else {
