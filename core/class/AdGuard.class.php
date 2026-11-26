@@ -653,9 +653,12 @@ class AdGuard extends eqLogic {
 		}
 	}
 	
-	/* Widget du serveur : protection, statistiques, protections globales, puis les commandes action visibles. Les clients gardent le widget Jeedom */
+	/* Widget du plugin. Serveur : protection, statistiques, protections globales. Client : accès internet, réglages, services bloqués. Puis les commandes action visibles */
 	public function toHtml($_version = 'dashboard') {
-		if ($this->getConfiguration('type','') != 'AdGuardGlobal') return parent::toHtml($_version);
+		$type = $this->getConfiguration('type','');
+		if (!in_array($type, ['AdGuardGlobal', 'Client'])) return parent::toHtml($_version);
+		$isClient = ($type == 'Client');
+		$p = ($isClient) ? 'client_' : ''; // préfixe des commandes du client
 		$replace = $this->preToHtml($_version);
 		if (!is_array($replace)) return $replace;
 		$version = jeedom::versionAlias($_version);
@@ -702,6 +705,19 @@ class AdGuard extends eqLogic {
 			}
 		}
 
+		// client : accès internet (bloqué via DNS) avec un bouton pour couper / rétablir
+		$state = $find('client_blocked_internet');
+		$on = $action('client_internet_unblock');
+		$off = $action('client_internet_block');
+		if ($isClient && is_object($state)) {
+			$protection = '<div class="ag-title">'.__("Internet", __FILE__).'</div>';
+			$protection .= '<div class="ag-state" '.$attr($state, 'protection').' data-ag_invert="1"><span class="ag-lbl-on">'.__("Autorisé", __FILE__).'</span><span class="ag-lbl-off">'.__("Bloqué via DNS", __FILE__).'</span></div>';
+			if (is_object($on) && is_object($off)) {
+				$switch = '<i class="fas fa-globe ag-switch" '.$attr($state, 'switch').' data-ag_invert="1" data-ag_on="'.$on->getId().'" data-ag_off="'.$off->getId().'" title="'.__("Bloquer / Débloquer internet pour ce client", __FILE__).'"></i>';
+				$handled = array_merge($handled, ['client_internet_block', 'client_internet_unblock']);
+			}
+		}
+
 		// statistiques, comme le tableau de bord d'AdGuard Home
 		$tiles = '';
 		$total = $find('num_dns_queries');
@@ -732,20 +748,31 @@ class AdGuard extends eqLogic {
 		if (is_object($cmd)) $rows .= '<tr><td>'.__("Temps moyen de traitement", __FILE__).'</td><td>'.$span($cmd).' ms</td></tr>';
 		if ($rows != '') $tiles .= '<table class="ag-rows">'.$rows.'</table>';
 
-		// protections globales : une pastille par réglage, un clic l'inverse
+		// protections : une pastille par réglage, un clic l'inverse. Client : les réglages propres sont grisés quand il suit les paramètres généraux
 		$chips = '';
-		foreach([
-			['filtering', __("Filtrage", __FILE__), 'chip'],
-			['safebrowsing', __("Sécurité de navigation", __FILE__), 'chip'],
-			['parental', __("Contrôle parental", __FILE__), 'chip'],
-			['safesearch', __("Recherche sécurisée", __FILE__), 'chip'],
-		] as $chip) {
+		$list = [
+			[$p.'filtering', __("Filtrage", __FILE__), 'settings'],
+			[$p.'safebrowsing', __("Sécurité de navigation", __FILE__), 'settings'],
+			[$p.'parental', __("Contrôle parental", __FILE__), 'settings'],
+			[$p.'safesearch', __("Recherche sécurisée", __FILE__), 'settings'],
+		];
+		if ($isClient) {
+			array_unshift($list, ['client_use_global_settings', __("Paramètres généraux", __FILE__), '']);
+			$list[] = ['client_use_global_blocked_services', __("Services bloqués généraux", __FILE__), ''];
+		}
+		foreach($list as $chip) {
 			$cmd = $find($chip[0].'_enabled');
-			$chipOn = $action($chip[0].'_enable');
-			$chipOff = $action($chip[0].'_disable');
+			if (!is_object($cmd)) $cmd = $find($chip[0]); // client_use_global_... n'a pas de suffixe _enabled
+			$base = preg_replace('/_enabled$/', '', $chip[0]);
+			$chipOn = $action($base.'_enable');
+			$chipOff = $action($base.'_disable');
 			if (!is_object($cmd) || !is_object($chipOn) || !is_object($chipOff)) continue;
-			$chips .= '<span class="ag-chip cursor" '.$attr($cmd, $chip[2]).' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'" title="'.__("Cliquer pour activer / désactiver", __FILE__).'"><i class="fas fa-circle"></i> '.$chip[1].'</span>';
-			$handled = array_merge($handled, [$chip[0].'_enable', $chip[0].'_disable']);
+			$scope = '';
+			if ($isClient && $chip[2] != '') $scope = ' data-ag_in="'.$chip[2].'"';
+			if ($chip[0] == 'client_use_global_settings') $scope = ' data-ag_scope="settings"';
+			if ($chip[0] == 'client_use_global_blocked_services') $scope = ' data-ag_scope="services"';
+			$chips .= '<span class="ag-chip cursor" '.$attr($cmd, 'chip').$scope.' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'" title="'.__("Cliquer pour activer / désactiver", __FILE__).'"><i class="fas fa-circle"></i> '.$chip[1].'</span>';
+			$handled = array_merge($handled, [$base.'_enable', $base.'_disable']);
 		}
 		$cmd = $find('blocked_internet');
 		$chipOn = $action('internet_block');
@@ -755,6 +782,16 @@ class AdGuard extends eqLogic {
 			$handled = array_merge($handled, ['internet_block', 'internet_unblock']);
 		}
 		if ($chips != '') $chips = '<div class="ag-chips">'.$chips.'</div>';
+
+		// client : identifiants et services bloqués (grisés quand il suit les services bloqués généraux)
+		if ($isClient) {
+			$rows = '';
+			$cmd = $find('client_ids');
+			if (is_object($cmd)) $rows .= '<tr><td>'.__("Identifiant(s)", __FILE__).'</td><td>'.$span($cmd, 'list').'</td></tr>';
+			$cmd = $find('client_blocked_services');
+			if (is_object($cmd)) $rows .= '<tr data-ag_in="services"><td>'.__("Services bloqués", __FILE__).'</td><td>'.$span($cmd, 'list').'</td></tr>';
+			if ($rows != '') $chips .= '<table class="ag-rows ag-client-rows">'.$rows.'</table>';
+		}
 
 		// pied : en ligne, version, mise à jour, actualiser
 		$foot = '';
