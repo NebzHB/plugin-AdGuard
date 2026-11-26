@@ -858,10 +858,10 @@ class AdGuard extends eqLogic {
 		// outils : les commandes action visibles, en lignes compactes (liste ou saisie + boutons)
 		$visible = [];
 		foreach($this->getCmd('action', null, true) as $cmd) $visible[$cmd->getLogicalId()] = $cmd;
-		$button = function($id, $icon, $title, $input = '', $text = '') use ($visible, &$handled) {
+		$button = function($id, $icon, $title, $input = '', $text = '', $confirm = '') use ($visible, &$handled) {
 			if (!isset($visible[$id])) return '';
 			$handled[] = $id;
-			return '<button type="button" class="ag-btn" data-role="none" data-ag_exec="'.$visible[$id]->getId().'"'.(($input != '')?' data-ag_input="'.$input.'"':'').' title="'.$title.'"><i class="'.$icon.'"></i>'.(($text != '')?' '.$text:'').'</button>';
+			return '<button type="button" class="ag-btn" data-role="none" data-ag_exec="'.$visible[$id]->getId().'"'.(($input != '')?' data-ag_input="'.$input.'"':'').(($confirm != '')?' data-ag_confirm="'.$confirm.'"':'').' title="'.$title.'"><i class="'.$icon.'"></i>'.(($text != '')?' '.$text:'').'</button>';
 		};
 		$select = function($ids) use ($visible) {
 			foreach($ids as $id) {
@@ -955,9 +955,9 @@ class AdGuard extends eqLogic {
 		if ($test != '' && is_object($cmd)) $test .= '<div class="ag-tool-result">'.$span($cmd, 'result').'</div>';
 		$tools .= $test;
 		$tools .= $tool(__("Maintenance", __FILE__), '<span class="ag-grow"></span>',
-			$button('cache_clear', 'fas fa-broom', __("Vider le cache DNS", __FILE__), '', __("Cache", __FILE__)).
-			$button('filters_refresh', 'fas fa-sync', __("Mettre à jour les filtres", __FILE__), '', __("Filtres", __FILE__)).
-			$button('reset_stats', 'fas fa-eraser', __("Réinitialiser les statistiques", __FILE__), '', __("Stats", __FILE__)));
+			$button('cache_clear', 'fas fa-broom', __("Vider le cache DNS", __FILE__), '', __("Cache", __FILE__), __("Vider le cache DNS d'AdGuard Home ?", __FILE__)).
+			$button('filters_refresh', 'fas fa-sync', __("Mettre à jour les filtres", __FILE__), '', __("Filtres", __FILE__), __("Mettre à jour les listes de filtrage maintenant ?", __FILE__)).
+			$button('reset_stats', 'fas fa-eraser', __("Réinitialiser les statistiques", __FILE__), '', __("Stats", __FILE__), __("Réinitialiser toutes les statistiques d'AdGuard Home ? Elles seront perdues.", __FILE__)));
 		if ($tools != '') $chips .= '<div class="ag-tools">'.$tools.'</div>';
 		if (!$isClient) {
 			$cmd = $find('hasUpdateAdGuard');

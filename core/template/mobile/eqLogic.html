@@ -351,6 +351,17 @@
 					btn.classList.remove(cls);
 				}, 1200);
 			};
+			// confirmation avec la boîte de dialogue de Jeedom (jeeDialog en 4.4, sinon bootbox, sinon celle du navigateur)
+			var ask = function(question, run) {
+				if (!question) return run();
+				if (typeof jeeDialog !== 'undefined' && jeeDialog.confirm) {
+					jeeDialog.confirm(question, function(result) { if (result) run(); });
+				} else if (typeof bootbox !== 'undefined') {
+					bootbox.confirm(question, function(result) { if (result) run(); });
+				} else if (window.confirm(question)) {
+					run();
+				}
+			};
 			root.querySelectorAll('.ag-btn[data-ag_exec]').forEach(function(btn) {
 				btn.addEventListener('click', function() {
 					var kind = btn.getAttribute('data-ag_input');
@@ -367,7 +378,6 @@
 						}
 						options.value = (kind == 'select') ? {select: value} : {title: '', message: value};
 					}
-					btn.classList.add('ag-busy');
 					options.success = function() {
 						flash(btn, 'ag-ok');
 						if (kind == 'message' && field) field.value = '';
@@ -376,7 +386,10 @@
 						flash(btn, 'ag-ko');
 						if (error && error.message && typeof jeedomUtils !== 'undefined' && jeedomUtils.showAlert) jeedomUtils.showAlert({message: error.message, level: 'danger'});
 					};
-					jeedom.cmd.execute(options);
+					ask(btn.getAttribute('data-ag_confirm'), function() {
+						btn.classList.add('ag-busy');
+						jeedom.cmd.execute(options);
+					});
 				});
 			});
 			root.querySelectorAll('.ag-tool input.ag-field').forEach(function(field) {
@@ -445,14 +458,7 @@
 					var run = function() {
 						jeedom.cmd.execute({id: update.getAttribute('data-ag_update')});
 					};
-					var question = update.getAttribute('data-ag_confirm');
-					if (typeof jeeDialog !== 'undefined' && jeeDialog.confirm) {
-						jeeDialog.confirm(question, function(result) { if (result) run(); });
-					} else if (typeof bootbox !== 'undefined') {
-						bootbox.confirm(question, function(result) { if (result) run(); });
-					} else if (window.confirm(question)) {
-						run();
-					}
+					ask(update.getAttribute('data-ag_confirm'), run);
 				});
 			}
 			var refresh = root.querySelector('.ag-refresh');
