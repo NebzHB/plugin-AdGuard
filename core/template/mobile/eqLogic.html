@@ -58,6 +58,24 @@
 		.ag-widget .ag-btn.ag-busy i { animation: fa-spin 1s linear infinite; }
 		.ag-widget .ag-tool-result { margin: 2px 0 0 78px; font-size: 11px; opacity: .85; white-space: normal; word-break: break-word; }
 		.ag-widget .ag-tool-result:empty, .ag-widget .ag-tool-result .ag-empty { display: none; }
+		.ag-widget .ag-svc-ico { display: inline-block; flex: none; width: 18px; height: 18px; vertical-align: middle; color: inherit !important; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; }
+		.ag-widget .ag-svc-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px; }
+		.ag-widget .ag-svc { display: inline-flex; align-items: center; }
+		.ag-widget .ag-svc .ag-svc-name { display: none; }
+		.ag-widget .ag-svc.ag-noicon .ag-svc-ico { display: none; }
+		.ag-widget .ag-svc.ag-noicon .ag-svc-name { display: inline; font-size: 11px; padding: 1px 6px; border-radius: 8px; background: rgba(127,127,127,.15); }
+		.ag-widget .ag-pick { flex: 1; min-width: 0; display: flex; align-items: center; gap: 5px; height: 24px; padding: 0 6px; font-size: 12px; border-radius: 4px; border: 1px solid rgba(127,127,127,.4); background: rgba(127,127,127,.08); }
+		.ag-widget .ag-pick .ag-svc-ico:not([class*="ag-svc-ico ag-svc-"]) { display: none; }
+		.ag-widget .ag-pick .ag-pick-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.ag-widget .ag-pick-menu { width: 240px; padding: 6px; }
+		.ag-widget .ag-pick-search { width: 100% !important; height: 26px !important; margin: 0 0 4px 0 !important; padding: 0 6px !important; box-sizing: border-box; font-size: 12px !important; border-radius: 4px !important; border: 1px solid rgba(127,127,127,.4) !important; background: transparent !important; color: inherit !important; }
+		.ag-widget .ag-pick-list { max-height: 45vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+		.ag-widget .ag-pick-item { display: flex; align-items: center; gap: 8px; }
+		.ag-widget .ag-pick-item.ag-hidden { display: none; }
+		.ag-widget .ag-pick-group { font-weight: 600; margin-top: 4px; }
+		.ag-widget .ag-pick-group i { width: 18px; text-align: center; opacity: .7; }
+		.ag-widget .ag-pick-child { padding-left: 18px; }
+		.ag-widget .ag-pick-header { padding: 6px 6px 2px 6px; font-size: 11px; font-weight: 600; opacity: .6; }
 		.ag-widget .ag-actions { margin-top: 8px; text-align: center; }
 		.ag-widget .ag-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 11px; opacity: .8; }
 		.ag-widget .ag-foot .ag-grow { flex: 1; }
@@ -83,7 +101,8 @@
 		<span class="warning" title="#alert_name#"><i class='#alert_icon#'></i></span>
 		<span>#name_display# <span class="object_name">#object_name#</span></span>
 	</center>
-	<div class="ag-body">
+	#ag_icons#
+	<div class="ag-body" data-ag_names="#ag_names#">
 		<div class="ag-head">
 			<img class="ag-img" src="#ag_image#" alt=""/>
 			<div class="ag-protection">#ag_protection#</div>
@@ -165,6 +184,46 @@
 					case 'flag':
 						el.classList.toggle('ag-on', number == 1);
 						break;
+					case 'services': // icônes, nom complet en infobulle ; le nom s'affiche si l'icône n'est pas connue
+						if (!widget.agNames) {
+							try { widget.agNames = JSON.parse(widget.querySelector('.ag-body').getAttribute('data-ag_names')) || {}; } catch (e) { widget.agNames = {}; }
+						}
+						el.textContent = '';
+						var list = String((value === null || value === undefined) ? '' : value).split(',').filter(function(id) { return id.trim() !== ''; });
+						if (list.length == 0) {
+							el.textContent = '—';
+							break;
+						}
+						var box = document.createElement('span');
+						box.className = 'ag-svc-list';
+						list.forEach(function(id) {
+							id = id.trim();
+							var name = widget.agNames[id] || id;
+							var item = document.createElement('span');
+							item.className = 'ag-svc';
+							item.title = name;
+							var icon = document.createElement('i');
+							icon.className = 'ag-svc-ico' + (/^[a-z0-9_]+$/i.test(id) ? ' ag-svc-' + id : '');
+							var label = document.createElement('span');
+							label.className = 'ag-svc-name';
+							label.textContent = name;
+							item.appendChild(icon);
+							item.appendChild(label);
+							box.appendChild(item);
+						});
+						el.appendChild(box);
+						var check = function() {
+							box.querySelectorAll('.ag-svc').forEach(function(item) {
+								var style = window.getComputedStyle(item.querySelector('.ag-svc-ico'));
+								var mask = style.webkitMaskImage || style.maskImage || 'none';
+								item.classList.toggle('ag-noicon', mask == 'none');
+							});
+						};
+						check();
+						[300, 1500, 5000].forEach(function(delay) { // la feuille des icônes peut finir de charger après le widget
+							setTimeout(check, delay);
+						});
+						break;
 					case 'list':
 						el.textContent = (value === '' || value === null || value === undefined) ? '—' : String(value).split(',').join(', ');
 						break;
@@ -226,13 +285,15 @@
 					event.stopPropagation();
 				});
 			};
-			var close = function() {
+			var close = function(event) {
 				if (!document.body.contains(root)) { // widget redessiné
 					document.removeEventListener('click', close);
 					window.removeEventListener('scroll', close, true);
 					return;
 				}
 				popups.forEach(function(menu) {
+					// le défilement de la liste elle-même, ou du clavier mobile pendant la saisie, ne ferme pas le popup
+					if (event && event.type == 'scroll' && (menu.contains(event.target) || menu.contains(document.activeElement))) return;
 					menu.classList.remove('ag-open');
 				});
 			};
@@ -289,7 +350,9 @@
 				btn.addEventListener('click', function() {
 					var kind = btn.getAttribute('data-ag_input');
 					var field = btn.closest('.ag-tool').querySelector('.ag-field');
-					var options = {id: btn.getAttribute('data-ag_exec')};
+					// un groupe choisi dans la liste des services passe par la commande du groupe
+					var group = field && field.getAttribute('data-ag_group') == '1' && btn.getAttribute('data-ag_exec_group');
+					var options = {id: group ? btn.getAttribute('data-ag_exec_group') : btn.getAttribute('data-ag_exec')};
 					if (kind) {
 						var value = field ? field.value.trim() : '';
 						if (value === '') {
@@ -317,6 +380,58 @@
 					event.preventDefault();
 					var btn = field.closest('.ag-tool').querySelector('.ag-btn');
 					if (btn) btn.click();
+				});
+			});
+			// liste des services avec icônes : recherche, puis le choix remplit le champ caché de la ligne
+			root.querySelectorAll('.ag-pick').forEach(function(pick) {
+				var tool = pick.closest('.ag-tool');
+				var menu = tool.querySelector('.ag-pick-menu');
+				var field = tool.querySelector('.ag-field');
+				var search = menu.querySelector('.ag-pick-search');
+				popup(pick, menu);
+				pick.addEventListener('click', function(event) {
+					event.stopPropagation();
+					open(pick, menu);
+					if (menu.classList.contains('ag-open') && !('ontouchstart' in window)) search.focus();
+				});
+				search.addEventListener('input', function() {
+					var text = search.value.trim().toLowerCase();
+					var match = function(item) {
+						return text === '' || item.textContent.toLowerCase().indexOf(text) != -1 || item.getAttribute('data-ag_value').indexOf(text) != -1;
+					};
+					// un groupe qui correspond montre tous ses services, un service qui correspond montre son groupe
+					var groupItem = null, groupMatch = false, groupShown = false;
+					var finish = function() {
+						if (groupItem) groupItem.classList.toggle('ag-hidden', !(groupMatch || groupShown));
+					};
+					menu.querySelectorAll('.ag-pick-item, .ag-pick-header').forEach(function(item) {
+						if (item.classList.contains('ag-pick-header')) {
+							finish();
+							groupItem = null;
+							return;
+						}
+						if (item.getAttribute('data-ag_group') == '1') {
+							finish();
+							groupItem = item;
+							groupMatch = match(item);
+							groupShown = false;
+							return;
+						}
+						var show = (groupItem && groupMatch) || match(item);
+						item.classList.toggle('ag-hidden', !show);
+						if (show) groupShown = true;
+					});
+					finish();
+				});
+				menu.querySelectorAll('.ag-pick-item').forEach(function(item) {
+					item.addEventListener('click', function() {
+						field.value = item.getAttribute('data-ag_value');
+						field.setAttribute('data-ag_group', item.getAttribute('data-ag_group') || '0');
+						pick.querySelector('.ag-pick-label').textContent = item.textContent;
+						var icon = item.querySelector('i');
+						pick.querySelector('i').className = icon.className + (icon.classList.contains('fas') ? ' ag-pick-icon' : '');
+						menu.classList.remove('ag-open');
+					});
 				});
 			});
 			var update = root.querySelector('.ag-update[data-ag_update]');

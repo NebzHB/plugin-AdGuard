@@ -108,6 +108,49 @@ class AdGuard extends eqLogic {
 		return (($ret === false) ? false : true);
 	}
 
+	/**
+	 * Feuille de style des icônes des services (data/services_icons.css), chargée par les widgets.
+	 * Les icônes servent de masque : elles prennent la couleur du texte, en thème clair comme sombre.
+	 */
+	public static function setServicesIcons($icons) {
+		if(!is_array($icons) || count($icons) == 0) return false;
+		$css = '';
+		ksort($icons);
+		foreach($icons as $id => $svg) {
+			// id et base64 vérifiés : rien d'autre ne peut entrer dans la feuille de style
+			if(!preg_match('/^[a-z0-9_]+$/i', $id) || !preg_match('/^[A-Za-z0-9+\/=]+$/', $svg)) continue;
+			$url = 'url("data:image/svg+xml;base64,'.$svg.'")';
+			$css .= '.ag-svc-'.$id.'{background-color:currentColor;-webkit-mask-image:'.$url.';mask-image:'.$url.'}'."\n";
+		}
+		if($css == '') return false;
+		$file = dirname(__FILE__) . '/../../data/services_icons.css';
+		if(file_exists($file) && md5_file($file) == md5($css)) return true;
+		exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
+		exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
+		return (file_put_contents($file, $css) !== false);
+	}
+
+	/**
+	 * Groupe de chaque service (data/services_groups.json), pour ranger la liste de choix des widgets par groupe.
+	 */
+	public static function setServicesGroups($groups) {
+		if(!is_array($groups) || count($groups) == 0) return false;
+		ksort($groups);
+		$json = json_encode($groups);
+		$file = dirname(__FILE__) . '/../../data/services_groups.json';
+		if(file_exists($file) && md5_file($file) == md5($json)) return true;
+		exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
+		exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
+		return (file_put_contents($file, $json) !== false);
+	}
+
+	public static function getServicesGroups() {
+		$file = dirname(__FILE__) . '/../../data/services_groups.json';
+		if(!file_exists($file)) return [];
+		$groups = json_decode(file_get_contents($file), true);
+		return (is_array($groups)) ? $groups : [];
+	}
+
 	public static function getServicesList() {
 		exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
 		exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
@@ -429,9 +472,15 @@ class AdGuard extends eqLogic {
 		
 		$temp_services_list=$this->getAdGuard('blocked_services/all');
 		$AdGuardinfo['services_list']=[];
+		$AdGuardinfo['services_icons']=[];
+		$AdGuardinfo['services_groups']=[];
 		if($temp_services_list && is_array($temp_services_list)) {
 			foreach($temp_services_list['blocked_services'] as $i=>$s) {
 				$AdGuardinfo['services_list'][$temp_services_list['blocked_services'][$i]['id']]=$temp_services_list['blocked_services'][$i]['name'];
+				// icône du service (SVG en base64), gardée à part pour ne pas alourdir le log
+				if(isset($s['icon_svg']) && is_string($s['icon_svg'])) $AdGuardinfo['services_icons'][$s['id']]=$s['icon_svg'];
+				// groupe du service (AdGuard Home >= v0.107.68), pour la liste de choix des widgets
+				if(isset($s['group_id']) && is_string($s['group_id']) && $s['group_id'] !== '') $AdGuardinfo['services_groups'][$s['id']]=$s['group_id'];
 			}
 		}
 		$temp_services_list=null;
@@ -446,6 +495,10 @@ class AdGuard extends eqLogic {
 			$AdGuardinfo=$this->getAdGuardStatut();
 			if(!$AdGuardinfo) return;
 
+			$icons = (isset($AdGuardinfo['services_icons'])) ? $AdGuardinfo['services_icons'] : [];
+			unset($AdGuardinfo['services_icons']);
+			$groups = (isset($AdGuardinfo['services_groups'])) ? $AdGuardinfo['services_groups'] : [];
+			unset($AdGuardinfo['services_groups']);
 			log::add('AdGuard','info','Reçu info de AdGuard Home');
 			log::add('AdGuard','debug','Reçu:'.json_encode($AdGuardinfo));
 			
@@ -476,6 +529,8 @@ class AdGuard extends eqLogic {
 			// write new servicesList if it's the cron only (to avoid infinite loop with postSave
 			if($allowListServices) {
 				self::setServicesList($AdGuardinfo['services_list']);
+				self::setServicesIcons($icons);
+				self::setServicesGroups($groups);
 			}
 			
 			// internet_block
@@ -785,13 +840,17 @@ class AdGuard extends eqLogic {
 		if ($chips != '') $chips = '<div class="ag-chips">'.$chips.'</div>';
 		if ($isClient && $chips != '') $chips .= '<div class="ag-note" data-ag_in_scope="settings"><i class="fas fa-link"></i> '.__("Ce client suit les paramètres généraux : ses réglages grisés ne s'appliquent pas", __FILE__).'</div>';
 
+		// serveur : services bloqués, comme sur les clients
+		$cmd = $find('blocked_services');
+		if (!$isClient && is_object($cmd)) $chips .= '<div class="ag-rows"><div class="ag-row ag-row-list"><span>'.__("Services bloqués", __FILE__).'</span><b>'.$span($cmd, 'services').'</b></div></div>';
+
 		// client : identifiants et services bloqués (grisés quand il suit les services bloqués généraux)
 		if ($isClient) {
 			$rows = '';
 			$cmd = $find('client_ids');
 			if (is_object($cmd)) $rows .= '<div class="ag-row ag-row-list"><span>'.__("Identifiant(s)", __FILE__).'</span><b>'.$span($cmd, 'list').'</b></div>';
 			$cmd = $find('client_blocked_services');
-			if (is_object($cmd)) $rows .= '<div class="ag-row ag-row-list" data-ag_in="services"><span>'.__("Services bloqués", __FILE__).'</span><b>'.$span($cmd, 'list').'</b></div>';
+			if (is_object($cmd)) $rows .= '<div class="ag-row ag-row-list" data-ag_in="services"><span>'.__("Services bloqués", __FILE__).'</span><b>'.$span($cmd, 'services').'</b></div>';
 			if ($rows != '') $chips .= '<div class="ag-rows">'.$rows.'</div>';
 			$chips .= '<div class="ag-note" data-ag_in_scope="services"><i class="fas fa-link"></i> '.__("Ce client suit les services bloqués généraux : sa liste grisée ne s'applique pas", __FILE__).'</div>';
 		}
@@ -817,6 +876,46 @@ class AdGuard extends eqLogic {
 			}
 			return '';
 		};
+		// liste des services avec leur icône (une liste native ne sait pas afficher d'image), rangés sous leur groupe :
+		// on peut choisir un groupe entier ou un service
+		$picker = function($ids, $groupCmd) use ($visible) {
+			foreach($ids as $id) {
+				if (!isset($visible[$id])) continue;
+				$services = [];
+				foreach(explode(';', (string)$visible[$id]->getConfiguration('listValue')) as $item) {
+					$item = explode('|', $item, 2);
+					if (count($item) != 2 || $item[0] === '') continue;
+					$services[$item[0]] = $item[1];
+				}
+				$item = function($value, $label, $class = '') {
+					$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+					return '<div class="ag-menu-item ag-pick-item cursor'.$class.'" data-ag_value="'.$value.'"><i class="ag-svc-ico ag-svc-'.$value.'"></i><span>'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</span></div>';
+				};
+				$items = '';
+				$byGroup = [];
+				$serviceGroups = ($groupCmd != '') ? self::getServicesGroups() : [];
+				foreach($services as $value => $label) {
+					$group = (isset($serviceGroups[$value])) ? $serviceGroups[$value] : '';
+					$byGroup[$group][$value] = $label;
+				}
+				if (count($serviceGroups) > 0) {
+					foreach(self::serviceGroupList() + array_fill_keys(array_keys($byGroup), '') as $group => $groupName) {
+						if ($group === '' || !isset($byGroup[$group])) continue;
+						$items .= '<div class="ag-menu-item ag-pick-item ag-pick-group cursor" data-ag_value="'.htmlspecialchars($group, ENT_QUOTES, 'UTF-8').'" data-ag_group="1"><i class="fas fa-layer-group"></i><span>'.htmlspecialchars(($groupName != '') ? $groupName : $group, ENT_QUOTES, 'UTF-8').'</span></div>';
+						foreach($byGroup[$group] as $value => $label) $items .= $item($value, $label, ' ag-pick-child');
+					}
+					if (isset($byGroup[''])) {
+						$items .= '<div class="ag-pick-header">'.__("Autres services", __FILE__).'</div>';
+						foreach($byGroup[''] as $value => $label) $items .= $item($value, $label, ' ag-pick-child');
+					}
+				} else {
+					foreach($services as $value => $label) $items .= $item($value, $label);
+				}
+				return '<input type="hidden" class="ag-field"/><span class="ag-pick cursor"><i class="ag-svc-ico"></i><span class="ag-pick-label">'.__("Choisir...", __FILE__).'</span><i class="fas fa-caret-down"></i></span>'
+					.'<div class="ag-popup ag-pick-menu"><input type="text" class="ag-pick-search" data-role="none" placeholder="'.__("Rechercher...", __FILE__).'"/><div class="ag-pick-list">'.$items.'</div></div>';
+			}
+			return '';
+		};
 		$input = function($placeholder) {
 			return '<input type="text" class="ag-field" data-role="none" placeholder="'.$placeholder.'"/>';
 		};
@@ -825,14 +924,23 @@ class AdGuard extends eqLogic {
 			return '<div class="ag-tool"'.$extra.'><span class="ag-tool-label">'.$label.'</span>'.$content.'<span class="ag-tool-btns">'.$buttons.'</span></div>';
 		};
 		$tools = '';
-		$tools .= $tool(__("Services", __FILE__), $select([$p.'service_block', $p.'service_unblock']),
-			$button($p.'service_block', 'fas fa-ban', __("Bloquer ce service", __FILE__), 'select').
-			$button($p.'service_unblock', 'fas fa-check', __("Débloquer ce service", __FILE__), 'select').
+		// groupes dans la même liste que les services quand on connaît le groupe de chaque service (AdGuard Home >= v0.107.68)
+		$merged = (isset($visible[$p.'group_block']) && isset($visible[$p.'group_unblock']) && count(self::getServicesGroups()) > 0);
+		$withGroup = function($html, $groupId) use ($visible, $merged, &$handled) {
+			if (!$merged || $html == '') return $html;
+			$handled[] = $groupId;
+			return str_replace('<button ', '<button data-ag_exec_group="'.$visible[$groupId]->getId().'" ', $html);
+		};
+		$tools .= $tool(__("Services", __FILE__), $picker([$p.'service_block', $p.'service_unblock'], ($merged) ? $p.'group_block' : ''),
+			$withGroup($button($p.'service_block', 'fas fa-ban', __("Bloquer ce service ou ce groupe", __FILE__), 'select'), $p.'group_block').
+			$withGroup($button($p.'service_unblock', 'fas fa-check', __("Débloquer ce service ou ce groupe", __FILE__), 'select'), $p.'group_unblock').
 			$button($p.'services_block', 'fas fa-users-slash', __("Bloquer tous les services", __FILE__)).
 			$button($p.'services_unblock', 'fas fa-users', __("Débloquer tous les services", __FILE__)), ($isClient)?' data-ag_in="services"':'');
-		$tools .= $tool(__("Groupes", __FILE__), $select([$p.'group_block', $p.'group_unblock']),
-			$button($p.'group_block', 'fas fa-ban', __("Bloquer ce groupe de services", __FILE__), 'select').
-			$button($p.'group_unblock', 'fas fa-check', __("Débloquer ce groupe de services", __FILE__), 'select'), ($isClient)?' data-ag_in="services"':'');
+		if (!$merged) {
+			$tools .= $tool(__("Groupes", __FILE__), $select([$p.'group_block', $p.'group_unblock']),
+				$button($p.'group_block', 'fas fa-ban', __("Bloquer ce groupe de services", __FILE__), 'select').
+				$button($p.'group_unblock', 'fas fa-check', __("Débloquer ce groupe de services", __FILE__), 'select'), ($isClient)?' data-ag_in="services"':'');
+		}
 		if ($isClient) {
 			$tools .= $tool(__("Identifiants", __FILE__), $input(__("IP, MAC ou ClientID", __FILE__)),
 				$button('client_ids_add', 'fas fa-plus', __("Ajouter un identifiant", __FILE__), 'message').
@@ -891,6 +999,10 @@ class AdGuard extends eqLogic {
 		}
 		if ($actions != '') $actions = '<div class="ag-actions">'.$actions.'</div>';
 
+		// noms des services pour les infobulles des icônes, et feuille de style des icônes (générée au cron)
+		$replace['#ag_names#'] = htmlspecialchars(json_encode(self::serviceList(), JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
+		$css = dirname(__FILE__) . '/../../data/services_icons.css';
+		$replace['#ag_icons#'] = (file_exists($css)) ? '<link rel="stylesheet" href="plugins/AdGuard/data/services_icons.css?v='.filemtime($css).'"/>' : '';
 		$replace['#ag_image#'] = $this->getImage();
 		$replace['#ag_protection#'] = $protection;
 		$replace['#ag_switch#'] = $switch;
