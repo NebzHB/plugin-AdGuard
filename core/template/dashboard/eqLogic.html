@@ -72,10 +72,15 @@
 		.ag-widget .ag-pick-list { max-height: 45vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 		.ag-widget .ag-pick-item { display: flex; align-items: center; gap: 8px; }
 		.ag-widget .ag-pick-item.ag-hidden { display: none; }
-		.ag-widget .ag-pick-group { font-weight: 600; margin-top: 4px; }
-		.ag-widget .ag-pick-group i { width: 18px; text-align: center; opacity: .7; }
-		.ag-widget .ag-pick-child { padding-left: 18px; }
-		.ag-widget .ag-pick-header { padding: 6px 6px 2px 6px; font-size: 11px; font-weight: 600; opacity: .6; }
+		/* catégories : bandeau en petites capitales, services indentés dessous avec un filet */
+		.ag-widget .ag-pick-group, .ag-widget .ag-pick-header { margin-top: 6px; padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase !important; letter-spacing: .04em; background: rgba(127,127,127,.18); }
+		.ag-widget .ag-pick-group:first-child { margin-top: 0; }
+		.ag-widget .ag-pick-group:hover { background: rgba(127,127,127,.32); }
+		.ag-widget .ag-pick-group i, .ag-widget .ag-pick-header i, .ag-widget .ag-pick i { width: 18px; text-align: center; color: inherit !important; }
+		.ag-widget .ag-pick-group span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+		.ag-widget .ag-pick-group small { flex: none; font-size: 10px; font-weight: 400; text-transform: none; letter-spacing: 0; opacity: .7; }
+		.ag-widget .ag-pick-header { opacity: .75; }
+		.ag-widget .ag-pick-child { margin-left: 14px; padding-left: 10px; border-left: 2px solid rgba(127,127,127,.3); border-radius: 0 4px 4px 0; }
 		.ag-widget .ag-actions { margin-top: 8px; text-align: center; }
 		.ag-widget .ag-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 11px; opacity: .8; }
 		.ag-widget .ag-foot .ag-grow { flex: 1; }
@@ -398,7 +403,7 @@
 				search.addEventListener('input', function() {
 					var text = search.value.trim().toLowerCase();
 					var match = function(item) {
-						return text === '' || item.textContent.toLowerCase().indexOf(text) != -1 || item.getAttribute('data-ag_value').indexOf(text) != -1;
+						return text === '' || (item.querySelector('span') || item).textContent.toLowerCase().indexOf(text) != -1 || item.getAttribute('data-ag_value').indexOf(text) != -1;
 					};
 					// un groupe qui correspond montre tous ses services, un service qui correspond montre son groupe
 					var groupItem = null, groupMatch = false, groupShown = false;
@@ -428,7 +433,7 @@
 					item.addEventListener('click', function() {
 						field.value = item.getAttribute('data-ag_value');
 						field.setAttribute('data-ag_group', item.getAttribute('data-ag_group') || '0');
-						pick.querySelector('.ag-pick-label').textContent = item.textContent;
+						pick.querySelector('.ag-pick-label').textContent = (item.querySelector('span') || item).textContent;
 						var icon = item.querySelector('i');
 						pick.querySelector('i').className = icon.className + (icon.classList.contains('fas') ? ' ag-pick-icon' : '');
 						menu.classList.remove('ag-open');
