@@ -19,22 +19,6 @@
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 function AdGuard_update() {
-	// La beta a brièvement confié les confirmations au core (actionConfirm). Les widgets posent leurs propres questions :
-	// on retire actionConfirm une seule fois de ces commandes, sinon l'action serait confirmée deux fois.
-	if (config::byKey('actionConfirmRemoved', 'AdGuard', 0) != 1) {
-		$confirmed = ['internet_block', 'filtering_disable', 'parental_disable', 'services_block', 'services_unblock', 'cache_clear', 'filters_refresh', 'reset_stats', 'UpdateAdGuard',
-			'client_internet_block', 'client_filtering_disable', 'client_parental_disable', 'client_services_block', 'client_services_unblock'];
-		foreach (eqLogic::byType('AdGuard') as $AdGuard) {
-			foreach ($confirmed as $logicalId) {
-				$cmd = $AdGuard->getCmd('action', $logicalId);
-				if (is_object($cmd) && $cmd->getConfiguration('actionConfirm', 0) == 1) {
-					$cmd->setConfiguration('actionConfirm', 0);
-					$cmd->save();
-				}
-			}
-		}
-		config::save('actionConfirmRemoved', 1, 'AdGuard');
-	}
 	foreach (eqLogic::byType('AdGuard') as $AdGuard) {
 		/*if($AdGuard->getConfiguration('type','') == 'AdGuardGlobal')*/ $AdGuard->save();
 	}
