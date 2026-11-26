@@ -36,6 +36,9 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "UpdateAdGuard"
 		}, {
 			"name": "{{Version Actuelle}}",
@@ -137,6 +140,9 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "filtering_disable",
 			"value": "filtering_enabled"
 		}, {
@@ -205,6 +211,9 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "parental_disable",
 			"value": "parental_enabled"
 		}, {
@@ -284,6 +293,9 @@
 				"icon": "<i class=\"fas fa-users-slash\"></i>"
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "services_block"
 		}, {
 			"name": "{{Débloquer tous les services}}",
@@ -294,6 +306,9 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "services_unblock"
 		}, {
 			"name": "{{Bloquer un groupe de services}}",
@@ -340,6 +355,9 @@
 				"icon": "<i class=\"fas fa-phone-slash\"></i>"
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "internet_block"
 		}, {
 			"name": "{{Débloquer tout internet via DNS}}",
@@ -383,6 +401,9 @@
 				"icon": "<i class=\"fas fa-eraser\"></i>"
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "reset_stats"
 		}, {
 			"name": "{{Vider le cache DNS}}",
@@ -392,6 +413,9 @@
 				"icon": "<i class=\"fas fa-broom\"></i>"
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "cache_clear"
 		}, {
 			"name": "{{Mettre à jour les filtres}}",
@@ -402,6 +426,9 @@
 				"forceReturnLineAfter": 1
 			},
 			"isVisible": 1,
+			"configuration": {
+				"actionConfirm": 1
+			},
 			"logicalId": "filters_refresh"
 		}, {
 			"name": "{{Tester un domaine}}",

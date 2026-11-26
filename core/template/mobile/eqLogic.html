@@ -101,18 +101,13 @@
 		.ag-widget .ag-menu-title { font-weight: 600; padding: 2px 6px 4px 6px; opacity: .8; }
 		.ag-widget .ag-menu-item { padding: 4px 6px; border-radius: 4px; white-space: nowrap; }
 		.ag-widget .ag-menu-item:hover { background: rgba(127,127,127,.2); }
-		.ag-widget .ag-confirm { width: 240px; white-space: normal; }
-		.ag-widget .ag-confirm-text { padding: 2px 2px 8px 2px; font-size: 13px; }
-		.ag-widget .ag-confirm-btns { display: flex; justify-content: flex-end; gap: 6px; }
-		.ag-widget .ag-confirm .ag-btn { height: 28px; padding: 0 12px; font-size: 13px; }
-		.ag-widget .ag-confirm .ag-btn-confirm { background: var(--al-danger-color, #e53935); color: #fff; }
 	</style>
 	<center class="widget-name">
 		<span class="warning" title="#alert_name#"><i class='#alert_icon#'></i></span>
 		<span>#name_display# <span class="object_name">#object_name#</span></span>
 	</center>
 	#ag_icons#
-	<div class="ag-body" data-ag_names="#ag_names#" data-ag_txt_cancel="#ag_txt_cancel#" data-ag_txt_ok="#ag_txt_ok#">
+	<div class="ag-body" data-ag_names="#ag_names#">
 		<div class="ag-head">
 			<img class="ag-img" src="#ag_image#" alt=""/>
 			<div class="ag-protection">#ag_protection#</div>
@@ -348,13 +343,11 @@
 				button.addEventListener('click', function(event) {
 					event.stopPropagation();
 					if (!button.classList.contains('ag-on')) {
-						jeedom.cmd.execute({id: button.getAttribute('data-ag_on')});
+						execute({id: button.getAttribute('data-ag_on')});
 					} else if (pauseMenu) {
 						open(button, pauseMenu);
 					} else {
-						ask(button.getAttribute('data-ag_confirm_off'), function() { // couper internet d'un client
-							jeedom.cmd.execute({id: button.getAttribute('data-ag_off')});
-						}, button);
+						execute({id: button.getAttribute('data-ag_off')}); // couper internet d'un client (confirmation par le core)
 					}
 				});
 			}
@@ -362,19 +355,28 @@
 				pauseMenu.querySelectorAll('[data-ag_select]').forEach(function(item) {
 					item.addEventListener('click', function() {
 						pauseMenu.classList.remove('ag-open');
-						jeedom.cmd.execute({id: button.getAttribute('data-ag_off'), value: {select: item.getAttribute('data-ag_select')}});
+						execute({id: button.getAttribute('data-ag_off'), value: {select: item.getAttribute('data-ag_select')}});
 					});
 				});
 			}
 			root.querySelectorAll('.ag-chip').forEach(function(chip) {
 				chip.addEventListener('click', function() {
-					// confirmation éventuelle : couper internet pour tout le réseau, désactiver le filtrage ou le contrôle parental
-					var action = chip.classList.contains('ag-on') ? 'off' : 'on';
-					ask(chip.getAttribute('data-ag_confirm_' + action), function() {
-						jeedom.cmd.execute({id: chip.getAttribute('data-ag_' + action)});
-					}, chip);
+					execute({id: chip.getAttribute(chip.classList.contains('ag-on') ? 'data-ag_off' : 'data-ag_on')});
 				});
 			});
+			// Les actions sensibles (couper internet, désactiver le filtrage...) ont l'option « Confirmer l'action » de Jeedom :
+			// le core refuse d'abord la commande (code -32006), affiche sa propre confirmation (jeeDialog, confirm() en mobile)
+			// et la relance si on accepte. Ce premier refus, comme la demande de code (-32005), n'est donc pas une erreur.
+			var asked = function(error) {
+				return error && (error.code == -32006 || error.code == -32005);
+			};
+			var execute = function(options) {
+				options.error = function(error) {
+					if (asked(error)) return;
+					if (error && error.message && typeof jeedomUtils !== 'undefined' && jeedomUtils.showAlert) jeedomUtils.showAlert({message: error.message, level: 'danger'});
+				};
+				jeedom.cmd.execute(options);
+			};
 			// outils : liste ou saisie de la ligne envoyée avec la commande, puis un retour vert ou rouge sur le bouton
 			var flash = function(btn, cls) {
 				btn.classList.remove('ag-busy');
@@ -382,44 +384,6 @@
 				setTimeout(function() {
 					btn.classList.remove(cls);
 				}, 1200);
-			};
-			// En mobile, jeeDialog est chargé mais sans sa feuille de style (celle du bureau) : sa boîte reste invisible
-			// sous la page. La confirmation se fait donc dans un popup du widget, sous l'élément touché.
-			var confirmBox = null;
-			var ask = function(question, run, anchor) {
-				if (!question) return run();
-				if (!confirmBox) {
-					var body = root.querySelector('.ag-body');
-					confirmBox = document.createElement('div');
-					confirmBox.className = 'ag-popup ag-confirm';
-					var text = document.createElement('div');
-					text.className = 'ag-confirm-text';
-					var buttons = document.createElement('div');
-					buttons.className = 'ag-confirm-btns';
-					[['0', body.getAttribute('data-ag_txt_cancel') || 'Annuler', 'ag-btn'], ['1', body.getAttribute('data-ag_txt_ok') || 'OK', 'ag-btn ag-btn-confirm']].forEach(function(answer) {
-						var b = document.createElement('button');
-						b.type = 'button';
-						b.className = answer[2];
-						b.setAttribute('data-role', 'none');
-						b.textContent = answer[1];
-						b.addEventListener('click', function() {
-							confirmBox.classList.remove('ag-open');
-							if (answer[0] == '1' && confirmBox.agRun) confirmBox.agRun();
-							confirmBox.agRun = null;
-						});
-						buttons.appendChild(b);
-					});
-					confirmBox.appendChild(text);
-					confirmBox.appendChild(buttons);
-					body.appendChild(confirmBox);
-					popup(root, confirmBox);
-				}
-				confirmBox.querySelector('.ag-confirm-text').textContent = question;
-				confirmBox.agRun = run;
-				confirmBox.classList.remove('ag-open');
-				setTimeout(function() { // après le clic en cours, qui fermerait le popup
-					open(anchor || root, confirmBox);
-				}, 0);
 			};
 			root.querySelectorAll('.ag-btn[data-ag_exec]').forEach(function(btn) {
 				btn.addEventListener('click', function() {
@@ -442,13 +406,12 @@
 						if (kind == 'message' && field) field.value = '';
 					};
 					options.error = function(error) {
+						if (asked(error)) return btn.classList.remove('ag-busy'); // confirmation demandée par le core, qui relance la commande si on accepte
 						flash(btn, 'ag-ko');
 						if (error && error.message && typeof jeedomUtils !== 'undefined' && jeedomUtils.showAlert) jeedomUtils.showAlert({message: error.message, level: 'danger'});
 					};
-					ask(btn.getAttribute('data-ag_confirm'), function() {
-						btn.classList.add('ag-busy');
-						jeedom.cmd.execute(options);
-					}, btn);
+					btn.classList.add('ag-busy');
+					jeedom.cmd.execute(options);
 				});
 			});
 			root.querySelectorAll('.ag-tool input.ag-field').forEach(function(field) {
@@ -514,10 +477,7 @@
 			var update = root.querySelector('.ag-update[data-ag_update]');
 			if (update) {
 				update.addEventListener('click', function() {
-					var run = function() {
-						jeedom.cmd.execute({id: update.getAttribute('data-ag_update')});
-					};
-					ask(update.getAttribute('data-ag_confirm'), run, update);
+					execute({id: update.getAttribute('data-ag_update')});
 				});
 			}
 			var refresh = root.querySelector('.ag-refresh');
