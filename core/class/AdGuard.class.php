@@ -768,7 +768,7 @@ class AdGuard extends eqLogic {
 			$protection = '<div class="ag-title">'.__("Internet", __FILE__).'</div>';
 			$protection .= '<div class="ag-state" '.$attr($state, 'protection').' data-ag_invert="1"><span class="ag-lbl-on">'.__("Autorisé", __FILE__).'</span><span class="ag-lbl-off">'.__("Bloqué via DNS", __FILE__).'</span></div>';
 			if (is_object($on) && is_object($off)) {
-				$switch = '<i class="fas fa-globe ag-switch" '.$attr($state, 'switch').' data-ag_invert="1" data-ag_on="'.$on->getId().'" data-ag_off="'.$off->getId().'" title="'.__("Bloquer / Débloquer internet pour ce client", __FILE__).'"></i>';
+				$switch = '<i class="fas fa-globe ag-switch" '.$attr($state, 'switch').' data-ag_invert="1" data-ag_on="'.$on->getId().'" data-ag_off="'.$off->getId().'" data-ag_confirm_off="'.__("Couper internet pour ce client ?", __FILE__).'" title="'.__("Bloquer / Débloquer internet pour ce client", __FILE__).'"></i>';
 				$handled = array_merge($handled, ['client_internet_block', 'client_internet_unblock']);
 			}
 		}
@@ -806,9 +806,9 @@ class AdGuard extends eqLogic {
 		// protections : une pastille par réglage, un clic l'inverse. Client : les réglages propres sont grisés quand il suit les paramètres généraux
 		$chips = '';
 		$list = [
-			[$p.'filtering', __("Filtrage", __FILE__), 'settings'],
+			[$p.'filtering', __("Filtrage", __FILE__), 'settings', __("Désactiver le filtrage ?", __FILE__)],
 			[$p.'safebrowsing', __("Sécurité de navigation", __FILE__), 'settings'],
-			[$p.'parental', __("Contrôle parental", __FILE__), 'settings'],
+			[$p.'parental', __("Contrôle parental", __FILE__), 'settings', __("Désactiver le contrôle parental ?", __FILE__)],
 			[$p.'safesearch', __("Recherche sécurisée", __FILE__), 'settings'],
 		];
 		if ($isClient) {
@@ -827,14 +827,15 @@ class AdGuard extends eqLogic {
 			if ($chip[0] == 'client_use_global_settings') $scope = ' data-ag_scope="settings"';
 			if ($chip[0] == 'client_use_global_blocked_services') $scope = ' data-ag_scope="services"';
 			$tips = ' data-ag_tip_on="'.$chip[1].' : '.__("activé, cliquer pour désactiver", __FILE__).'" data-ag_tip_off="'.$chip[1].' : '.__("désactivé, cliquer pour activer", __FILE__).'"';
-			$chips .= '<span class="ag-chip cursor" '.$attr($cmd, 'chip').$scope.$tips.' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'"><span class="ag-toggle"></span>'.$chip[1].'</span>';
+			$confirm = (isset($chip[3])) ? ' data-ag_confirm_off="'.$chip[3].'"' : ''; // seulement quand on baisse la protection
+			$chips .= '<span class="ag-chip cursor" '.$attr($cmd, 'chip').$scope.$tips.$confirm.' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'"><span class="ag-toggle"></span>'.$chip[1].'</span>';
 			$handled = array_merge($handled, [$base.'_enable', $base.'_disable']);
 		}
 		$cmd = $find('blocked_internet');
 		$chipOn = $action('internet_block');
 		$chipOff = $action('internet_unblock');
 		if (is_object($cmd) && is_object($chipOn) && is_object($chipOff)) {
-			$chips .= '<span class="ag-chip ag-chip-danger cursor" '.$attr($cmd, 'chip').' data-ag_tip_on="'.__("Internet bloqué pour tout le réseau, cliquer pour débloquer", __FILE__).'" data-ag_tip_off="'.__("Internet autorisé, cliquer pour bloquer tout internet via DNS", __FILE__).'" data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'"><span class="ag-toggle"></span>'.__("Internet bloqué", __FILE__).'</span>';
+			$chips .= '<span class="ag-chip ag-chip-danger cursor" '.$attr($cmd, 'chip').' data-ag_tip_on="'.__("Internet bloqué pour tout le réseau, cliquer pour débloquer", __FILE__).'" data-ag_tip_off="'.__("Internet autorisé, cliquer pour bloquer tout internet via DNS", __FILE__).'" data-ag_confirm_on="'.__("Couper internet pour tout le réseau ?", __FILE__).'" data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'"><span class="ag-toggle"></span>'.__("Internet bloqué", __FILE__).'</span>';
 			$handled = array_merge($handled, ['internet_block', 'internet_unblock']);
 		}
 		if ($chips != '') $chips = '<div class="ag-chips">'.$chips.'</div>';
@@ -934,8 +935,8 @@ class AdGuard extends eqLogic {
 		$tools .= $tool(__("Services", __FILE__), $picker([$p.'service_block', $p.'service_unblock'], ($merged) ? $p.'group_block' : ''),
 			$withGroup($button($p.'service_block', 'fas fa-ban', __("Bloquer ce service ou ce groupe", __FILE__), 'select'), $p.'group_block').
 			$withGroup($button($p.'service_unblock', 'fas fa-check', __("Débloquer ce service ou ce groupe", __FILE__), 'select'), $p.'group_unblock').
-			$button($p.'services_block', 'fas fa-users-slash', __("Bloquer tous les services", __FILE__)).
-			$button($p.'services_unblock', 'fas fa-users', __("Débloquer tous les services", __FILE__)), ($isClient)?' data-ag_in="services"':'');
+			$button($p.'services_block', 'fas fa-users-slash', __("Bloquer tous les services", __FILE__), '', '', __("Bloquer tous les services ?", __FILE__)).
+			$button($p.'services_unblock', 'fas fa-users', __("Débloquer tous les services", __FILE__), '', '', __("Débloquer tous les services ? La liste des services bloqués sera vidée.", __FILE__)), ($isClient)?' data-ag_in="services"':'');
 		if (!$merged) {
 			$tools .= $tool(__("Groupes", __FILE__), $select([$p.'group_block', $p.'group_unblock']),
 				$button($p.'group_block', 'fas fa-ban', __("Bloquer ce groupe de services", __FILE__), 'select').

@@ -326,7 +326,9 @@
 					} else if (pauseMenu) {
 						open(button, pauseMenu);
 					} else {
-						jeedom.cmd.execute({id: button.getAttribute('data-ag_off')});
+						ask(button.getAttribute('data-ag_confirm_off'), function() { // couper internet d'un client
+							jeedom.cmd.execute({id: button.getAttribute('data-ag_off')});
+						});
 					}
 				});
 			}
@@ -340,7 +342,11 @@
 			}
 			root.querySelectorAll('.ag-chip').forEach(function(chip) {
 				chip.addEventListener('click', function() {
-					jeedom.cmd.execute({id: chip.classList.contains('ag-on') ? chip.getAttribute('data-ag_off') : chip.getAttribute('data-ag_on')});
+					// confirmation éventuelle : couper internet pour tout le réseau, désactiver le filtrage ou le contrôle parental
+					var action = chip.classList.contains('ag-on') ? 'off' : 'on';
+					ask(chip.getAttribute('data-ag_confirm_' + action), function() {
+						jeedom.cmd.execute({id: chip.getAttribute('data-ag_' + action)});
+					});
 				});
 			});
 			// outils : liste ou saisie de la ligne envoyée avec la commande, puis un retour vert ou rouge sur le bouton
