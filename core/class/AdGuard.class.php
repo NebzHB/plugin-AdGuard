@@ -802,7 +802,7 @@ class AdGuard extends eqLogic {
 		$button = function($id, $icon, $title, $input = '', $text = '') use ($visible, &$handled) {
 			if (!isset($visible[$id])) return '';
 			$handled[] = $id;
-			return '<button type="button" class="ag-btn" data-ag_exec="'.$visible[$id]->getId().'"'.(($input != '')?' data-ag_input="'.$input.'"':'').' title="'.$title.'"><i class="'.$icon.'"></i>'.(($text != '')?' '.$text:'').'</button>';
+			return '<button type="button" class="ag-btn" data-role="none" data-ag_exec="'.$visible[$id]->getId().'"'.(($input != '')?' data-ag_input="'.$input.'"':'').' title="'.$title.'"><i class="'.$icon.'"></i>'.(($text != '')?' '.$text:'').'</button>';
 		};
 		$select = function($ids) use ($visible) {
 			foreach($ids as $id) {
@@ -813,12 +813,12 @@ class AdGuard extends eqLogic {
 					if (count($item) != 2 || $item[0] === '') continue;
 					$options .= '<option value="'.htmlspecialchars($item[0], ENT_QUOTES, 'UTF-8').'">'.htmlspecialchars($item[1], ENT_QUOTES, 'UTF-8').'</option>';
 				}
-				return '<select class="ag-field">'.$options.'</select>';
+				return '<select class="ag-field" data-role="none">'.$options.'</select>';
 			}
 			return '';
 		};
 		$input = function($placeholder) {
-			return '<input type="text" class="ag-field" placeholder="'.$placeholder.'"/>';
+			return '<input type="text" class="ag-field" data-role="none" placeholder="'.$placeholder.'"/>';
 		};
 		$tool = function($label, $content, $buttons, $extra = '') {
 			if ($buttons == '') return '';
