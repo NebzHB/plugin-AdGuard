@@ -1,0 +1,262 @@
+<div class="eqLogic eqLogic-widget ag-widget #eqLogic_class# #class#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width:#width#;height:#height#;#style#">
+	<style>
+		.ag-widget { min-width: 260px; width: 100%; }
+		.ag-widget .ag-body { padding: 4px 10px 8px 10px; text-align: left; }
+		.ag-widget .ag-head { display: flex; align-items: center; gap: 10px; }
+		.ag-widget .ag-img { width: 48px; height: 48px; object-fit: contain; flex: none; }
+		.ag-widget .ag-protection { flex: 1; min-width: 0; }
+		.ag-widget .ag-title { font-size: 22px; font-weight: 600; line-height: 1.1; }
+		.ag-widget .ag-state { font-size: 12px; opacity: .8; }
+		.ag-widget .ag-lbl-off, .ag-widget .ag-lbl-pause, .ag-widget .ag-off .ag-lbl-on { display: none; }
+		.ag-widget .ag-off .ag-lbl-off { display: inline; color: var(--al-danger-color, #e53935); }
+		.ag-widget.ag-paused .ag-off .ag-lbl-pause { display: inline; }
+		.ag-widget .ag-switch { cursor: pointer; font-size: 26px; opacity: .45; flex: none; }
+		.ag-widget .ag-switch.ag-on { opacity: 1; color: var(--al-success-color, #4caf50); }
+		.ag-widget .ag-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+		.ag-widget .ag-tile { border-radius: 6px; padding: 4px 8px 6px 8px; background: rgba(127,127,127,.12); min-width: 0; --ag-color: #888; }
+		.ag-widget .ag-tile.ag-red { --ag-color: #e8673c; }
+		.ag-widget .ag-tile.ag-amber { --ag-color: #d29a19; }
+		.ag-widget .ag-tile.ag-purple { --ag-color: #9a6bc0; }
+		.ag-widget .ag-tile-label { display: flex; gap: 4px; font-size: 11px; opacity: .8; white-space: nowrap; overflow: hidden; }
+		.ag-widget .ag-tile.ag-red .ag-tile-label, .ag-widget .ag-tile.ag-amber .ag-tile-label, .ag-widget .ag-tile.ag-purple .ag-tile-label { color: var(--ag-color); opacity: 1; }
+		.ag-widget .ag-tile-label .ag-pct { margin-left: auto; font-weight: 600; }
+		.ag-widget .ag-tile-value { font-size: 18px; font-weight: 600; white-space: nowrap; }
+		.ag-widget .ag-bar { height: 4px; border-radius: 2px; background: rgba(127,127,127,.25); margin-top: 2px; overflow: hidden; }
+		.ag-widget .ag-bar > div { height: 100%; width: 0; background: var(--ag-color); transition: width .4s; }
+		.ag-widget table.ag-rows { width: 100%; margin-top: 6px; font-size: 12px; border-collapse: collapse; }
+		.ag-widget table.ag-rows td { padding: 2px 4px; white-space: nowrap; background: transparent; border: 0; }
+		.ag-widget table.ag-rows td:first-child { opacity: .75; }
+		.ag-widget table.ag-rows td:last-child { text-align: right; font-weight: 600; }
+		.ag-widget table.ag-rows tr + tr td { border-top: 1px solid rgba(127,127,127,.2); }
+		.ag-widget .ag-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+		.ag-widget .ag-chip { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: rgba(127,127,127,.12); opacity: .6; white-space: nowrap; }
+		.ag-widget .ag-chip i { font-size: 8px; vertical-align: 1px; }
+		.ag-widget .ag-chip.ag-on { opacity: 1; }
+		.ag-widget .ag-chip.ag-on i { color: var(--al-success-color, #4caf50); }
+		.ag-widget .ag-chip-danger { display: none; }
+		.ag-widget .ag-chip-danger i { font-size: 10px; }
+		.ag-widget .ag-chip-danger.ag-on { display: inline-block; background: var(--al-danger-color, #e53935); color: #fff; }
+		.ag-widget .ag-chip-danger.ag-on i { color: #fff; }
+		.ag-widget .ag-actions { margin-top: 8px; text-align: center; }
+		.ag-widget .ag-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 11px; opacity: .8; }
+		.ag-widget .ag-foot .ag-grow { flex: 1; }
+		.ag-widget .ag-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--al-danger-color, #e53935); vertical-align: middle; }
+		.ag-widget .ag-dot.ag-on { background: var(--al-success-color, #4caf50); }
+		.ag-widget .ag-lbl-offline, .ag-widget .ag-offline .ag-lbl-online { display: none; }
+		.ag-widget .ag-offline .ag-lbl-offline { display: inline; }
+		.ag-widget .ag-update { display: none; color: var(--al-warning-color, #f0ad4e); font-weight: 600; }
+		.ag-widget .ag-update.ag-on { display: inline; }
+		.ag-widget .ag-refresh, .ag-widget .ag-more { display: inline-block; min-width: 16px; padding: 0 3px; text-align: center; font-size: 13px; }
+		.ag-widget .ag-refresh.ag-spin i { animation: fa-spin 1s linear infinite; }
+		.ag-widget .ag-popup { display: none; position: fixed; z-index: 1050; max-height: 60vh; max-width: 92vw; overflow: auto; padding: 6px 8px; border-radius: 6px; font-size: 12px; text-align: left; color: #333; background: #fff; border: 1px solid rgba(127,127,127,.4); box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+		.ag-widget .ag-popup.ag-open { display: block; }
+		.ag-widget .ag-popup table { border-collapse: collapse; color: inherit; font-size: inherit; }
+		.ag-widget .ag-popup td { padding: 2px 6px; white-space: nowrap; background: transparent; border: 0; }
+		.ag-widget .ag-popup td:last-child { text-align: right; font-weight: 600; }
+		.ag-widget .ag-popup tr + tr td { border-top: 1px solid rgba(127,127,127,.2); }
+		.ag-widget .ag-menu-title { font-weight: 600; padding: 2px 6px 4px 6px; opacity: .8; }
+		.ag-widget .ag-menu-item { padding: 4px 6px; border-radius: 4px; white-space: nowrap; }
+		.ag-widget .ag-menu-item:hover { background: rgba(127,127,127,.2); }
+	</style>
+	<center class="widget-name">
+		<span class="warning" title="#alert_name#"><i class='#alert_icon#'></i></span>
+		<span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
+		<a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
+	</center>
+	<div class="ag-body">
+		<div class="ag-head">
+			<img class="ag-img" src="#ag_image#" alt=""/>
+			<div class="ag-protection">#ag_protection#</div>
+			#ag_switch#
+		</div>
+		#ag_tiles#
+		#ag_chips#
+		#ag_actions#
+		<div class="ag-foot">#ag_foot#</div>
+		#ag_others#
+	</div>
+	<script>
+		(function() {
+			var root = document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"]');
+			if (!root) return;
+			if (typeof jeedom.cmd.addUpdateFunction !== 'function') { // avant 4.3
+				jeedom.cmd.addUpdateFunction = function(id, func) {
+					jeedom.cmd.update[id] = func;
+				};
+			}
+			var format = function(value, decimals) {
+				if (value === '' || value === null || value === undefined) return '—';
+				var number = parseFloat(value);
+				if (isNaN(number)) return value;
+				return number.toLocaleString(undefined, {maximumFractionDigits: decimals || 0});
+			};
+			var duration = function(seconds) {
+				seconds = Math.max(0, Math.round(seconds));
+				var h = Math.floor(seconds / 3600), m = Math.floor(seconds % 3600 / 60), s = seconds % 60;
+				return (h > 0 ? h + ':' + (m < 10 ? '0' : '') : '') + m + ':' + (s < 10 ? '0' : '') + s;
+			};
+			// pourcentages des tuiles, calculés à partir des valeurs affichées dans le widget
+			var ratios = function(widget) {
+				widget.querySelectorAll('[data-ag_ratio]').forEach(function(el) {
+					var part = widget.querySelector('[data-ag_cmd="' + el.getAttribute('data-ag_part') + '"]');
+					var total = widget.querySelector('[data-ag_cmd="' + el.getAttribute('data-ag_total') + '"]');
+					var p = part ? parseFloat(part.getAttribute('data-ag_value')) : NaN;
+					var t = total ? parseFloat(total.getAttribute('data-ag_value')) : NaN;
+					var pct = (t > 0 && !isNaN(p)) ? p * 100 / t : 0;
+					if (el.getAttribute('data-ag_ratio') == 'bar') el.style.width = Math.max(0, Math.min(100, pct)) + '%';
+					else el.textContent = format(pct, pct < 10 ? 1 : 0) + '%';
+				});
+			};
+			// compte à rebours de la pause : AdGuard Home ne renvoie le temps restant qu'à chaque actualisation
+			var tick = function(widget) {
+				var el = widget.querySelector('[data-ag_kind="pause"]');
+				if (!el) return;
+				var left = (parseFloat(el.getAttribute('data-ag_until')) - Date.now()) / 1000;
+				widget.classList.toggle('ag-paused', left > 0);
+				el.textContent = duration(left);
+			};
+			var apply = function(el, value) {
+				var widget = el.closest('.ag-widget');
+				var kind = el.getAttribute('data-ag_kind');
+				var number = parseFloat(value);
+				el.setAttribute('data-ag_value', (value === null || value === undefined) ? '' : value);
+				switch (kind) {
+					case 'protection':
+						el.classList.toggle('ag-off', number != 1);
+						break;
+					case 'pause':
+						el.setAttribute('data-ag_until', Date.now() + (number > 0 ? number * 1000 : 0));
+						tick(widget);
+						break;
+					case 'online':
+						el.parentNode.classList.toggle('ag-offline', number != 1);
+						el.classList.toggle('ag-on', number == 1);
+						break;
+					case 'switch':
+					case 'chip':
+					case 'flag':
+						el.classList.toggle('ag-on', number == 1);
+						break;
+					case 'text':
+						el.textContent = (value === '' || value === null || value === undefined) ? '—' : value;
+						break;
+					default:
+						el.textContent = format(value, 2);
+				}
+			};
+			root.querySelectorAll('[data-ag_cmd]').forEach(function(el) {
+				apply(el, el.getAttribute('data-ag_value'));
+			});
+			ratios(root);
+			var ids = {};
+			root.querySelectorAll('[data-ag_cmd]').forEach(function(el) {
+				ids[el.getAttribute('data-ag_cmd')] = true;
+			});
+			Object.keys(ids).forEach(function(id) {
+				// Le core ignore une fonction identique déjà enregistrée pour la commande : après un redessin du widget c'est
+				// donc l'ancienne qui reste. Elle cherche les éléments dans la page à chaque valeur, jamais ceux d'avant.
+				jeedom.cmd.addUpdateFunction(id, function(_options) {
+					var value = (_options.value !== undefined) ? _options.value : _options.display_value;
+					document.querySelectorAll('.ag-widget [data-ag_cmd="' + id + '"]').forEach(function(el) {
+						apply(el, value);
+						ratios(el.closest('.ag-widget'));
+					});
+				});
+			});
+			var timer = setInterval(function() {
+				if (!document.body.contains(root)) { // widget redessiné
+					clearInterval(timer);
+					return;
+				}
+				tick(root);
+			}, 1000);
+
+			// popups (pause et autres valeurs) : sous le bouton, sans sortir de l'écran, mêmes couleurs que le widget
+			var popups = [];
+			var open = function(button, popup) {
+				popups.forEach(function(other) {
+					if (other != popup) other.classList.remove('ag-open');
+				});
+				if (popup.classList.toggle('ag-open')) {
+					var style = window.getComputedStyle(root);
+					if (style.backgroundColor && style.backgroundColor != 'transparent' && style.backgroundColor.indexOf('rgba(0, 0, 0, 0)') == -1) {
+						popup.style.backgroundColor = style.backgroundColor;
+						popup.style.color = style.color;
+					}
+					var rect = button.getBoundingClientRect();
+					popup.style.left = Math.max(4, Math.min(rect.left, window.innerWidth - popup.offsetWidth - 4)) + 'px';
+					popup.style.top = Math.max(4, Math.min(rect.bottom + 4, window.innerHeight - popup.offsetHeight - 4)) + 'px';
+				}
+			};
+			var popup = function(button, menu) {
+				if (!button || !menu) return;
+				popups.push(menu);
+				menu.addEventListener('click', function(event) {
+					event.stopPropagation();
+				});
+			};
+			var close = function() {
+				if (!document.body.contains(root)) { // widget redessiné
+					document.removeEventListener('click', close);
+					window.removeEventListener('scroll', close, true);
+					return;
+				}
+				popups.forEach(function(menu) {
+					menu.classList.remove('ag-open');
+				});
+			};
+			document.addEventListener('click', close);
+			window.addEventListener('scroll', close, true);
+
+			var more = root.querySelector('.ag-more');
+			var others = root.querySelector('.ag-others');
+			popup(more, others);
+			if (more && others) {
+				more.addEventListener('click', function(event) {
+					event.stopPropagation();
+					open(more, others);
+				});
+			}
+			// protection : activée -> menu des durées de pause, désactivée -> réactivation
+			var button = root.querySelector('.ag-switch');
+			var pauseMenu = root.querySelector('.ag-pause-menu');
+			popup(button, pauseMenu);
+			if (button) {
+				button.addEventListener('click', function(event) {
+					event.stopPropagation();
+					if (!button.classList.contains('ag-on')) {
+						jeedom.cmd.execute({id: button.getAttribute('data-ag_on')});
+					} else if (pauseMenu) {
+						open(button, pauseMenu);
+					} else {
+						jeedom.cmd.execute({id: button.getAttribute('data-ag_off'), value: {select: '0'}});
+					}
+				});
+			}
+			if (pauseMenu) {
+				pauseMenu.querySelectorAll('[data-ag_select]').forEach(function(item) {
+					item.addEventListener('click', function() {
+						pauseMenu.classList.remove('ag-open');
+						jeedom.cmd.execute({id: button.getAttribute('data-ag_off'), value: {select: item.getAttribute('data-ag_select')}});
+					});
+				});
+			}
+			root.querySelectorAll('.ag-chip').forEach(function(chip) {
+				chip.addEventListener('click', function() {
+					jeedom.cmd.execute({id: chip.classList.contains('ag-on') ? chip.getAttribute('data-ag_off') : chip.getAttribute('data-ag_on')});
+				});
+			});
+			var refresh = root.querySelector('.ag-refresh');
+			if (refresh) {
+				refresh.addEventListener('click', function() {
+					refresh.classList.add('ag-spin');
+					jeedom.cmd.execute({id: refresh.getAttribute('data-ag_exec'), success: function() {
+						refresh.classList.remove('ag-spin');
+					}, error: function() {
+						refresh.classList.remove('ag-spin');
+					}});
+				});
+			}
+		})();
+	</script>
+</div>

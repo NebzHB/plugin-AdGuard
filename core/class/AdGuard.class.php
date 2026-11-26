@@ -653,6 +653,154 @@ class AdGuard extends eqLogic {
 		}
 	}
 	
+	/* Widget du serveur : protection, statistiques, protections globales, puis les commandes action visibles. Les clients gardent le widget Jeedom */
+	public function toHtml($_version = 'dashboard') {
+		if ($this->getConfiguration('type','') != 'AdGuardGlobal') return parent::toHtml($_version);
+		$replace = $this->preToHtml($_version);
+		if (!is_array($replace)) return $replace;
+		$version = jeedom::versionAlias($_version);
+		$cmds = [];
+		foreach($this->getCmd('info') as $cmd) $cmds[$cmd->getLogicalId()] = $cmd;
+		$find = function($id) use ($cmds) {
+			return (isset($cmds[$id])) ? $cmds[$id] : null;
+		};
+		$action = function($id) {
+			$cmd = $this->getCmd('action', $id);
+			return (is_object($cmd)) ? $cmd : null;
+		};
+		$attr = function($cmd, $kind) {
+			return 'data-ag_cmd="'.$cmd->getId().'" data-ag_kind="'.$kind.'" data-ag_value="'.htmlspecialchars((string)$cmd->execCmd(), ENT_QUOTES, 'UTF-8').'"';
+		};
+		$span = function($cmd, $kind = 'number') use ($attr) {
+			$history = ($cmd->getIsHistorized() == 1)?' history cursor':'';
+			return '<span class="ag-value'.$history.'" data-cmd_id="'.$cmd->getId().'" '.$attr($cmd, $kind).'></span>';
+		};
+		$handled = []; // commandes action remplacées par le widget
+
+		// protection : état, bouton marche/arrêt et menu de pause
+		$protection = '';
+		$switch = '';
+		$state = $find('protection_enabled');
+		$on = $action('protection_enable');
+		$off = $action('protection_disable');
+		if (is_object($state)) {
+			$protection = '<div class="ag-title">'.__("Protection", __FILE__).'</div>';
+			$protection .= '<div class="ag-state" '.$attr($state, 'protection').'><span class="ag-lbl-on">'.__("Activée", __FILE__).'</span><span class="ag-lbl-off">'.__("Désactivée", __FILE__).'</span>';
+			$pause = $find('protection_disabled_duration');
+			if (is_object($pause)) $protection .= '<span class="ag-lbl-pause"> · '.__("reprise dans", __FILE__).' <span '.$attr($pause, 'pause').'></span></span>';
+			$protection .= '</div>';
+			if (is_object($on) && is_object($off)) {
+				$menu = '';
+				foreach(explode(';', (string)$off->getConfiguration('listValue')) as $item) {
+					$item = explode('|', $item, 2);
+					if (count($item) != 2) continue;
+					$menu .= '<div class="ag-menu-item cursor" data-ag_select="'.htmlspecialchars($item[0], ENT_QUOTES, 'UTF-8').'">'.htmlspecialchars($item[1], ENT_QUOTES, 'UTF-8').'</div>';
+				}
+				$switch = '<i class="fas fa-power-off ag-switch" '.$attr($state, 'switch').' data-ag_on="'.$on->getId().'" data-ag_off="'.$off->getId().'" title="'.__("Activer / Désactiver la protection", __FILE__).'"></i>';
+				if ($menu != '') $switch .= '<div class="ag-popup ag-pause-menu"><div class="ag-menu-title">'.__("Désactiver la protection", __FILE__).'</div>'.$menu.'</div>';
+				$handled = array_merge($handled, ['protection_enable', 'protection_disable']);
+			}
+		}
+
+		// statistiques, comme le tableau de bord d'AdGuard Home
+		$tiles = '';
+		$total = $find('num_dns_queries');
+		foreach([
+			['num_dns_queries', __("Requêtes DNS", __FILE__), ''],
+			['num_blocked_filtering', __("Bloquées par filtres", __FILE__), 'ag-red'],
+			['num_replaced_safebrowsing', __("Menaces bloquées", __FILE__), 'ag-amber'],
+			['num_replaced_parental', __("Contenu adulte bloqué", __FILE__), 'ag-purple'],
+		] as $stat) {
+			$cmd = $find($stat[0]);
+			if (!is_object($cmd)) continue;
+			$pct = '';
+			$bar = '';
+			if ($stat[0] != 'num_dns_queries' && is_object($total)) {
+				$ratio = 'data-ag_part="'.$cmd->getId().'" data-ag_total="'.$total->getId().'"';
+				$pct = '<span class="ag-pct" data-ag_ratio="text" '.$ratio.'></span>';
+				$bar = '<div class="ag-bar"><div data-ag_ratio="bar" '.$ratio.'></div></div>';
+			} else {
+				$bar = '<div class="ag-bar"><div style="width:100%"></div></div>';
+			}
+			$tiles .= '<div class="ag-tile '.$stat[2].'"><div class="ag-tile-label">'.$stat[1].$pct.'</div><div class="ag-tile-value">'.$span($cmd).'</div>'.$bar.'</div>';
+		}
+		if ($tiles != '') $tiles = '<div class="ag-tiles">'.$tiles.'</div>';
+		$rows = '';
+		$cmd = $find('num_replaced_safesearch');
+		if (is_object($cmd)) $rows .= '<tr><td>'.__("Recherches sécurisées forcées", __FILE__).'</td><td>'.$span($cmd).'</td></tr>';
+		$cmd = $find('avg_processing_time');
+		if (is_object($cmd)) $rows .= '<tr><td>'.__("Temps moyen de traitement", __FILE__).'</td><td>'.$span($cmd).' ms</td></tr>';
+		if ($rows != '') $tiles .= '<table class="ag-rows">'.$rows.'</table>';
+
+		// protections globales : une pastille par réglage, un clic l'inverse
+		$chips = '';
+		foreach([
+			['filtering', __("Filtrage", __FILE__), 'chip'],
+			['safebrowsing', __("Sécurité de navigation", __FILE__), 'chip'],
+			['parental', __("Contrôle parental", __FILE__), 'chip'],
+			['safesearch', __("Recherche sécurisée", __FILE__), 'chip'],
+		] as $chip) {
+			$cmd = $find($chip[0].'_enabled');
+			$chipOn = $action($chip[0].'_enable');
+			$chipOff = $action($chip[0].'_disable');
+			if (!is_object($cmd) || !is_object($chipOn) || !is_object($chipOff)) continue;
+			$chips .= '<span class="ag-chip cursor" '.$attr($cmd, $chip[2]).' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'" title="'.__("Cliquer pour activer / désactiver", __FILE__).'"><i class="fas fa-circle"></i> '.$chip[1].'</span>';
+			$handled = array_merge($handled, [$chip[0].'_enable', $chip[0].'_disable']);
+		}
+		$cmd = $find('blocked_internet');
+		$chipOn = $action('internet_block');
+		$chipOff = $action('internet_unblock');
+		if (is_object($cmd) && is_object($chipOn) && is_object($chipOff)) {
+			$chips .= '<span class="ag-chip ag-chip-danger cursor" '.$attr($cmd, 'chip').' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'" title="'.__("Cliquer pour bloquer / débloquer tout internet", __FILE__).'"><i class="fas fa-ban"></i> '.__("Internet bloqué", __FILE__).'</span>';
+			$handled = array_merge($handled, ['internet_block', 'internet_unblock']);
+		}
+		if ($chips != '') $chips = '<div class="ag-chips">'.$chips.'</div>';
+
+		// pied : en ligne, version, mise à jour, actualiser
+		$foot = '';
+		$cmd = $find('online');
+		if (is_object($cmd)) $foot .= '<span><span class="ag-dot" '.$attr($cmd, 'online').'></span> <span class="ag-lbl-online">'.__("En ligne", __FILE__).'</span><span class="ag-lbl-offline">'.__("Hors ligne", __FILE__).'</span></span>';
+		$cmd = $find('currentVersion');
+		if (is_object($cmd)) $foot .= '<span>'.$span($cmd, 'text').'</span>';
+		$cmd = $find('hasUpdateAdGuard');
+		$newVersion = $find('newVersion');
+		if (is_object($cmd)) $foot .= '<span class="ag-update" '.$attr($cmd, 'flag').' title="'.__("Mise à jour AdGuard Disponible", __FILE__).'"><i class="fas fa-arrow-circle-up"></i>'.(is_object($newVersion)?' '.$span($newVersion, 'text'):'').'</span>';
+		preg_match_all('/data-ag_cmd="(\d+)"/', $protection.$switch.$tiles.$chips.$foot, $shown);
+		$others = '';
+		foreach($this->getCmd('info', null, true) as $cmd) {
+			if (in_array($cmd->getId(), $shown[1])) continue;
+			$others .= '<tr><td>'.$cmd->getName().'</td><td>'.$span($cmd, ($cmd->getSubType() == 'numeric')?'number':'text').' '.$cmd->getUnite().'</td></tr>';
+		}
+		$foot .= '<span class="ag-grow"></span>';
+		$refresh = $action('refresh');
+		if (is_object($refresh)) {
+			$foot .= '<span class="ag-refresh cursor" data-ag_exec="'.$refresh->getId().'" title="'.__("Actualiser les statistiques", __FILE__).'"><i class="fas fa-sync-alt"></i></span>';
+			$handled[] = 'refresh';
+		}
+		if ($others != '') {
+			$foot .= '<span class="ag-more cursor" title="'.__("Autres valeurs", __FILE__).'"><i class="fas fa-list-ul"></i></span>';
+			$others = '<div class="ag-popup ag-others"><table>'.$others.'</table></div>';
+		}
+
+		// les autres commandes action visibles (services, règles, mise à jour...) gardent leur widget Jeedom
+		$actions = '';
+		foreach($this->getCmd('action', null, true) as $cmd) {
+			if (in_array($cmd->getLogicalId(), $handled)) continue;
+			$actions .= $cmd->toHtml($_version, '');
+		}
+		if ($actions != '') $actions = '<div class="ag-actions">'.$actions.'</div>';
+
+		$replace['#ag_image#'] = $this->getImage();
+		$replace['#ag_protection#'] = $protection;
+		$replace['#ag_switch#'] = $switch;
+		$replace['#ag_tiles#'] = $tiles;
+		$replace['#ag_chips#'] = $chips;
+		$replace['#ag_actions#'] = $actions;
+		$replace['#ag_foot#'] = $foot;
+		$replace['#ag_others#'] = $others;
+		return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'eqLogic', 'AdGuard')));
+	}
+	
 	public function preSave() {
 		if ($this->getConfiguration('type','') == ''){
 			$this->setConfiguration('type','AdGuardGlobal');
