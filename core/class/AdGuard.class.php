@@ -152,13 +152,17 @@ class AdGuard extends eqLogic {
 	}
 
 	public static function getServicesList() {
-		exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
-		exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
-		exec('touch ' . dirname(__FILE__) . '/../../data/services.json');
-		exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
-		exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
-		
-		return json_decode(file_get_contents(dirname(__FILE__) . '/../../data/services.json') , true);
+		$file = dirname(__FILE__) . '/../../data/services.json';
+		// appelée à chaque affichage de widget : on ne corrige les droits que si le fichier n'est pas lisible
+		if (!is_readable($file)) {
+			exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
+			exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
+			exec('touch ' . $file);
+			exec(system::getCmdSudo() . 'chown -R www-data:www-data ' . dirname(__FILE__) . '/../../data/');
+			exec(system::getCmdSudo() . 'chmod -R 775 ' . dirname(__FILE__) . '/../../data/');
+		}
+		$content = @file_get_contents($file);
+		return ($content) ? json_decode($content, true) : null;
 	}
 	
 	public static function cron($_eqlogic_id = null) {
