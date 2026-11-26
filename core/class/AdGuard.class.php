@@ -723,9 +723,9 @@ class AdGuard extends eqLogic {
 		$total = $find('num_dns_queries');
 		foreach([
 			['num_dns_queries', __("Requêtes DNS", __FILE__), ''],
-			['num_blocked_filtering', __("Bloquées par filtres", __FILE__), 'ag-red'],
-			['num_replaced_safebrowsing', __("Menaces bloquées", __FILE__), 'ag-amber'],
-			['num_replaced_parental', __("Contenu adulte bloqué", __FILE__), 'ag-purple'],
+			['num_blocked_filtering', __("Bloquées", __FILE__), 'ag-red'],
+			['num_replaced_safebrowsing', __("Menaces", __FILE__), 'ag-amber'],
+			['num_replaced_parental', __("Contenu adulte", __FILE__), 'ag-purple'],
 		] as $stat) {
 			$cmd = $find($stat[0]);
 			if (!is_object($cmd)) continue;
@@ -738,15 +738,15 @@ class AdGuard extends eqLogic {
 			} else {
 				$bar = '<div class="ag-bar"><div style="width:100%"></div></div>';
 			}
-			$tiles .= '<div class="ag-tile '.$stat[2].'"><div class="ag-tile-label">'.$stat[1].$pct.'</div><div class="ag-tile-value">'.$span($cmd).'</div>'.$bar.'</div>';
+			$tiles .= '<div class="ag-tile '.$stat[2].'" title="'.$cmd->getName().'"><div class="ag-tile-label">'.$stat[1].'</div><div class="ag-tile-value">'.$span($cmd).$pct.'</div>'.$bar.'</div>';
 		}
 		if ($tiles != '') $tiles = '<div class="ag-tiles">'.$tiles.'</div>';
 		$rows = '';
 		$cmd = $find('num_replaced_safesearch');
-		if (is_object($cmd)) $rows .= '<tr><td>'.__("Recherches sécurisées forcées", __FILE__).'</td><td>'.$span($cmd).'</td></tr>';
+		if (is_object($cmd)) $rows .= '<div class="ag-row"><span>'.__("Recherches sécurisées forcées", __FILE__).'</span><b>'.$span($cmd).'</b></div>';
 		$cmd = $find('avg_processing_time');
-		if (is_object($cmd)) $rows .= '<tr><td>'.__("Temps moyen de traitement", __FILE__).'</td><td>'.$span($cmd).' ms</td></tr>';
-		if ($rows != '') $tiles .= '<table class="ag-rows">'.$rows.'</table>';
+		if (is_object($cmd)) $rows .= '<div class="ag-row"><span>'.__("Temps moyen de traitement", __FILE__).'</span><b>'.$span($cmd).' ms</b></div>';
+		if ($rows != '') $tiles .= '<div class="ag-rows">'.$rows.'</div>';
 
 		// protections : une pastille par réglage, un clic l'inverse. Client : les réglages propres sont grisés quand il suit les paramètres généraux
 		$chips = '';
@@ -758,7 +758,7 @@ class AdGuard extends eqLogic {
 		];
 		if ($isClient) {
 			array_unshift($list, ['client_use_global_settings', __("Paramètres généraux", __FILE__), '']);
-			$list[] = ['client_use_global_blocked_services', __("Services bloqués généraux", __FILE__), ''];
+			$list[] = ['client_use_global_blocked_services', __("Services généraux", __FILE__), ''];
 		}
 		foreach($list as $chip) {
 			$cmd = $find($chip[0].'_enabled');
@@ -771,26 +771,89 @@ class AdGuard extends eqLogic {
 			if ($isClient && $chip[2] != '') $scope = ' data-ag_in="'.$chip[2].'"';
 			if ($chip[0] == 'client_use_global_settings') $scope = ' data-ag_scope="settings"';
 			if ($chip[0] == 'client_use_global_blocked_services') $scope = ' data-ag_scope="services"';
-			$chips .= '<span class="ag-chip cursor" '.$attr($cmd, 'chip').$scope.' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'" title="'.__("Cliquer pour activer / désactiver", __FILE__).'"><i class="fas fa-circle"></i> '.$chip[1].'</span>';
+			$tips = ' data-ag_tip_on="'.$chip[1].' : '.__("activé, cliquer pour désactiver", __FILE__).'" data-ag_tip_off="'.$chip[1].' : '.__("désactivé, cliquer pour activer", __FILE__).'"';
+			$chips .= '<span class="ag-chip cursor" '.$attr($cmd, 'chip').$scope.$tips.' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'"><span class="ag-toggle"></span>'.$chip[1].'</span>';
 			$handled = array_merge($handled, [$base.'_enable', $base.'_disable']);
 		}
 		$cmd = $find('blocked_internet');
 		$chipOn = $action('internet_block');
 		$chipOff = $action('internet_unblock');
 		if (is_object($cmd) && is_object($chipOn) && is_object($chipOff)) {
-			$chips .= '<span class="ag-chip ag-chip-danger cursor" '.$attr($cmd, 'chip').' data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'" title="'.__("Cliquer pour bloquer / débloquer tout internet", __FILE__).'"><i class="fas fa-ban"></i> '.__("Internet bloqué", __FILE__).'</span>';
+			$chips .= '<span class="ag-chip ag-chip-danger cursor" '.$attr($cmd, 'chip').' data-ag_tip_on="'.__("Internet bloqué pour tout le réseau, cliquer pour débloquer", __FILE__).'" data-ag_tip_off="'.__("Internet autorisé, cliquer pour bloquer tout internet via DNS", __FILE__).'" data-ag_on="'.$chipOn->getId().'" data-ag_off="'.$chipOff->getId().'"><span class="ag-toggle"></span>'.__("Internet bloqué", __FILE__).'</span>';
 			$handled = array_merge($handled, ['internet_block', 'internet_unblock']);
 		}
 		if ($chips != '') $chips = '<div class="ag-chips">'.$chips.'</div>';
+		if ($isClient && $chips != '') $chips .= '<div class="ag-note" data-ag_in_scope="settings"><i class="fas fa-link"></i> '.__("Ce client suit les paramètres généraux : ses réglages grisés ne s'appliquent pas", __FILE__).'</div>';
 
 		// client : identifiants et services bloqués (grisés quand il suit les services bloqués généraux)
 		if ($isClient) {
 			$rows = '';
 			$cmd = $find('client_ids');
-			if (is_object($cmd)) $rows .= '<tr><td>'.__("Identifiant(s)", __FILE__).'</td><td>'.$span($cmd, 'list').'</td></tr>';
+			if (is_object($cmd)) $rows .= '<div class="ag-row ag-row-list"><span>'.__("Identifiant(s)", __FILE__).'</span><b>'.$span($cmd, 'list').'</b></div>';
 			$cmd = $find('client_blocked_services');
-			if (is_object($cmd)) $rows .= '<tr data-ag_in="services"><td>'.__("Services bloqués", __FILE__).'</td><td>'.$span($cmd, 'list').'</td></tr>';
-			if ($rows != '') $chips .= '<table class="ag-rows ag-client-rows">'.$rows.'</table>';
+			if (is_object($cmd)) $rows .= '<div class="ag-row ag-row-list" data-ag_in="services"><span>'.__("Services bloqués", __FILE__).'</span><b>'.$span($cmd, 'list').'</b></div>';
+			if ($rows != '') $chips .= '<div class="ag-rows">'.$rows.'</div>';
+			$chips .= '<div class="ag-note" data-ag_in_scope="services"><i class="fas fa-link"></i> '.__("Ce client suit les services bloqués généraux : sa liste grisée ne s'applique pas", __FILE__).'</div>';
+		}
+
+		// outils : les commandes action visibles, en lignes compactes (liste ou saisie + boutons)
+		$visible = [];
+		foreach($this->getCmd('action', null, true) as $cmd) $visible[$cmd->getLogicalId()] = $cmd;
+		$button = function($id, $icon, $title, $input = '', $text = '') use ($visible, &$handled) {
+			if (!isset($visible[$id])) return '';
+			$handled[] = $id;
+			return '<button type="button" class="ag-btn" data-ag_exec="'.$visible[$id]->getId().'"'.(($input != '')?' data-ag_input="'.$input.'"':'').' title="'.$title.'"><i class="'.$icon.'"></i>'.(($text != '')?' '.$text:'').'</button>';
+		};
+		$select = function($ids) use ($visible) {
+			foreach($ids as $id) {
+				if (!isset($visible[$id])) continue;
+				$options = '<option value="">'.__("Choisir...", __FILE__).'</option>';
+				foreach(explode(';', (string)$visible[$id]->getConfiguration('listValue')) as $item) {
+					$item = explode('|', $item, 2);
+					if (count($item) != 2 || $item[0] === '') continue;
+					$options .= '<option value="'.htmlspecialchars($item[0], ENT_QUOTES, 'UTF-8').'">'.htmlspecialchars($item[1], ENT_QUOTES, 'UTF-8').'</option>';
+				}
+				return '<select class="ag-field">'.$options.'</select>';
+			}
+			return '';
+		};
+		$input = function($placeholder) {
+			return '<input type="text" class="ag-field" placeholder="'.$placeholder.'"/>';
+		};
+		$tool = function($label, $content, $buttons, $extra = '') {
+			if ($buttons == '') return '';
+			return '<div class="ag-tool"'.$extra.'><span class="ag-tool-label">'.$label.'</span>'.$content.'<span class="ag-tool-btns">'.$buttons.'</span></div>';
+		};
+		$tools = '';
+		$tools .= $tool(__("Services", __FILE__), $select([$p.'service_block', $p.'service_unblock']),
+			$button($p.'service_block', 'fas fa-ban', __("Bloquer ce service", __FILE__), 'select').
+			$button($p.'service_unblock', 'fas fa-check', __("Débloquer ce service", __FILE__), 'select').
+			$button($p.'services_block', 'fas fa-users-slash', __("Bloquer tous les services", __FILE__)).
+			$button($p.'services_unblock', 'fas fa-users', __("Débloquer tous les services", __FILE__)), ($isClient)?' data-ag_in="services"':'');
+		$tools .= $tool(__("Groupes", __FILE__), $select([$p.'group_block', $p.'group_unblock']),
+			$button($p.'group_block', 'fas fa-ban', __("Bloquer ce groupe de services", __FILE__), 'select').
+			$button($p.'group_unblock', 'fas fa-check', __("Débloquer ce groupe de services", __FILE__), 'select'), ($isClient)?' data-ag_in="services"':'');
+		if ($isClient) {
+			$tools .= $tool(__("Identifiants", __FILE__), $input(__("IP, MAC ou ClientID", __FILE__)),
+				$button('client_ids_add', 'fas fa-plus', __("Ajouter un identifiant", __FILE__), 'message').
+				$button('client_ids_del', 'fas fa-minus', __("Retirer un identifiant", __FILE__), 'message'));
+		} else {
+			$tools .= $tool(__("Règles", __FILE__), $input(__("Règle de filtrage", __FILE__)),
+				$button('add_custom_rule', 'fas fa-plus', __("Ajouter une règle filtrage personnalisée", __FILE__), 'message').
+				$button('del_custom_rule', 'fas fa-minus', __("Retirer une règle filtrage personnalisée", __FILE__), 'message'));
+		}
+		$test = $tool(__("Tester", __FILE__), $input(__("Domaine", __FILE__)), $button($p.'check_host', 'fas fa-search', __("Tester un domaine", __FILE__), 'message'));
+		$cmd = $find($p.'check_host_result');
+		if ($test != '' && is_object($cmd)) $test .= '<div class="ag-tool-result">'.$span($cmd, 'result').'</div>';
+		$tools .= $test;
+		$tools .= $tool(__("Maintenance", __FILE__), '<span class="ag-grow"></span>',
+			$button('cache_clear', 'fas fa-broom', __("Vider le cache DNS", __FILE__), '', __("Cache", __FILE__)).
+			$button('filters_refresh', 'fas fa-sync', __("Mettre à jour les filtres", __FILE__), '', __("Filtres", __FILE__)).
+			$button('reset_stats', 'fas fa-eraser', __("Réinitialiser les statistiques", __FILE__), '', __("Stats", __FILE__)));
+		if ($tools != '') $chips .= '<div class="ag-tools">'.$tools.'</div>';
+		if (!$isClient) {
+			$cmd = $find('hasUpdateAdGuard');
+			if (is_object($cmd) && isset($visible['UpdateAdGuard'])) $handled[] = 'UpdateAdGuard'; // le badge de mise à jour du pied lance la mise à jour
 		}
 
 		// pied : en ligne, version, mise à jour, actualiser
@@ -801,7 +864,8 @@ class AdGuard extends eqLogic {
 		if (is_object($cmd)) $foot .= '<span>'.$span($cmd, 'text').'</span>';
 		$cmd = $find('hasUpdateAdGuard');
 		$newVersion = $find('newVersion');
-		if (is_object($cmd)) $foot .= '<span class="ag-update" '.$attr($cmd, 'flag').' title="'.__("Mise à jour AdGuard Disponible", __FILE__).'"><i class="fas fa-arrow-circle-up"></i>'.(is_object($newVersion)?' '.$span($newVersion, 'text'):'').'</span>';
+		$update = $action('UpdateAdGuard');
+		if (is_object($cmd)) $foot .= '<span class="ag-update'.((is_object($update) && $update->getIsVisible())?' cursor" data-ag_update="'.$update->getId().'" data-ag_confirm="'.__("Mettre à jour AdGuard Home maintenant ?", __FILE__).'':'').'" '.$attr($cmd, 'flag').' title="'.__("Mise à jour AdGuard Disponible", __FILE__).'"><i class="fas fa-arrow-circle-up"></i>'.(is_object($newVersion)?' '.$span($newVersion, 'text'):'').'</span>';
 		preg_match_all('/data-ag_cmd="(\d+)"/', $protection.$switch.$tiles.$chips.$foot, $shown);
 		$others = '';
 		foreach($this->getCmd('info', null, true) as $cmd) {
@@ -819,7 +883,7 @@ class AdGuard extends eqLogic {
 			$others = '<div class="ag-popup ag-others"><table>'.$others.'</table></div>';
 		}
 
-		// les autres commandes action visibles (services, règles, mise à jour...) gardent leur widget Jeedom
+		// les commandes action visibles que le widget ne connaît pas gardent leur widget Jeedom
 		$actions = '';
 		foreach($this->getCmd('action', null, true) as $cmd) {
 			if (in_array($cmd->getLogicalId(), $handled)) continue;

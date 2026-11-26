@@ -17,28 +17,46 @@
 		.ag-widget .ag-tile.ag-red { --ag-color: #e8673c; }
 		.ag-widget .ag-tile.ag-amber { --ag-color: #d29a19; }
 		.ag-widget .ag-tile.ag-purple { --ag-color: #9a6bc0; }
-		.ag-widget .ag-tile-label { display: flex; gap: 4px; font-size: 11px; opacity: .8; white-space: nowrap; overflow: hidden; }
+		.ag-widget .ag-tile-label { font-size: 11px; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 		.ag-widget .ag-tile.ag-red .ag-tile-label, .ag-widget .ag-tile.ag-amber .ag-tile-label, .ag-widget .ag-tile.ag-purple .ag-tile-label { color: var(--ag-color); opacity: 1; }
-		.ag-widget .ag-tile-label .ag-pct { margin-left: auto; font-weight: 600; }
+		.ag-widget .ag-tile-value .ag-pct { float: right; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--ag-color); }
 		.ag-widget .ag-tile-value { font-size: 18px; font-weight: 600; white-space: nowrap; }
 		.ag-widget .ag-bar { height: 4px; border-radius: 2px; background: rgba(127,127,127,.25); margin-top: 2px; overflow: hidden; }
 		.ag-widget .ag-bar > div { height: 100%; width: 0; background: var(--ag-color); transition: width .4s; }
-		.ag-widget table.ag-rows { width: 100%; margin-top: 6px; font-size: 12px; border-collapse: collapse; }
-		.ag-widget table.ag-rows td { padding: 2px 4px; white-space: nowrap; background: transparent; border: 0; }
-		.ag-widget table.ag-rows td:first-child { opacity: .75; }
-		.ag-widget table.ag-rows td:last-child { text-align: right; font-weight: 600; }
-		.ag-widget table.ag-rows tr + tr td { border-top: 1px solid rgba(127,127,127,.2); }
-		.ag-widget .ag-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-		.ag-widget .ag-chip { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: rgba(127,127,127,.12); opacity: .6; white-space: nowrap; }
-		.ag-widget .ag-chip i { font-size: 8px; vertical-align: 1px; }
-		.ag-widget .ag-chip.ag-on { opacity: 1; }
-		.ag-widget .ag-chip.ag-on i { color: var(--al-success-color, #4caf50); }
-		.ag-widget .ag-chip-danger { display: none; }
-		.ag-widget .ag-chip-danger i { font-size: 10px; }
-		.ag-widget .ag-chip-danger.ag-on { display: inline-block; background: var(--al-danger-color, #e53935); color: #fff; }
-		.ag-widget .ag-chip-danger.ag-on i { color: #fff; }
-		.ag-widget table.ag-client-rows td:last-child { white-space: normal; word-break: break-word; font-weight: 400; }
-		.ag-widget.ag-scope-settings [data-ag_in="settings"], .ag-widget.ag-scope-services [data-ag_in="services"] { opacity: .3; }
+		.ag-widget .ag-rows { margin-top: 6px; font-size: 12px; }
+		.ag-widget .ag-row { display: flex; gap: 8px; padding: 2px 2px; }
+		.ag-widget .ag-row + .ag-row { border-top: 1px solid rgba(127,127,127,.2); }
+		.ag-widget .ag-row > span { flex: 1; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.ag-widget .ag-row > b { white-space: nowrap; }
+		.ag-widget .ag-row-list { display: block; }
+		.ag-widget .ag-row-list > span { display: block; }
+		.ag-widget .ag-row-list > b { display: block; font-weight: 400; font-size: 11px; white-space: normal; word-break: break-word; }
+		.ag-widget .ag-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 8px; margin-top: 8px; }
+		.ag-widget .ag-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.ag-widget .ag-toggle { position: relative; flex: none; width: 26px; height: 14px; border-radius: 7px; background: rgba(127,127,127,.45); transition: background .2s; }
+		.ag-widget .ag-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: #fff; transition: left .2s; }
+		.ag-widget .ag-chip.ag-on .ag-toggle { background: var(--al-success-color, #4caf50); }
+		.ag-widget .ag-chip.ag-on .ag-toggle::after { left: 14px; }
+		.ag-widget .ag-chip-danger.ag-on .ag-toggle { background: var(--al-danger-color, #e53935); }
+		.ag-widget .ag-chip-danger.ag-on { color: var(--al-danger-color, #e53935); font-weight: 600; }
+		.ag-widget.ag-scope-settings [data-ag_in="settings"], .ag-widget.ag-scope-services [data-ag_in="services"] { opacity: .35; }
+		.ag-widget .ag-note { display: none; margin-top: 4px; font-size: 11px; opacity: .75; font-style: italic; }
+		.ag-widget.ag-scope-settings .ag-note[data-ag_in_scope="settings"], .ag-widget.ag-scope-services .ag-note[data-ag_in_scope="services"] { display: block; }
+		.ag-widget .ag-tools { margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(127,127,127,.25); }
+		.ag-widget .ag-tool { display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+		.ag-widget .ag-tool-label { flex: none; width: 74px; font-size: 11px; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.ag-widget .ag-tool .ag-grow { flex: 1; }
+		.ag-widget .ag-tool-btns { display: flex; gap: 3px; flex: none; }
+		.ag-widget .ag-tool .ag-field { flex: 1; min-width: 0; width: auto !important; height: 24px !important; margin: 0 !important; padding: 0 4px !important; font-size: 12px !important; line-height: 22px !important; border-radius: 4px !important; border: 1px solid rgba(127,127,127,.4) !important; background: rgba(127,127,127,.08) !important; color: inherit !important; box-shadow: none !important; }
+		.ag-widget .ag-tool select.ag-field option { color: #333; background: #fff; }
+		.ag-widget .ag-btn { height: 24px; min-width: 26px; margin: 0; padding: 0 6px; border: 0; border-radius: 4px; font-size: 12px; line-height: 24px; color: inherit; background: rgba(127,127,127,.2); cursor: pointer; white-space: nowrap; transition: background .2s; }
+		.ag-widget .ag-btn i, .ag-widget .ag-foot i, .ag-widget .ag-note i { color: inherit !important; }
+		.ag-widget .ag-btn:hover { background: rgba(127,127,127,.35); }
+		.ag-widget .ag-btn.ag-ok { background: var(--al-success-color, #4caf50); color: #fff; }
+		.ag-widget .ag-btn.ag-ko { background: var(--al-danger-color, #e53935); color: #fff; }
+		.ag-widget .ag-btn.ag-busy i { animation: fa-spin 1s linear infinite; }
+		.ag-widget .ag-tool-result { margin: 2px 0 0 78px; font-size: 11px; opacity: .85; white-space: normal; word-break: break-word; }
+		.ag-widget .ag-tool-result:empty, .ag-widget .ag-tool-result .ag-empty { display: none; }
 		.ag-widget .ag-actions { margin-top: 8px; text-align: center; }
 		.ag-widget .ag-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 11px; opacity: .8; }
 		.ag-widget .ag-foot .ag-grow { flex: 1; }
@@ -138,6 +156,10 @@
 					case 'chip':
 						if (el.getAttribute('data-ag_scope')) widget.classList.toggle('ag-scope-' + el.getAttribute('data-ag_scope'), number == 1);
 						el.classList.toggle('ag-on', number == 1);
+						el.setAttribute('title', el.getAttribute(number == 1 ? 'data-ag_tip_on' : 'data-ag_tip_off') || '');
+						break;
+					case 'result':
+						el.textContent = (value === null || value === undefined) ? '' : value;
 						break;
 					case 'switch':
 					case 'flag':
@@ -255,6 +277,64 @@
 					jeedom.cmd.execute({id: chip.classList.contains('ag-on') ? chip.getAttribute('data-ag_off') : chip.getAttribute('data-ag_on')});
 				});
 			});
+			// outils : liste ou saisie de la ligne envoyée avec la commande, puis un retour vert ou rouge sur le bouton
+			var flash = function(btn, cls) {
+				btn.classList.remove('ag-busy');
+				btn.classList.add(cls);
+				setTimeout(function() {
+					btn.classList.remove(cls);
+				}, 1200);
+			};
+			root.querySelectorAll('.ag-btn[data-ag_exec]').forEach(function(btn) {
+				btn.addEventListener('click', function() {
+					var kind = btn.getAttribute('data-ag_input');
+					var field = btn.closest('.ag-tool').querySelector('.ag-field');
+					var options = {id: btn.getAttribute('data-ag_exec')};
+					if (kind) {
+						var value = field ? field.value.trim() : '';
+						if (value === '') {
+							flash(btn, 'ag-ko');
+							if (field) field.focus();
+							return;
+						}
+						options.value = (kind == 'select') ? {select: value} : {title: '', message: value};
+					}
+					btn.classList.add('ag-busy');
+					options.success = function() {
+						flash(btn, 'ag-ok');
+						if (kind == 'message' && field) field.value = '';
+					};
+					options.error = function(error) {
+						flash(btn, 'ag-ko');
+						if (error && error.message && typeof jeedomUtils !== 'undefined' && jeedomUtils.showAlert) jeedomUtils.showAlert({message: error.message, level: 'danger'});
+					};
+					jeedom.cmd.execute(options);
+				});
+			});
+			root.querySelectorAll('.ag-tool input.ag-field').forEach(function(field) {
+				field.addEventListener('keydown', function(event) { // Entrée = premier bouton de la ligne
+					if (event.key != 'Enter') return;
+					event.preventDefault();
+					var btn = field.closest('.ag-tool').querySelector('.ag-btn');
+					if (btn) btn.click();
+				});
+			});
+			var update = root.querySelector('.ag-update[data-ag_update]');
+			if (update) {
+				update.addEventListener('click', function() {
+					var run = function() {
+						jeedom.cmd.execute({id: update.getAttribute('data-ag_update')});
+					};
+					var question = update.getAttribute('data-ag_confirm');
+					if (typeof jeeDialog !== 'undefined' && jeeDialog.confirm) {
+						jeeDialog.confirm(question, function(result) { if (result) run(); });
+					} else if (typeof bootbox !== 'undefined') {
+						bootbox.confirm(question, function(result) { if (result) run(); });
+					} else if (window.confirm(question)) {
+						run();
+					}
+				});
+			}
 			var refresh = root.querySelector('.ag-refresh');
 			if (refresh) {
 				refresh.addEventListener('click', function() {
